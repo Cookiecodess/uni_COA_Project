@@ -9,6 +9,8 @@ INCLUDE Irvine32.inc
 		choose byte "Choose a number to login",0
 		user1 byte "1. Customer",0
 		user2 byte "2. Admin",0
+		username byte "abcdAAA",0
+		password byte "password123",0
 
 	;RECEIPT--------------------------------
 		receipt byte "Receipt",0
@@ -33,7 +35,7 @@ INCLUDE Irvine32.inc
 main PROC
 
 	;USER LOGIN------------------------------
-		;LOGIN:
+		LOGIN:
 		lea edx,header
 
 		call WriteString
@@ -72,21 +74,39 @@ main PROC
 		lea edx,header
 		call WriteString
 		call CRLF
-		
+
+		mov al, SPACE 
+		call WriteChar 
+
 		lea edx,bookingS
 		call WriteString
-		mov  eax,yellow+(blue*16)
-      call SetTextColor
+
+
 		;call Random32
 		call Randomize
 		mov eax, 90000000			;since rand is from 0 to n-1 so it will generate 0 - 89999999
 		call RandomRange		; EAX = random number in range 0-89999999
 		add eax, 10000000			; adjust to range 10000000-99999999
 		mov bookingnum,eax
-
 		call WriteDec
 		call CRLF
 
+		mov al, SPACE
+		call WriteChar
+		lea edx,personS
+		call WriteString
+		call CRLF
+
+		mov al, SPACE
+		call WriteChar
+		lea edx,priceS
+		call WriteString
+		call CRLF
+
+		mov al, SPACE
+		call WriteChar
+		lea edx,detailS
+		call WriteString
 		
 
 
@@ -116,7 +136,9 @@ main PROC
 		call WriteString
 
 
-
+		;call WaitMsg
+		;call Clrscr
+		;call LOGIN
 	exit
 main ENDP
 END main

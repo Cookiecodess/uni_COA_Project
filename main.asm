@@ -31,6 +31,8 @@ INCLUDE Irvine32.inc
 
 		report byte "Report",0
 
+		;REPORT--------------------------------------------------------------------
+
 .code
 main PROC
 

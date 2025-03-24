@@ -6,11 +6,30 @@ INCLUDE Irvine32.inc
 	header byte	"======================================",0
 	;USER LOGIN----------------------------------------------------------------
 		welcome byte " Welcome,here is a login page",0
-		choose byte "Choose a number to login",0
+		choose byte "Choose a number to login : ",0
 		user1 byte "1. Customer",0
 		user2 byte "2. Admin",0
-		username byte "abcdAAA",0
-		password byte "password123",0
+		loginChoose byte ?
+
+		;username byte "abcdAAA",0
+		;password byte "password123",0
+
+		loginMsg BYTE "Enter Username: ", 0
+		passMsg BYTE "Enter Password: ", 0
+
+		successMsg BYTE "Login Successful!", 0
+		failMsg BYTE "Login Failed!", 0
+
+		
+		username BYTE 20 DUP(0)	;like char[20] and initialize it by 0(null)
+		password BYTE 20 DUP(0)	;but user only can type 19 word since at 20 need to store the 0(to stop)
+	;ADMIN LOGIN
+	admin byte "ADMIN",0
+
+
+	;CUSOTMER LOGIN
+	customer byte "CUSTOMER",0
+
 
 	;RECEIPT--------------------------------
 		receipt byte "Receipt",0
@@ -61,12 +80,69 @@ main PROC
 		call WriteString
 		call CRLF
 
+		mov al, SPACE   ; Load tab character
+		call WriteChar  ; Print tab
+		lea edx,choose
+		call WriteString
+
+
+		call ReadChar
+		mov loginChoose, al
+		
+		cmp loginChoose, '1'	; If user chose Admin
+		je 	customerLogin		;je=jump if equal to
+		cmp loginChoose, '2'	; If user chose Customer
+		je adminLogin
+
+		adminLogin:
+			call CRLF
+			lea edx,header
+			call WriteString
+			lea edx,admin
+			call WriteString
+			lea edx,header
+			call WriteString
+			call CRLF
+
+			lea edx,loginMsg
+			call WriteString
+			mov ecx,20	;to ensure the user only input 20 char?
+			call ReadString
+			call CRLF
+			lea edx,username
+
+
+			lea edx,passMsg
+			call WriteString
+
+			mov ecx,20	;to ensure the user only input 20 char
+			call ReadString
+			call CRLF
+			lea edx,password
+
+
+			jmp exitLogin 
+		customerLogin:
+				call CRLF
+				lea edx,header
+				call WriteString
+				lea edx,customer
+				call WriteString
+				lea edx,header
+				call WriteString
+				call CRLF
+				jmp exitLogin 
+		
+		exitLogin:;
+
+
 		call WaitMsg
 
 		call Clrscr
 
 		;JMP LOGIN
 	;RECEIPT--------------------------------
+		;Receipt:
 		lea edx,header
 		call WriteString
 		lea edx,receipt
@@ -116,6 +192,7 @@ main PROC
 		call Delay
 
 	;REPORT---------------------------------
+		;Report:
 		;ticket price * ticket sold
 		
 		lea edx,header

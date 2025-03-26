@@ -8,9 +8,9 @@ INCLUDE Irvine32.inc
     headerReceipt		byte "Receipt",0
     header3             byte "Register",0
     equalSign           byte '='
-    leftRightPadding    dword 10
+    leftRightPadding    dword 40
 
-	; header byte	"======================================",0
+
 	;USER LOGIN----------------------------------------------------------------
 		welcome byte " Welcome,here is a login page",0
 		choose byte "Choose a number to login : ",0
@@ -71,27 +71,19 @@ main PROC
 		mov eax, offset headerLogin
 		mov ebx, lengthof headerLogin
 		call PrintHeader
-		; lea edx,header
 
-		; call WriteString
-		; lea edx,welcome
-		; call WriteString
-		; lea edx,header
-		; call WriteString
-		; call CRLF
-	
 		lea edx,choose
 		call WriteString
 		call CRLF
 
-		mov al, SPACE   ; Load tab character
-		call WriteChar  ; Print tab
+		mov al, SPACE  
+		call WriteChar  
 		lea edx,user1
 		call WriteString
 		call CRLF
 
-		mov al, SPACE   ; Load tab character
-		call WriteChar  ; Print tab
+		mov al, SPACE  
+		call WriteChar  
 		lea edx,user2
 		call WriteString
 		call CRLF
@@ -110,18 +102,57 @@ main PROC
 		cmp loginChoose, '2'	; If user chose Customer
 		je adminLogin
 
-		adminLogin:
+		adminLogin:		;=======================================================
 		mov eax, offset admin
 		mov ebx, lengthof admin
 		call PrintHeader
 
+		lea edx,loginMsg
+		call WriteString
+		mov edx, OFFSET username  ; use username as buffer
+		mov ecx,20	;to ensure the user only input 20 char?
+		call ReadString
+		call CRLF
+		
+
+		lea edx,passMsg
+		call WriteString
+		mov edx,OFFSET password
+		mov ecx,20	;to ensure the user only input 20 char
+		call ReadString
+		call CRLF
+		lea edx,password
+
+
+		jmp check_admin 
+
+		check_admin:	;============================================================
+			lea esi,username
+			lea edi,aUsername
+			call Str_compare	;to check/compare the username is true or false
+			jne Alogin_failed
+
+			lea esi, password
+			lea edi, aPassword
+			call Str_compare
+			jne Alogin_failed
+
+			jmp adminPage
+		
+		
+		
+		customerLogin:		;===================================
+			mov eax, offset customer
+			mov ebx, lengthof customer
+			call PrintHeader
+			call CRLF
+			
 			lea edx,loginMsg
 			call WriteString
 			mov ecx,20	;to ensure the user only input 20 char?
 			call ReadString
 			call CRLF
 			lea edx,username
-
 
 			lea edx,passMsg
 			call WriteString
@@ -130,17 +161,23 @@ main PROC
 			call ReadString
 			call CRLF
 			lea edx,password
+			
+			jmp check_customer
 
 
-			jmp exitLogin 
-		customerLogin:
-		mov eax, offset customer
-		mov ebx, lengthof customer
-		call PrintHeader
-				call CRLF
-				jmp exitLogin 
+		check_customer:		;====================================
+			mov esi, OFFSET username
+			mov edi, OFFSET cUsername
+			call Str_compare
+			
+			jne Clogin_failed
+
+			mov esi, OFFSET password
+			mov edi, OFFSET cPassword
+			call Str_compare
 		
-		exitLogin:;
+			jne Clogin_failed
+			jmp customerPage
 
 
 		call WaitMsg
@@ -148,6 +185,58 @@ main PROC
 		call Clrscr
 
 		;JMP LOGIN
+
+
+	Alogin_failed:		;==============================
+
+		mov edx, OFFSET failMsg
+		call WriteString
+		call Crlf
+
+		; clear username and password by using rep stosb by fill it by 0
+			mov edi, OFFSET username
+				mov ecx, 20
+				mov al, 0
+				rep stosb
+			mov edi, OFFSET password
+				mov ecx, 20
+				mov al, 0
+				rep stosb
+
+
+		jmp adminLogin   ; Retry Admin login
+
+	Clogin_failed:		;==============================
+		mov edx, OFFSET failMsg
+		call WriteString
+		call Crlf
+		jmp customerLogin  ; Retry Customer login
+
+		 ; clear username, password
+		mov edi, OFFSET username
+			mov ecx, 20
+			mov al, 0
+			rep stosb
+
+		mov edi, OFFSET password
+			mov ecx, 20
+			mov al, 0
+			rep stosb
+
+	;CUSTOMER PAGE--------------------------
+	customerPage:
+		mov eax, offset customer
+		mov ebx, lengthof customer
+		call PrintHeader
+	adminPage:
+		mov eax, offset admin
+		mov ebx, lengthof admin
+		call PrintHeader
+
+
+
+
+
 	;RECEIPT--------------------------------
 		mov eax, offset headerReceipt
 		mov ebx, lengthof headerReceipt

@@ -133,13 +133,13 @@ main PROC
 		jmp check_admin 
 
 		check_admin:	;============================================================
-			lea esi, inputUsername
-			lea edi, aUsername
+			push OFFSET inputUsername
+			push OFFSET aUsername
 			call Str_compare	;to check/compare the username is true or false
 			jne Alogin_failed
 
-			lea esi, inputPassword
-			lea edi, aPassword
+			push OFFSET inputPassword
+			push OFFSET aPassword
 			call Str_compare
 			jne Alogin_failed
 
@@ -175,23 +175,16 @@ main PROC
 
 
 		check_customer:		;====================================
-			mov esi, OFFSET inputUsername
-			mov edi, OFFSET cUsername
-
-			push edi
-			push esi
-			call Str_compare
-			
+			push OFFSET inputUsername
+			push OFFSET cUsername
+			call Str_compare			
 			jne Clogin_failed
 
-			mov esi, OFFSET inputPassword
-			mov edi, OFFSET cPassword
-
-			push edi
-			push esi
-			call Str_compare
-		
+			push OFFSET inputPassword
+			push OFFSET cPassword
+			call Str_compare		
 			jne Clogin_failed
+
 			jmp customerPage
 
 
@@ -246,12 +239,20 @@ main PROC
 		mov eax, offset customer
 		mov ebx, lengthof customer
 		call PrintHeader
+
+		mov edx, offset successMsg
+		call WriteString
+
 		exit
 
 	adminPage:
 		mov eax, offset admin
 		mov ebx, lengthof admin
 		call PrintHeader
+		
+		mov edx, offset successMsg
+		call WriteString
+
 		exit
 
 

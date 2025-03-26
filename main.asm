@@ -108,13 +108,16 @@ main PROC
 
 		adminLogin:
 			call CRLF
-			lea edx,header
-			call WriteString
-			lea edx,admin
-			call WriteString
-			lea edx,header
-			call WriteString
-			call CRLF
+			mov eax, offset admin
+			mov ebx, lengthof admin
+			call PrintHeader
+			; lea edx,header
+			; call WriteString
+			; lea edx,admin
+			; call WriteString
+			; lea edx,header
+			; call WriteString
+			; call CRLF
 
 			lea edx,loginMsg
 			call WriteString
@@ -136,13 +139,16 @@ main PROC
 			jmp exitLogin 
 		customerLogin:
 				call CRLF
-				lea edx,header
-				call WriteString
-				lea edx,customer
-				call WriteString
-				lea edx,header
-				call WriteString
-				call CRLF
+				mov eax, offset customer
+				mov ebx, lengthof customer
+				call PrintHeader
+				; lea edx,header
+				; call WriteString
+				; lea edx,customer
+				; call WriteString
+				; lea edx,header
+				; call WriteString
+				; call CRLF
 				jmp exitLogin 
 		
 		exitLogin:;

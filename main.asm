@@ -100,21 +100,16 @@ main PROC
 
 		call ReadChar
 		mov loginChoose, al
-		
+				call CRLF
 		cmp loginChoose, '1'	; If user chose Admin
 		je 	customerLogin		;je=jump if equal to
 		cmp loginChoose, '2'	; If user chose Customer
 		je adminLogin
 
 		adminLogin:
-			call CRLF
-			lea edx,header
-			call WriteString
-			lea edx,admin
-			call WriteString
-			lea edx,header
-			call WriteString
-			call CRLF
+		mov eax, offset admin
+		mov ebx, lengthof admin
+		call PrintHeader
 
 			lea edx,loginMsg
 			call WriteString
@@ -135,13 +130,9 @@ main PROC
 
 			jmp exitLogin 
 		customerLogin:
-				call CRLF
-				lea edx,header
-				call WriteString
-				lea edx,customer
-				call WriteString
-				lea edx,header
-				call WriteString
+		mov eax, offset customer
+		mov ebx, lengthof customer
+		call PrintHeader
 				call CRLF
 				jmp exitLogin 
 		
@@ -157,13 +148,6 @@ main PROC
 		mov eax, offset headerReceipt
 		mov ebx, lengthof headerReceipt
 		call PrintHeader
-		; lea edx,header
-		; call WriteString
-		; lea edx,receipt
-		; call WriteString
-		; lea edx,header
-		; call WriteString
-		; call CRLF
 
 		mov al, SPACE 
 		call WriteChar 
@@ -213,22 +197,15 @@ main PROC
 		mov eax, offset report
 		mov ebx, lengthof report
 		call PrintHeader
-		; lea edx,header
-		; call WriteString
-		; call WriteString
-		; call CRLF				; new line
 
-		; mov al, SPACE   ; Load tab character
-		; call WriteChar  ; Print tab
-		; call WriteChar  ; Print tab
-		; call WriteChar  ; Print tab
-		; lea edx,report
-		; call WriteString
-		; call CRLF
+		 call CRLF				; new line
 
-		; lea edx,header
-		; call WriteString
-		; call WriteString
+		 mov al, SPACE   ; Load tab character
+		 call WriteChar  ; Print tab
+		 call WriteChar  ; Print tab
+		 call WriteChar  ; Print tab
+		 
+
 
 
 		;call WaitMsg

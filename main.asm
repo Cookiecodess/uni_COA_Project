@@ -18,8 +18,12 @@ INCLUDE Irvine32.inc
 		user2 byte "2. Admin",0
 		loginChoose byte ?
 
-		;username byte "abcdAAA",0
-		;password byte "password123",0
+		cUsername byte "aaa",0
+		cPassword byte "123",0
+
+		aUsername byte "bbb",0
+		aPassword byte "zzz",0
+
 
 		loginMsg BYTE "Enter Username: ", 0
 		passMsg BYTE "Enter Password: ", 0

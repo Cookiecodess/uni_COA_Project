@@ -3,6 +3,7 @@ INCLUDE Irvine32.inc
 	LF = 0Ah	; Line Feed
 	SPACE =09h
 .data
+	;HEADER-------------------------------------------------------------------
 	header1             byte "Main Menu",0
     headerLogin			byte "Login",0
     headerReceipt		byte "Receipt",0
@@ -10,30 +11,35 @@ INCLUDE Irvine32.inc
     equalSign           byte '='
     leftRightPadding    dword 40
 
+	;GENERAL------------------------------------------------------------------
+	MAX	= 20								; max characters to read
+	inputBuffer			byte  MAX+1 dup(?)  ; room for null character
+
 
 	;USER LOGIN----------------------------------------------------------------
-		welcome byte " Welcome,here is a login page",0
-		choose byte "Choose a number to login : ",0
-		user1 byte "1. Customer",0
-		user2 byte "2. Admin",0
-		loginChoose byte ?
+	welcome			byte	" Welcome,here is a login page",0
+	choose			byte	"Choose a number to login : ",0
+	user1			byte	"1. Customer",0
+	user2			byte	"2. Admin",0
+	loginChoose		byte	?
 
-		cUsername byte "aaa",0
-		cPassword byte "123",0
+	cUsername		byte	"aaa",0
+	cPassword		byte	"123",0
 
-		aUsername byte "bbb",0
-		aPassword byte "zzz",0
+	aUsername		byte	"bbb",0
+	aPassword		byte	"zzz",0
 
 
-		loginMsg BYTE "Enter Username: ", 0
-		passMsg BYTE "Enter Password: ", 0
+	loginMsg		BYTE	"Enter Username: ", 0
+	passMsg			BYTE	"Enter Password: ", 0
 
-		successMsg BYTE "Login Successful!", 0
-		failMsg BYTE "Login Failed!", 0
+	successMsg		BYTE	"Login Successful!", 0
+	failMsg			BYTE	"Login Failed!", 0
 
 		
-		username BYTE 20 DUP(0)	;like char[20] and initialize it by 0(null)
-		password BYTE 20 DUP(0)	;but user only can type 19 word since at 20 need to store the 0(to stop)
+	inputUsername	BYTE	MAX+1 DUP(?)	;like char[20] and initialize it by 0(null)
+	inputPassword	BYTE	MAX+1 DUP(?)	;but user only can type 19 word since at 20 need to store the 0(to stop)
+	
 	;ADMIN LOGIN
 	admin byte "ADMIN",0
 
@@ -109,30 +115,30 @@ main PROC
 
 		lea edx,loginMsg
 		call WriteString
-		mov edx, OFFSET username  ; use username as buffer
-		mov ecx,20	;to ensure the user only input 20 char?
+		mov edx, OFFSET inputUsername  ; use username as buffer
+		mov ecx, MAX	;to ensure the user only input 20 char?
 		call ReadString
 		call CRLF
 		
 
 		lea edx,passMsg
 		call WriteString
-		mov edx,OFFSET password
-		mov ecx,20	;to ensure the user only input 20 char
+		mov edx, OFFSET inputPassword
+		mov ecx, 20	;to ensure the user only input 20 char
 		call ReadString
 		call CRLF
-		lea edx,password
+		; lea edx,password
 
 
 		jmp check_admin 
 
 		check_admin:	;============================================================
-			lea esi,username
-			lea edi,aUsername
+			lea esi, inputUsername
+			lea edi, aUsername
 			call Str_compare	;to check/compare the username is true or false
 			jne Alogin_failed
 
-			lea esi, password
+			lea esi, inputPassword
 			lea edi, aPassword
 			call Str_compare
 			jne Alogin_failed
@@ -149,31 +155,40 @@ main PROC
 			
 			lea edx,loginMsg
 			call WriteString
-			mov ecx,20	;to ensure the user only input 20 char?
+
+			mov edx, offset inputUsername
+			mov ecx, MAX	;to ensure the user only input 20 char?
 			call ReadString
 			call CRLF
-			lea edx,username
+			; lea edx,username
 
 			lea edx,passMsg
 			call WriteString
 
-			mov ecx,20	;to ensure the user only input 20 char
+			mov edx, offset inputPassword
+			mov ecx, MAX	;to ensure the user only input 20 char
 			call ReadString
 			call CRLF
-			lea edx,password
+			; lea edx,password
 			
 			jmp check_customer
 
 
 		check_customer:		;====================================
-			mov esi, OFFSET username
+			mov esi, OFFSET inputUsername
 			mov edi, OFFSET cUsername
+
+			push edi
+			push esi
 			call Str_compare
 			
 			jne Clogin_failed
 
-			mov esi, OFFSET password
+			mov esi, OFFSET inputPassword
 			mov edi, OFFSET cPassword
+
+			push edi
+			push esi
 			call Str_compare
 		
 			jne Clogin_failed
@@ -193,15 +208,18 @@ main PROC
 		call WriteString
 		call Crlf
 
-		; clear username and password by using rep stosb by fill it by 0
-			mov edi, OFFSET username
-				mov ecx, 20
-				mov al, 0
-				rep stosb
-			mov edi, OFFSET password
-				mov ecx, 20
-				mov al, 0
-				rep stosb
+		; clear user-input username and password by using rep stosb by fill it by 0
+		mov edi, OFFSET inputUsername
+		mov ecx, MAX
+		mov al, 0
+		rep stosb		; Fill buffer (inputUsername) with MAX number of zeroes
+						; Note: stosb = store string byte
+						;		rep = repeat for ECX times
+
+		mov edi, OFFSET inputPassword
+		mov ecx, MAX
+		mov al, 0
+		rep stosb		; Fill buffer (inputPassword) with MAX number of zeroes
 
 
 		jmp adminLogin   ; Retry Admin login
@@ -212,26 +230,29 @@ main PROC
 		call Crlf
 		jmp customerLogin  ; Retry Customer login
 
-		 ; clear username, password
-		mov edi, OFFSET username
-			mov ecx, 20
-			mov al, 0
-			rep stosb
+		; clear user-input username, password
+		mov edi, OFFSET inputUsername
+		mov ecx, 20
+		mov al, 0
+		rep stosb
 
-		mov edi, OFFSET password
-			mov ecx, 20
-			mov al, 0
-			rep stosb
+		mov edi, OFFSET inputPassword
+		mov ecx, 20
+		mov al, 0
+		rep stosb
 
 	;CUSTOMER PAGE--------------------------
 	customerPage:
 		mov eax, offset customer
 		mov ebx, lengthof customer
 		call PrintHeader
+		exit
+
 	adminPage:
 		mov eax, offset admin
 		mov ebx, lengthof admin
 		call PrintHeader
+		exit
 
 
 

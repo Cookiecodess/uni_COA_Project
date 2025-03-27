@@ -51,7 +51,7 @@ WriteStrArr PROC
 		call crlf
 		inc esi
 
-		cmp byte ptr [esi+1], 0		; if the next char is also 0 then we know its the end of the array
+		cmp byte ptr [esi], 0		; if the next char is also 0 then we know its the end of the array
 		je done
 
 		inc edx				; writing the index number

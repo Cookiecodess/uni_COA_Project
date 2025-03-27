@@ -22,15 +22,16 @@ main PROC
 	push offset promptChooseHead
 	push offset promptChooseTail
 	call WriteMenu
-	; returned selected index in EAX, length of passed string array in EBX
+	; returned: selected index in EAX, length of passed string array in EBX
+	; length of string array is needed to call GetStrArrElem
 
-	; call dumpregs
+	; call DumpRegs
 
 	push offset ticketTypeArr
 	push ebx		; length of ticketTypeArr. This is the 2nd return value of WriteMenu
 	push eax		; selected index. This is the 1st return value of WriteMenu
 	call GetStrArrElem
-	; returned offset of string at given index in EAX
+	; returned: offset of string in EAX
 
 	mov edx, offset msgChose
 	call WriteString

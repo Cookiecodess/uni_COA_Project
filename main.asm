@@ -47,6 +47,8 @@ INCLUDE Irvine32.inc
 	customer byte "CUSTOMER",0
 	customerSelection byte "View Schedule",0,"Ticketing",0,"Buy Member",0,"Check Nearby Station",0,"log out",0,0
 
+	;REGISTER
+	register byte "REGISTER",0
 	;RECEIPT--------------------------------
 		receipt byte "Receipt",0
 		
@@ -106,7 +108,7 @@ main PROC
 		lea edx,loginMsg
 		call WriteString
 		mov edx, OFFSET inputUsername  ; use username as buffer
-		mov ecx, MAX	;to ensure the user only input 20 char?
+		mov ecx, MAX	;to ensure the user only input 20 char
 		call ReadString
 		call CRLF
 		
@@ -232,7 +234,7 @@ main PROC
 
 		mov edx, offset successMsg
 		call WriteString
-
+		call CRLF
 		push OFFSET customerSelection
 		call WriteStrArr
 
@@ -253,6 +255,29 @@ main PROC
 
 	;REGISTER
 		;register:
+		mov eax,offset register
+		mov ebx, lengthof register
+		call PrintHeader
+		call CRLF
+
+		lea edx,loginMsg
+		call WriteString
+		mov edx, OFFSET inputUsername  ; use username as buffer
+		mov ecx, MAX	;to ensure the user only input 20 char
+		call ReadString
+		call CRLF
+		
+
+		lea edx,passMsg
+		call WriteString
+		mov edx, OFFSET inputPassword
+		mov ecx, 20	;to ensure the user only input 20 char
+		call ReadString
+		call CRLF
+		; lea edx,password
+
+
+		jmp check_admin 
 
 
 

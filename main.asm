@@ -19,8 +19,7 @@ INCLUDE Irvine32.inc
 	;USER LOGIN----------------------------------------------------------------
 	welcome			byte	" Welcome,here is a login page",0
 	choose			byte	"Choose a number to login : ",0
-	user1			byte	"1. Customer",0
-	user2			byte	"2. Admin",0
+	user			byte	"Customer",0,"Admin",0,0
 	loginChoose		byte	?
 
 	cUsername		byte	"aaa",0
@@ -82,17 +81,10 @@ main PROC
 		call WriteString
 		call CRLF
 
-		mov al, SPACE  
-		call WriteChar  
-		lea edx,user1
-		call WriteString
-		call CRLF
-
-		mov al, SPACE  
-		call WriteChar  
-		lea edx,user2
-		call WriteString
-		call CRLF
+ 
+		push OFFSET user
+		call WriteStrArr
+	
 
 		mov al, SPACE   ; Load tab character
 		call WriteChar  ; Print tab
@@ -415,6 +407,8 @@ WriteStrArr PROC
 
 	mov esi, [ebp+8] ; load the address of the string array to esi
 
+	mov al, SPACE  
+	call WriteChar
 	; printing the index number
 	mov edx, 1
 	mov eax, edx
@@ -441,7 +435,8 @@ WriteStrArr PROC
 
 		cmp byte ptr [esi+1], 0		; if the next char is also 0 then we know its the end of the array
 		je done
-
+		mov al, SPACE  
+		call WriteChar
 		inc edx				; writing the index number
 		mov eax, edx
 		call writeDec
@@ -461,4 +456,13 @@ WriteStrArr PROC
 
 WriteStrArr ENDP
 
+PromptEnterMsg PROC
+
+
+
+
+
+
+
+PromptEnterMsg ENDP
 END main

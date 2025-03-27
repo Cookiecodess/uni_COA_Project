@@ -463,6 +463,8 @@ WriteStrArr PROC
 	push edx
 
 	mov esi, [ebp+8] ; load the address of the string array to esi
+	mov al, SPACE  
+	call WriteChar
 
 	; printing the index number
 	mov edx, 1
@@ -490,6 +492,9 @@ WriteStrArr PROC
 
 		cmp byte ptr [esi+1], 0		; if the next char is also 0 then we know its the end of the array
 		je done
+
+		mov al, SPACE  
+		call WriteChar
 
 		inc edx				; writing the index number
 		mov eax, edx

@@ -1,13 +1,16 @@
 include Irvine32.inc
 
 .data
-	stringarr BYTE "hello",0,"world",0,"this",0,"test",0,0
+	stringarr BYTE "hello",0,"world",0,"this",0,"this",0,"test",0,0
 
 .code
 main PROC
 
+	call dumpregs
+
 	push OFFSET stringarr
 	call WriteStrArr
+	call dumpregs
 	
 	
 	exit
@@ -17,6 +20,10 @@ main ENDP
 WriteStrArr PROC
 	push ebp		; save current base pointer first
 	mov ebp, esp	; move sp to bp for us to access the parameters stored in the stack
+
+	; save old values of ESI and EDX
+	push esi
+	push edx
 
 	mov esi, [ebp+8] ; load the address of the string array to esi
 
@@ -61,8 +68,15 @@ WriteStrArr PROC
 
 	done:
 
+	; store return value (length of the string array) in EAX
+	mov eax, edx
+
+	; restore old ESI and EDX
+	pop edx
+	pop esi
+
 	pop ebp			; restore the initial base pointer before returning back to caller
-	ret 8			; clear the stack pointer before returning
+	ret 4			; clear the stack pointer before returning
 
 WriteStrArr ENDP
 

@@ -19,7 +19,7 @@ INCLUDE Irvine32.inc
 	;USER LOGIN----------------------------------------------------------------
 	welcome			byte	" Welcome,here is a login page",0
 	choose			byte	"Choose a number to login : ",0
-	user			byte	"Customer",0,"Admin",0,0
+	user			byte	"Customer",0,"Admin",0,"Back",0,0
 	loginChoose		byte	?
 
 	cUsername		byte	"aaa",0
@@ -29,23 +29,23 @@ INCLUDE Irvine32.inc
 	aPassword		byte	"zzz",0
 
 
-	loginMsg		BYTE	"Enter Username: ", 0
-	passMsg			BYTE	"Enter Password: ", 0
+	loginMsg		byte	"Enter Username: ", 0
+	passMsg			byte	"Enter Password: ", 0
 
-	successMsg		BYTE	"Login Successful!", 0
-	failMsg			BYTE	"Login Failed!", 0
+	successMsg		byte	"Login Successful!", 0
+	failMsg			byte	"Login Failed!", 0
 
 		
-	inputUsername	BYTE	MAX+1 DUP(?)	;like char[20] and initialize it by 0(null)
-	inputPassword	BYTE	MAX+1 DUP(?)	;but user only can type 19 word since at 20 need to store the 0(to stop)
+	inputUsername	byte	MAX+1 DUP(?)	;like char[20] and initialize it by 0(null)
+	inputPassword	byte	MAX+1 DUP(?)	;but user only can type 19 word since at 20 need to store the 0(to stop)
 	
 	;ADMIN LOGIN
 	admin byte "ADMIN",0
-
+	adminSelection byte "View Today Earning Report",0,"View Month Earning Report",0,"View Year Earning Report",0,"log out",0,0
 
 	;CUSOTMER LOGIN
 	customer byte "CUSTOMER",0
-
+	customerSelection byte "View Schedule",0,"Ticketing",0,"Buy Member",0,"Check Nearby Station",0,"log out",0,0
 
 	;RECEIPT--------------------------------
 		receipt byte "Receipt",0
@@ -81,10 +81,8 @@ main PROC
 		call WriteString
 		call CRLF
 
- 
 		push OFFSET user
 		call WriteStrArr
-	
 
 		mov al, SPACE   ; Load tab character
 		call WriteChar  ; Print tab
@@ -235,17 +233,26 @@ main PROC
 		mov edx, offset successMsg
 		call WriteString
 
+		push OFFSET customerSelection
+		call WriteStrArr
+
 		exit
 
 	adminPage:
 		mov eax, offset admin
 		mov ebx, lengthof admin
 		call PrintHeader
-		
+		call CRLF
 		mov edx, offset successMsg
 		call WriteString
+		call CRLF
+		push OFFSET adminSelection
+		call WriteStrArr
 
 		exit
+
+	;REGISTER
+		;register:
 
 
 
@@ -456,13 +463,5 @@ WriteStrArr PROC
 
 WriteStrArr ENDP
 
-PromptEnterMsg PROC
 
-
-
-
-
-
-
-PromptEnterMsg ENDP
 END main

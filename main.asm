@@ -5,13 +5,14 @@ INCLUDE generalFunctions.inc
 	LF = 0Ah	; Line Feed
 	SPACE =09h
 .data
-	;HEADER-------------------------------------------------------------------
+	;HEADERS-------------------------------------------------------------------
 	header1             byte "Main Menu",0
     headerLogin			byte "Login",0
     headerReceipt		byte "Receipt",0
     header3             byte "Register",0
-    equalSign           byte '='
-    leftRightPadding    dword 40
+	; NOTE: To modify the border pattern and left-and-right padding,
+	;       go to the .DATA segment in generalFunctions.asm
+	;       and look for "FOR PrintHeader".
 
 	;GENERAL------------------------------------------------------------------
 	MAX	= 20								; max characters to read

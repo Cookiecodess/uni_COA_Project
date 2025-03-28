@@ -2,6 +2,14 @@
 
 PrintHeader PROTO
 WriteStrArr PROTO
+	
+	CR = 0Dh	; Carriage Return
+	LF = 0Ah	; Line Feed
+	SPACE =09h
+.data
+	;FOR PrintHeader-------------------------------------------------------------------
+	equalSign           byte '='
+    leftRightPadding    dword 40
 
 .code
 ;--------------------------------------------------------

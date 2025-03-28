@@ -2,11 +2,13 @@ include Irvine32.inc
 
 .data
 	stringarr BYTE "hello",0,"world",0,"this",0,"this",0,"test",0,0
+	stringarr2 BYTE "hello",0,"world",0,"this",0,"this",0,"test",0,0
 
 .code
 main PROC
 
 	call dumpregs
+
 
 	push OFFSET stringarr
 	call WriteStrArr

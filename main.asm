@@ -1,10 +1,13 @@
 INCLUDE Irvine32.inc
 INCLUDE generalFunctions.inc
+INCLUDE TicketingPage.inc
 
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
 	SPACE =09h
 .data
+	;STATUS FLAGS--------------------------------------------------------------
+	showLoginSuccessMsg	byte 0
 	;HEADERS-------------------------------------------------------------------
 	header1             byte "Main Menu",0
     headerLogin			byte "Login",0
@@ -15,8 +18,8 @@ INCLUDE generalFunctions.inc
 	;       and look for "FOR PrintHeader".
 
 	;GENERAL------------------------------------------------------------------
-	MAX	= 20								; max characters to read
-	inputBuffer			byte  MAX+1 dup(?)  ; room for null character
+	; MAX	= 20								; max characters to read
+	; inputBuffer			byte  MAX+1 dup(?)  ; room for null character
 
 
 	;USER LOGIN----------------------------------------------------------------
@@ -47,8 +50,11 @@ INCLUDE generalFunctions.inc
 	adminSelection byte "View Today Earning Report",0,"View Month Earning Report",0,"View Year Earning Report",0,"log out",0,0
 
 	;CUSOTMER LOGIN
-	customer byte "CUSTOMER",0
-	customerSelection byte "View Schedule",0,"Ticketing",0,"Buy Member",0,"Check Nearby Station",0,"log out",0,0
+	headerCustomer byte "CUSTOMER",0
+	customerSelectionArr byte "View Schedule",0,"Ticketing",0,"Buy Member",0,"Check Nearby Station",0,"log out",0,0
+	customerSelectionArrLength dword ?
+	promptCustomerPageHead byte "Please select an action (1-",0
+	promptCustomerPageTail byte "): ",0
 
 	;REGISTER
 	register byte "REGISTER",0
@@ -143,8 +149,8 @@ main PROC
 		
 		
 		customerLogin:		;===================================
-			mov eax, offset customer
-			mov ebx, lengthof customer
+			mov eax, offset headerCustomer
+			mov ebx, lengthof headerCustomer
 			call PrintHeader
 			call CRLF
 			
@@ -180,6 +186,8 @@ main PROC
 			call Str_compare		
 			jne Clogin_failed
 
+			; at this point, customer is successfully authenticated
+			mov showLoginSuccessMsg, 1
 			jmp customerPage
 
 
@@ -231,24 +239,82 @@ main PROC
 
 	;CUSTOMER PAGE--------------------------
 	customerPage:
-		mov eax, offset customer
-		mov ebx, lengthof customer
+		call ClrScr						; Clear screen	
+
+		mov eax, offset headerCustomer		; Print header
+		mov ebx, lengthof headerCustomer
 		call PrintHeader
 
-		mov edx, offset successMsg
-		call WriteString
-		call CRLF
-		push OFFSET customerSelection
-		call WriteStrArr
+		cmp showLoginSuccessMsg, 0
+		je displayMenuLoop				; If the showLoginSuccessMsg flag is set to 0, 
+										; skip the code that prints login success msg.
 
-			mov al, SPACE   ; Load tab character
-		call WriteChar  ; Print tab
-		lea edx,choose
+		mov edx, offset successMsg		; Print login success message
 		call WriteString
-		call ReadChar
-		mov loginChoose, al
-				call CRLF
-		exit
+		mov showLoginSuccessMsg, 0		; Set the showLoginSuccessMsg flag is set to 0,
+										; so it won't show up the subsequent times this page is redrawn.
+
+		; push OFFSET customerSelection	; Print list of options
+		; call WriteStrArr
+
+		; mov al, SPACE   ; Load tab character
+		; call WriteChar  ; Print tab
+		; lea edx,choose
+		; call WriteString
+		; call ReadChar
+		; mov loginChoose, al
+				; call CRLF
+		; exit
+
+		displayMenuLoop:
+			call CRLF						; newline
+
+			; print list of options and a selection prompt
+			push offset customerSelectionArr
+			push offset promptCustomerPageHead
+			push offset promptCustomerPageTail
+			call WriteMenu
+			mov customerSelectionArrLength, ebx
+			; returned: selected index in EAX, length of passed string array in EBX
+			;           if selected number is out-of-bounds, EAX = -1
+			; length of string array is needed to call GetStrArrElem
+
+			; push offset customerSelectionArr
+			; push customerSelectionArrLength		; length of ticketTypeArr. This is the 2nd return value of WriteMenu
+			; push eax		; selected index. This is the 1st return value of WriteMenu
+			; call GetStrArrElem
+			; returned: offset of string in EAX
+
+			; Check for index-out-of-bounds error
+			cmp eax, -1
+			jne index_is_good
+	
+			; index is out of bounds!
+			call ClrScr							; Clear screen
+
+			lea eax, headerCustomer				; Print header again
+			mov ebx, lengthof headerCustomer
+			call PrintHeader
+
+			mov edx, offset errorOutOfBounds	; Print error message!
+			call WriteError
+			call CrLf							; print newlines (x2)
+			call CrLf							
+			jmp displayMenuLoop					; reprint menu and selection prompt
+
+		index_is_good:
+			; At this point, EAX = selected index
+			cmp eax, 1		; selection: Ticketing
+			je Ticketing
+			
+			jmp customerPage		; TEMP: redraw customerPage if user selects an option that hasn't been implemented
+
+		Ticketing:
+			call TicketingPage
+			jmp backToCustomerPage
+
+		backToCustomerPage:
+			jmp customerPage
 
 	adminPage:
 		mov eax, offset admin

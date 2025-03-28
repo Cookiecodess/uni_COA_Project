@@ -238,6 +238,13 @@ main PROC
 		push OFFSET customerSelection
 		call WriteStrArr
 
+			mov al, SPACE   ; Load tab character
+		call WriteChar  ; Print tab
+		lea edx,choose
+		call WriteString
+		call ReadChar
+		mov loginChoose, al
+				call CRLF
 		exit
 
 	adminPage:
@@ -251,6 +258,13 @@ main PROC
 		push OFFSET adminSelection
 		call WriteStrArr
 
+		mov al, SPACE   ; Load tab character
+		call WriteChar  ; Print tab
+		lea edx,choose
+		call WriteString
+		call ReadChar
+		mov loginChoose, al
+				call CRLF
 		exit
 
 	;REGISTER

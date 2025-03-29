@@ -4,7 +4,8 @@ INCLUDE TicketingPage.inc
 
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
-	SPACE =09h
+	TAB = 09h
+	SPACE = 20h
 .data
 	;STATUS FLAGS--------------------------------------------------------------
 	showLoginSuccessMsg	byte 0
@@ -95,7 +96,7 @@ main PROC
 		push OFFSET user
 		call WriteStrArr
 
-		mov al, SPACE   ; Load tab character
+		mov al, TAB   ; Load tab character
 		call WriteChar  ; Print tab
 		lea edx,choose
 		call WriteString
@@ -257,7 +258,7 @@ main PROC
 		; push OFFSET customerSelection	; Print list of options
 		; call WriteStrArr
 
-		; mov al, SPACE   ; Load tab character
+		; mov al, TAB   ; Load tab character
 		; call WriteChar  ; Print tab
 		; lea edx,choose
 		; call WriteString
@@ -327,7 +328,7 @@ main PROC
 		push OFFSET adminSelection
 		call WriteStrArr
 
-		mov al, SPACE   ; Load tab character
+		mov al, TAB   ; Load tab character
 		call WriteChar  ; Print tab
 		lea edx,choose
 		call WriteString
@@ -371,7 +372,7 @@ main PROC
 		mov ebx, lengthof headerReceipt
 		call PrintHeader
 
-		mov al, SPACE 
+		mov al, TAB 
 		call WriteChar 
 
 		lea edx,bookingS
@@ -387,19 +388,19 @@ main PROC
 		call WriteDec
 		call CRLF
 
-		mov al, SPACE
+		mov al, TAB
 		call WriteChar
 		lea edx,personS
 		call WriteString
 		call CRLF
 
-		mov al, SPACE
+		mov al, TAB
 		call WriteChar
 		lea edx,priceS
 		call WriteString
 		call CRLF
 
-		mov al, SPACE
+		mov al, TAB
 		call WriteChar
 		lea edx,detailS
 		call WriteString
@@ -422,7 +423,7 @@ main PROC
 
 		 call CRLF				; new line
 
-		 mov al, SPACE   ; Load tab character
+		 mov al, TAB   ; Load tab character
 		 call WriteChar  ; Print tab
 		 call WriteChar  ; Print tab
 		 call WriteChar  ; Print tab

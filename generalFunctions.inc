@@ -5,7 +5,7 @@ WriteStrArr PROTO
 	
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
-	SPACE =09h
+	TAB = 09h
 .data
 	; FOR PrintHeader -------------------------------------------------------------------
 	equalSign           byte '='
@@ -92,6 +92,75 @@ PrintHeader PROC
 		pop ebp
 		ret
 PrintHeader ENDP
+
+
+
+
+
+; Example usage:
+;     lea edx, errorMsg
+;     mov ecx, sizeof errorMsg
+;     call WriteAlignRight
+WriteAlignRight PROC
+		push ebp
+		mov ebp, esp
+
+		; Allocate memory for 2 local variables
+		sub esp, 8
+
+		; Store arguments in local variables
+		mov dword ptr [ebp-4], edx
+		mov dword ptr [ebp-8], ecx
+
+		; save original values of registers
+		push edx
+		push ecx
+
+		; clear edx
+		xor edx, edx		
+	
+		; get max no. of columns in console
+		call GetMaxXY		; dl = number of columns in console
+		movzx edx, dl		; we only want dl, fill the rest with 0's
+
+		; edx = number of columns - (ticketTypeArr.length() - 1)
+		sub edx, dword ptr [ebp-8]
+		inc edx
+
+		; if edx >= 0 (string length not larger than console width), continue
+		jge continue
+		; else, write string as normal and abort
+		mov edx, dword ptr [ebp-4]
+		call WriteString
+		jmp done
+
+	continue:
+		; Left-pad with spaces
+		mov ecx, edx		; ECX = number of columns - (ticketTypeArr.length() - 1)
+		mov al, SPACE		; load SPACE character
+	SpaceLoop:				
+		call WriteChar
+		loop SpaceLoop
+
+		; write string
+		mov edx, dword ptr [ebp-4]
+		call WriteString
+
+	done:
+		; restore old values of registers
+		pop ecx
+		pop edx
+
+		; restore stack pointer
+		mov esp, ebp
+		; restore base pointer
+		pop ebp
+		ret
+WriteAlignRight ENDP
+
+
+
+
 
 
 
@@ -254,7 +323,7 @@ WriteStrArr PROC
 		push edx
 
 		mov esi, [ebp+8] ; load the address of the string array to esi
-		mov al, SPACE  
+		mov al, TAB  
 		call WriteChar
 
 		; printing the index number
@@ -284,7 +353,7 @@ WriteStrArr PROC
 		cmp byte ptr [esi], 0		; if the next char is also 0 then we know its the end of the array
 		je done
 
-		mov al, SPACE  
+		mov al, TAB  
 		call WriteChar
 
 		inc edx				; writing the index number

@@ -1,10 +1,10 @@
 ; INCLUDE generalFunctions.inc
 
 .data
-	SPACE = 32
+	; SPACE = 32
 	;GENERAL------------------------------------------------------------------
-	MAX	= 20								; max characters to read
-	inputBuffer			byte  MAX+1 dup(?)  ; room for null character
+	; MAX	= 20								; max characters to read
+	; inputBuffer			byte  MAX+1 dup(?)  ; room for null character
 
 	;TICKETING--------------------------------------------------------------------
 	headerTicketType	BYTE	"Choose ticket type",0
@@ -18,62 +18,65 @@
 	ticketTypeArrLength	DWORD	?
 	promptChooseHead	BYTE	"Please select a ticket for more options (1-",0
 	promptChooseTail	BYTE	"): ",0
+	promptChoose	BYTE	"Please select a ticket for more options.",0
 
 	msgChose			BYTE	"You chose ",0
-	selectionIndex		DWORD	?
+	; selectionIndex		DWORD	?
 	
 
 
 .code 
 TicketingPage PROC USES eax ebx edx
+		invoke InitMenu, offset headerTicketType, offset ticketTypeArr, offset promptChoose
+
 		; initial clear screen
-		call ClrScr
+		; call ClrScr
 
 		; Print header
-		lea eax, headerTicketType
-		mov ebx, lengthof headerTicketType
-		call PrintHeader
-	displayMenuLoop:
+		; lea eax, headerTicketType
+		; mov ebx, lengthof headerTicketType
+		; call PrintHeader
+	; displayMenuLoop:
 
 		; print list of options and a selection prompt
-		push offset ticketTypeArr
-		push offset promptChooseHead
-		push offset promptChooseTail
-		call WriteMenu
-		mov selectionIndex, eax
-		mov ticketTypeArrLength, ebx
+		; push offset ticketTypeArr
+		; push offset promptChooseHead
+		; push offset promptChooseTail
+		; call WriteMenu
+		; mov selectionIndex, eax
+		; mov ticketTypeArrLength, ebx
 		; returned: selected index in EAX, length of passed string array in EBX
 		; length of string array is needed to call GetStrArrElem
 
 
 
-		push offset ticketTypeArr
-		push ticketTypeArrLength		; length of ticketTypeArr. This is the 2nd return value of WriteMenu
+		; push offset ticketTypeArr
+		; push ticketTypeArrLength		; length of ticketTypeArr. This is the 2nd return value of WriteMenu
 		; mov eax, 4
-		push selectionIndex		; selected index. This is the 1st return value of WriteMenu
-		call GetStrArrElem
+		; push selectionIndex		; selected index. This is the 1st return value of WriteMenu
+		; call GetStrArrElem
 		; returned: offset of string in EAX
 
 		; check for index-out-of-bounds error
-		cmp eax, -1
-		jne index_is_good
+		; cmp eax, -1
+		; jne index_is_good
 	
 		; index is out of bounds!
-		call ClrScr							; Clear screen
+		; call ClrScr							; Clear screen
 
-		lea eax, headerTicketType			; Print header again
-		mov ebx, lengthof headerTicketType
-		call PrintHeader
+		; lea eax, headerTicketType			; Print header again
+		; mov ebx, lengthof headerTicketType
+		; call PrintHeader
 
-		mov edx, offset errorOutOfBounds	; Print error message!
-		call WriteError
-		call CrLf							; print newlines (x2)
-		call CrLf							
-		jmp displayMenuLoop					; reprint menu and selection prompt
+		; mov edx, offset errorOutOfBounds	; Print error message!
+		; call WriteError
+		; call CrLf							; print newlines (x2)
+		; call CrLf
+		; jmp displayMenuLoop					; reprint menu and selection prompt
 
-	index_is_good:
+	; index_is_good:
 		; Did user select "Back"? If so, let's not print anything and just return.
-		mov eax, selectionIndex
+		mov eax, currentSelection
 		cmp eax, backIndex
 		je go_back_whence_you_came
 

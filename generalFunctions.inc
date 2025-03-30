@@ -3,18 +3,89 @@
 PrintHeader PROTO
 WriteStrArr PROTO
 	
+SetConsoleCursorInfo PROTO, 
+hConsoleOutput:DWORD, 
+lpConsoleCursorInfo:PTR CONSOLE_CURSOR_INFO
+
+CONSOLE_CURSOR_INFO STRUCT
+	dwSize DWORD ?
+	bVisible DWORD ?
+CONSOLE_CURSOR_INFO ENDS
+
+.data
+	; cursorInfo CONSOLE_CURSOR_INFO <10, 1>  ; Size 10, Visible = FALSE (0)
+	; consoleHandle DWORD ?
+
+	;GENERAL------------------------------------------------------------------
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
 	TAB = 09h
-.data
+	SPACE = 20h
+
+	MAX	= 20								; max characters to read
+	inputBuffer			byte  MAX+1 dup(?)  ; room for null character
+
 	; FOR PrintHeader -------------------------------------------------------------------
 	equalSign           byte '='
     leftRightPadding    dword 40
 
 	; ERROR MESSAGES -------------------------------------------------------------------
-	errorOutOfBounds	BYTE	"Invalid option: Selected number not in list!",0
+	errorCode			DWORD	0
+	errorMessages		DWORD	OFFSET err1 
+	err1				BYTE	"Invalid option: Selected number not in list!",0
 
 .code
+; Print error message
+; No call args, no return args
+PrintErrorMessage PROC
+		; Return if no error (error code = 0)
+		cmp errorCode, 0
+		je return
+
+		; Print error message
+		mov eax, errorCode
+		dec eax
+		mov eax, [errorMessages + eax * 4]
+		mov edx, eax
+		call WriteStringInRed
+
+		; Reset errorCode to 0
+		mov errorCode, 0
+	return:
+		ret
+PrintErrorMessage ENDP
+
+
+
+
+
+SetCursorVisibility PROC USES eax, isVisible:DWORD
+	LOCAL cursorInfo:CONSOLE_CURSOR_INFO
+	LOCAL consoleHandle:DWORD
+
+	; Set cursor size and visibility
+	mov cursorInfo.dwSize, 10
+	mov eax, isVisible
+	mov cursorInfo.bVisible, eax
+
+	; Get the console output handle (Irvine library function)
+    INVOKE GetStdHandle, STD_OUTPUT_HANDLE
+    mov consoleHandle, eax
+    
+    ; Hide the cursor
+    INVOKE SetConsoleCursorInfo, 
+        consoleHandle,
+        ADDR cursorInfo
+
+	ret
+SetCursorVisibility ENDP
+
+
+
+
+
+
+
 ;--------------------------------------------------------
 ; PrintHeader
 ;
@@ -166,8 +237,8 @@ WriteAlignRight ENDP
 
 ; Example usage:
 ;     mov edx, offset errorMsg
-;     call WriteError
-WriteError PROC USES eax
+;     call WriteStringInRed
+WriteStringInRed PROC USES eax
 	mov eax, lightRed+(black*16)		; set to red color
 	call SetTextColor
 	call WriteString			; write error message in red
@@ -175,7 +246,7 @@ WriteError PROC USES eax
 	call SetTextColor
 
 	ret
-WriteError ENDP
+WriteStringInRed ENDP
 
 
 
@@ -385,13 +456,24 @@ WriteStrArr ENDP
 
 
 
+; USAGE EXAMPLE:
+; mov edx, offset strArray
+; call CalcStrArrSize
+; mov strArraySize, eax
+CalcStrArrSize PROC uses esi edx
+		mov esi, edx	; Initialize pointer
+		xor eax, eax	; Initialize counter
 
-
-
-
-
-
-
+	FindNextString:
+		inc esi			; Move pointer forward
+		cmp byte ptr [esi], 0		; Is it pointng to a null terminator?
+		jne FindNextString
+		inc eax			; It is! counter++
+		inc esi			; Move pointer past the null terminator
+		cmp byte ptr [esi], 0		; Is the char right next door ANOTHER null terminator?
+		jne FindNextString			; No? Ok, then we're at the start of a new string. Let's find its null terminator.			
+		ret							; Yes? That means it's the end of the array. EAX now stores the no. of strings in the array.
+CalcStrArrSize ENDP
 
 
 
@@ -404,13 +486,12 @@ WriteStrArr ENDP
 ;   Get the string at the provided index in a provided string array
 ;
 ; Call args:
-;	[ebp+16] - (DWORD) string array offset address
-;	[ebp+12] - (DWORD) string array length
-;	[ebp+8] - (DWORD) the index we're looking for
+;	EAX - (DWORD) index to look for
+;	EDX - (DWORD) offset of string array 
 ;
 ; Returns:
-;   EAX  - (DWORD) pointer to the wanted string 
-;   EBX  - (DWORD) Length of the string array
+;   EDX  - (DWORD) offset of found string 
+;				   OR if ERROR, EDX = -1
 ;
 ; Example usage:
 ;   .data
@@ -421,54 +502,55 @@ WriteStrArr ENDP
 ;					  BYTE  0				; IMPORTANT: This last 0 acts as
 ;											; terminator for the whole array.
 ;	index			  DWORD 1
-;   stringArrayLength DWORD 5
 ;
 ;   .code
-;       push offset stringArray
-;       push stringArrayLength
-;       push index
-;       call GetStrArrElem				
-;
-;       mov edx, eax
-;		call WriteString
+;		mov eax, index
+;		mov edx, offset stringArray
+;		call GetStrArrElem
+; 
+;		cmp edx, -1
+;		je outOfBoundsError
+;		call WriteString				; EDX = offset
+;	OutOfBoundsError:
+;		call PrintErrorMessage		; print error message ONLY IF errorCode != 0
 ;--------------------------------------------------------
-GetStrArrElem PROC
-		push ebp		; save current base pointer first
-		mov ebp, esp	; move sp to bp for us to access the parameters stored in the stack
+GetStrArrElem PROC USES eax ecx esi
+		; ECX = index to look for
+		mov ecx, eax
 
-		; save old values of registers
-		push esi
-		push edx
+		; Calculate size of string array
+			; EDX already stores the offset of str arr
+		call CalcStrArrSize
+			; EAX now stores size of str arr
 
-		; check for index-out-of-bounds
-		mov edx, dword ptr [ebp+8]		; EDX = the index we're looking for
-		cmp edx, dword ptr [ebp+12]		; index >= array length? ABORT
+		; Check for index-out-of-bounds error
+		cmp ecx, eax	; target index >= array size? ABORT
 		jge abort
-		cmp edx, 0						; index < 0? ABORT
+		cmp ecx, 0		; target index < 0? ABORT
 		jl abort
 
 		; index not out of bounds! we can now start executing the actual function code
 
-		mov esi, dword ptr [ebp+16] ; load the address of the string array to esi
-		mov edx, 0					; initialize index to 0
+		mov esi, edx ; load the address of the string array to esi
+		mov eax, 0					; initialize index to 0
 		; mov ecx, dword ptr [ebp+12]  ; times to loop
 
-	; at the start of each string, check if edx (current index) is the one we're looking for
+	; at the start of each string, check if EAX (current index) is the index we're looking for (ECX)
 	findString:
-		cmp edx, dword ptr [ebp+8]	; is the current index what we looking for?
+		cmp eax, ecx	; is the current index what we looking for?
 		je grabString				; yes? get that sweet, sweet element
 
-		inc edx						; no? increment the index
+		inc eax						; no? increment the index
 
 	; have we reached the null terminator of the current string?
 	findNull:
 		inc esi						; move esi forward
 		cmp byte ptr [esi], 0		; reached null terminator of a string yet?
-		je foundNull
 	
 		; haven't reached null? keep looking
-		jmp findNull
+		jne findNull
 
+		; reached the null terminator of the current string!
 	foundNull:
 		inc esi	; move from null terminator of the prev string, to the start of the next string
 		jmp findString
@@ -476,18 +558,15 @@ GetStrArrElem PROC
 	
 
 	grabString:
-		mov eax, esi		; load offset of the target string into EAX. This will be the return value.
-		jmp done
+		mov edx, esi		; load offset of the target string into EDX. This will be the return value.
+		jmp return
 	
 	abort:
-		mov eax, -1			; return -1 to indicate failure
-							; EBX will still store the return value: length of array
+		mov eax, 1
+		mov errorCode, eax			; Set error code = 1
+									; EBX will still store the length of array
+		mov edx, -1		; Return EDX = -1, to indicate error
 
-	done:
-		; restore old values of registers
-		pop edx
-		pop esi
-
-		pop ebp			; restore the initial base pointer before returning back to caller
-		ret 12			; clear the stack pointer before returning
+	return:
+		ret 			; clear the stack pointer before returning
 GetStrArrElem ENDP

@@ -1,11 +1,13 @@
 INCLUDE Irvine32.inc
 INCLUDE generalFunctions.inc
+INCLUDE coolMenu.inc
 INCLUDE TicketingPage.inc
 
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
 	TAB = 09h
 	SPACE = 20h
+
 .data
 	;STATUS FLAGS--------------------------------------------------------------
 	showLoginSuccessMsg	byte 0
@@ -56,6 +58,7 @@ INCLUDE TicketingPage.inc
 	customerSelectionArrLength dword ?
 	promptCustomerPageHead byte "Please select an action (1-",0
 	promptCustomerPageTail byte "): ",0
+	promptCustomerPage byte "Select an action to continue.",0
 
 	;REGISTER
 	register byte "REGISTER",0
@@ -82,7 +85,6 @@ INCLUDE TicketingPage.inc
 
 .code
 main PROC
-
 	;USER LOGIN------------------------------
 		LOGIN:
 		mov eax, offset headerLogin
@@ -240,19 +242,21 @@ main PROC
 
 	;CUSTOMER PAGE--------------------------
 	customerPage:
-		call ClrScr						; Clear screen	
+		invoke InitMenu, offset headerCustomer, offset customerSelectionArr, offset promptCustomerPage	
 
-		mov eax, offset headerCustomer		; Print header
-		mov ebx, lengthof headerCustomer
-		call PrintHeader
+		; call ClrScr						; Clear screen
 
-		cmp showLoginSuccessMsg, 0
-		je displayMenuLoop				; If the showLoginSuccessMsg flag is set to 0, 
+		; mov eax, offset headerCustomer		; Print header
+		; mov ebx, lengthof headerCustomer
+		; call PrintHeader
+
+		; cmp showLoginSuccessMsg, 0
+		; je displayMenuLoop				; If the showLoginSuccessMsg flag is set to 0,
 										; skip the code that prints login success msg.
 
-		mov edx, offset successMsg		; Print login success message
-		call WriteString
-		mov showLoginSuccessMsg, 0		; Set the showLoginSuccessMsg flag is set to 0,
+		; mov edx, offset successMsg		; Print login success message
+		; call WriteString
+		; mov showLoginSuccessMsg, 0		; Set the showLoginSuccessMsg flag is set to 0,
 										; so it won't show up the subsequent times this page is redrawn.
 
 		; push OFFSET customerSelection	; Print list of options
@@ -267,15 +271,15 @@ main PROC
 				; call CRLF
 		; exit
 
-		displayMenuLoop:
-			call CRLF						; newline
+		; displayMenuLoop:
+			; call CRLF						; newline
 
 			; print list of options and a selection prompt
-			push offset customerSelectionArr
-			push offset promptCustomerPageHead
-			push offset promptCustomerPageTail
-			call WriteMenu
-			mov customerSelectionArrLength, ebx
+			; push offset customerSelectionArr
+			; push offset promptCustomerPageHead
+			; push offset promptCustomerPageTail
+			; call WriteMenu
+			; mov customerSelectionArrLength, ebx
 			; returned: selected index in EAX, length of passed string array in EBX
 			;           if selected number is out-of-bounds, EAX = -1
 			; length of string array is needed to call GetStrArrElem
@@ -287,23 +291,24 @@ main PROC
 			; returned: offset of string in EAX
 
 			; Check for index-out-of-bounds error
-			cmp eax, -1
-			jne index_is_good
+			; cmp eax, -1
+			; jne index_is_good
 	
 			; index is out of bounds!
-			call ClrScr							; Clear screen
+			; call ClrScr							; Clear screen
 
-			lea eax, headerCustomer				; Print header again
-			mov ebx, lengthof headerCustomer
-			call PrintHeader
+			; lea eax, headerCustomer				; Print header again
+			; mov ebx, lengthof headerCustomer
+			; call PrintHeader
 
-			mov edx, offset errorOutOfBounds	; Print error message!
-			call WriteError
-			call CrLf							; print newlines (x2)
-			call CrLf							
-			jmp displayMenuLoop					; reprint menu and selection prompt
+			; mov edx, offset errorOutOfBounds	; Print error message!
+			; call WriteError
+			; call CrLf							; print newlines (x2)
+			; call CrLf
+			; jmp displayMenuLoop					; reprint menu and selection prompt
 
-		index_is_good:
+		; index_is_good:
+			
 			; At this point, EAX = selected index
 			cmp eax, 1		; selection: Ticketing
 			je Ticketing

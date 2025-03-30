@@ -27,7 +27,7 @@
 
 .code 
 TicketingPage PROC USES eax ebx edx
-		invoke InitMenu, offset headerTicketType, offset ticketTypeArr, offset promptChoose
+		invoke InitMenu, offset headerTicketType, offset ticketTypeArr, offset promptChoose, 0
 
 		; initial clear screen
 		; call ClrScr

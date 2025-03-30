@@ -1,7 +1,7 @@
 ; coolMenu.inc
 
-InitMenu PROTO STDCALL :DWORD, :DWORD, :DWORD
-DrawMenu PROTO
+InitMenu PROTO STDCALL :DWORD, :DWORD, :DWORD, :DWORD
+DrawDefaultMenu PROTO
 MoveCursorUp PROTO
 MoveCursorDown PROTO
 SelectItem PROTO
@@ -38,7 +38,8 @@ SelectItem PROTO
 ;       None
 ; Return arg:
 ;       EAX - (DWORD) index of selected option
-InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, selectionPromptOffset:DWORD
+InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, selectionPromptOffset:DWORD, customDrawMenuFunc:DWORD
+        LOCAL drawMenuFunc :DWORD
 
         ; Store data in global variables so they're accessible by all functions in this file
         mov eax, headerOffset
@@ -59,8 +60,19 @@ InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, sele
         mov currentSelection, 0
 
         ; Calculate number of options
-        ; TODO: make a function that calculates number of strings in a string array
-        mov totalOptions, 5
+        mov edx, globalOptionListOffset
+        call CalcStrArrSize
+        mov totalOptions, eax
+
+        ; Set draw menu function
+        cmp customDrawMenuFunc, 0
+        jne UseCustomMenu
+        mov eax, offset DrawDefaultMenu
+        jmp StoreFunc
+    UseCustomMenu:
+        mov eax, customDrawMenuFunc
+    StoreFunc:
+        mov drawMenuFunc, eax
 
         ; Initialize console
         call Clrscr
@@ -69,7 +81,7 @@ InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, sele
         INVOKE SetCursorVisibility, 0
 
         ; Initial menu display
-        call DrawMenu
+        call drawMenuFunc
 
         ; Input handling loop
     InputLoop:
@@ -91,7 +103,7 @@ InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, sele
         .ENDIF
 
         ; Redraw menu after potential changes
-        call DrawMenu
+        call drawMenuFunc
 
         jmp InputLoop
 
@@ -101,10 +113,10 @@ InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, sele
 InitMenu ENDP
 
 ;---------------------------------------------
-; DrawMenu Procedure
+; DrawDefaultMenu Procedure
 ; Draws the entire menu with current selection highlighted
 ;---------------------------------------------
-DrawMenu PROC USES eax ebx ecx edx esi
+DrawDefaultMenu PROC USES eax ebx ecx edx esi
 
         ; Clear screen
         call Clrscr
@@ -187,27 +199,29 @@ DrawMenu PROC USES eax ebx ecx edx esi
         inc ecx
 
         ; Check if we've drawn all items
-        .IF BYTE PTR [esi] != 0
-            jmp DrawMenuLoop
-        .ENDIF
+        cmp BYTE PTR [esi], 0
+        jne DrawMenuLoop 
 
         ; Reset text color
         mov eax, NORMAL_COLOR
         call SetTextColor
 
         ret
-DrawMenu ENDP
+DrawDefaultMenu ENDP
 
 ;---------------------------------------------
 ; MoveCursorUp Procedure
 ; Moves cursor up, preventing going above first item
 ;---------------------------------------------
-MoveCursorUp PROC
-    ; Check if already at top
-    .IF currentSelection > 0
-        dec currentSelection
-    .ENDIF
-    ret
+MoveCursorUp PROC USES eax
+        mov eax, currentSelection
+        dec eax
+        cmp eax, 0
+        jge no_wrapping_to_bottom
+        add eax, totalOptions
+    no_wrapping_to_bottom:
+        mov currentSelection, eax
+        ret
 MoveCursorUp ENDP
 
 ;---------------------------------------------
@@ -215,13 +229,14 @@ MoveCursorUp ENDP
 ; Moves cursor down, preventing going below last item
 ;---------------------------------------------
 MoveCursorDown PROC USES eax
-    ; Check if already at bottom
-    mov eax, currentSelection
-    inc eax
-    .IF eax < totalOptions
-        inc currentSelection
-    .ENDIF
-    ret
+        mov eax, currentSelection
+        inc eax
+        cmp eax, totalOptions
+        jl no_wrapping_to_top
+        xor eax, eax
+    no_wrapping_to_top:
+        mov currentSelection, eax
+        ret
 MoveCursorDown ENDP
 
 ;---------------------------------------------

@@ -243,7 +243,7 @@ main PROC
 
 	;CUSTOMER PAGE--------------------------
 	customerPage:
-			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, offset promptCustomerPage	
+			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, offset promptCustomerPage, 0
 			; EAX = index of selected option
 
 			cmp eax, 1		; selection: Ticketing

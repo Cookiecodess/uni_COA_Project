@@ -18,7 +18,7 @@ SelectItem PROTO
 
     ; Color constants
     NORMAL_COLOR = lightGray
-    HIGHLIGHT_COLOR = white
+    HIGHLIGHT_COLOR = yellow
 
     ; Arrow keys scan code (2 bytes)
     UP = 4800h

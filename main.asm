@@ -21,6 +21,7 @@ INCLUDE TicketingPage.inc
 	;       and look for "FOR PrintHeader".
 
 	;GENERAL------------------------------------------------------------------
+	; NOTE: These are defined in generalFunctions.inc
 	; MAX	= 20								; max characters to read
 	; inputBuffer			byte  MAX+1 dup(?)  ; room for null character
 
@@ -231,85 +232,20 @@ main PROC
 
 		; clear user-input username, password
 		mov edi, OFFSET inputUsername
-		mov ecx, 20
+		mov ecx, MAX
 		mov al, 0
 		rep stosb
 
 		mov edi, OFFSET inputPassword
-		mov ecx, 20
+		mov ecx, MAX
 		mov al, 0
 		rep stosb
 
 	;CUSTOMER PAGE--------------------------
 	customerPage:
-		invoke InitMenu, offset headerCustomer, offset customerSelectionArr, offset promptCustomerPage	
+			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, offset promptCustomerPage	
+			; EAX = index of selected option
 
-		; call ClrScr						; Clear screen
-
-		; mov eax, offset headerCustomer		; Print header
-		; mov ebx, lengthof headerCustomer
-		; call PrintHeader
-
-		; cmp showLoginSuccessMsg, 0
-		; je displayMenuLoop				; If the showLoginSuccessMsg flag is set to 0,
-										; skip the code that prints login success msg.
-
-		; mov edx, offset successMsg		; Print login success message
-		; call WriteString
-		; mov showLoginSuccessMsg, 0		; Set the showLoginSuccessMsg flag is set to 0,
-										; so it won't show up the subsequent times this page is redrawn.
-
-		; push OFFSET customerSelection	; Print list of options
-		; call WriteStrArr
-
-		; mov al, TAB   ; Load tab character
-		; call WriteChar  ; Print tab
-		; lea edx,choose
-		; call WriteString
-		; call ReadChar
-		; mov loginChoose, al
-				; call CRLF
-		; exit
-
-		; displayMenuLoop:
-			; call CRLF						; newline
-
-			; print list of options and a selection prompt
-			; push offset customerSelectionArr
-			; push offset promptCustomerPageHead
-			; push offset promptCustomerPageTail
-			; call WriteMenu
-			; mov customerSelectionArrLength, ebx
-			; returned: selected index in EAX, length of passed string array in EBX
-			;           if selected number is out-of-bounds, EAX = -1
-			; length of string array is needed to call GetStrArrElem
-
-			; push offset customerSelectionArr
-			; push customerSelectionArrLength		; length of ticketTypeArr. This is the 2nd return value of WriteMenu
-			; push eax		; selected index. This is the 1st return value of WriteMenu
-			; call GetStrArrElem
-			; returned: offset of string in EAX
-
-			; Check for index-out-of-bounds error
-			; cmp eax, -1
-			; jne index_is_good
-	
-			; index is out of bounds!
-			; call ClrScr							; Clear screen
-
-			; lea eax, headerCustomer				; Print header again
-			; mov ebx, lengthof headerCustomer
-			; call PrintHeader
-
-			; mov edx, offset errorOutOfBounds	; Print error message!
-			; call WriteError
-			; call CrLf							; print newlines (x2)
-			; call CrLf
-			; jmp displayMenuLoop					; reprint menu and selection prompt
-
-		; index_is_good:
-			
-			; At this point, EAX = selected index
 			cmp eax, 1		; selection: Ticketing
 			je Ticketing
 			

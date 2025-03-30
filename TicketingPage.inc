@@ -27,7 +27,7 @@
 
 .code 
 TicketingPage PROC USES eax ebx edx
-		invoke InitMenu, offset headerTicketType, offset ticketTypeArr, offset promptChoose, 0
+		invoke InitMenu, offset headerTicketType, offset ticketTypeArr, offset promptChoose, 0, 0
 
 		; initial clear screen
 		; call ClrScr
@@ -82,8 +82,10 @@ TicketingPage PROC USES eax ebx edx
 
 		mov edx, offset msgChose
 		call WriteString
-		; Write the string from the array
-		mov edx, eax
+		;Write the string from the array
+		mov edx, offset ticketTypeArr
+		mov eax, currentSelection
+		call GetStrArrElem
 		call WriteString
 		
 		exit	; TEMP. TO-DO: Implement actions for each selection.

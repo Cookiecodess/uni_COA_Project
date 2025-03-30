@@ -1,7 +1,8 @@
 ; coolMenu.inc
 
-InitMenu PROTO STDCALL :DWORD, :DWORD, :DWORD, :DWORD
+InitMenu PROTO STDCALL :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
 DrawDefaultMenu PROTO
+GetInput PROTO
 MoveCursorUp PROTO
 MoveCursorDown PROTO
 SelectItem PROTO
@@ -38,8 +39,9 @@ SelectItem PROTO
 ;       None
 ; Return arg:
 ;       EAX - (DWORD) index of selected option
-InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, selectionPromptOffset:DWORD, customDrawMenuFunc:DWORD
+InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, selectionPromptOffset:DWORD, customDrawMenuFunc:DWORD, customGetInputFunc:DWORD
         LOCAL drawMenuFunc :DWORD
+        LOCAL getInputFunc :DWORD
 
         ; Store data in global variables so they're accessible by all functions in this file
         mov eax, headerOffset
@@ -74,6 +76,16 @@ InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, sele
     StoreFunc:
         mov drawMenuFunc, eax
 
+        ; Set get input function
+        cmp customGetInputFunc, 0
+        jne UseCustomGetInput
+        mov eax, offset GetInput
+        jmp StoreGetInputFunc
+    UseCustomGetInput:
+        mov eax, customGetInputFunc
+    StoreGetInputFunc:
+        mov getInputFunc, eax
+
         ; Initialize console
         call Clrscr
 
@@ -83,7 +95,19 @@ InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, sele
         ; Initial menu display
         call drawMenuFunc
 
-        ; Input handling loop
+        ; Get input
+        push drawMenuFunc
+        call getInputFunc
+
+        ret
+InitMenu ENDP
+
+; Default function for reading input
+GetInput PROC
+        push ebp
+        mov ebp, esp
+        
+    ; Input handling loop
     InputLoop:
         ; Get keyboard input
         call ReadChar
@@ -94,23 +118,25 @@ InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, sele
         .ELSEIF al == 'j' || al == 'J' || ax == DOWN    ; Move down
             call MoveCursorDown
         .ELSEIF al == 13                                ; Enter key
-            ; Show cursor on return
-            INVOKE SetCursorVisibility, 1
-            mov eax, currentSelection
-            ret                                         ;     Returns selection index in EAX
+            jmp EnterPressed
         ;.ELSEIF al == 'q' || al == 'Q'                  ; Quit
         ;    jmp ExitProgram
         .ENDIF
 
         ; Redraw menu after potential changes
-        call drawMenuFunc
+        call dword ptr [ebp+8]
 
         jmp InputLoop
 
-    ; Cleanly exits the program
-    ;ExitProgram:
-    ;    exit
-InitMenu ENDP
+    EnterPressed:
+        ; Show cursor on return
+        INVOKE SetCursorVisibility, 1
+        mov eax, currentSelection     ; Returns selection index in EAX
+
+        mov esp, ebp
+        pop ebp
+        ret 4
+GetInput ENDP
 
 ;---------------------------------------------
 ; DrawDefaultMenu Procedure

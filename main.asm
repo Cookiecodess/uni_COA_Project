@@ -124,6 +124,9 @@ customerLogin proc
 			cmp byte ptr [eax],0
 			je jumpRegisterPage
 
+			
+			lea edx,loginMsg
+			call WriteString
 
 			
 			mov edx, offset inputUsername

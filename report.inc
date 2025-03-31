@@ -1,7 +1,7 @@
 include irvine32.inc
 INCLUDE generalFunctions.inc
 INCLUDE coolMenu.inc
-INCLUDE TicketingPage.inc
+
 
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed

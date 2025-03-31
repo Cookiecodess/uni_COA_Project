@@ -64,97 +64,15 @@ INCLUDE TicketingPage.inc
 
 	;REGISTER
 	register byte "REGISTER",0
-	;RECEIPT--------------------------------
-		receipt byte "Receipt",0
-		
-		person	byte ?
-		personS	byte "Name : ",0
-		total	byte ?
-		totalS	byte "Total : ",0
-		price	byte ?
-		priceS	byte "Price : ",0
-		detail	byte ?
-		detailS byte "Details : ",0
-		bookingS	byte "Your booking number is : ",0
-		bookingnum	dword ?
-	;REPORT--------------------------------------------------------------------
-		totalprice byte ?
-		totalticketsold byte ?
+	
 
-		report byte "Report",0
 
-		;REPORT--------------------------------------------------------------------
 
 .code
 main PROC
 	call startPage
-	;RECEIPT--------------------------------
-		mov eax, offset headerReceipt
-		mov ebx, lengthof headerReceipt
-		call PrintHeader
 
-		mov al, TAB 
-		call WriteChar 
-
-		lea edx,bookingS
-		call WriteString
-
-
-		;call Random32
-		call Randomize
-		mov eax, 90000000			;since rand is from 0 to n-1 so it will generate 0 - 89999999
-		call RandomRange		; EAX = random number in range 0-89999999
-		add eax, 10000000			; adjust to range 10000000-99999999
-		mov bookingnum,eax
-		call WriteDec
-		call CRLF
-
-		mov al, TAB
-		call WriteChar
-		lea edx,personS
-		call WriteString
-		call CRLF
-
-		mov al, TAB
-		call WriteChar
-		lea edx,priceS
-		call WriteString
-		call CRLF
-
-		mov al, TAB
-		call WriteChar
-		lea edx,detailS
-		call WriteString
-		
-
-
-
-		call CRLF
-		mov  eax,1000 ;delay 1 sec
-		call Delay
-
-	;REPORT---------------------------------
-		;Report:
-		;ticket price * ticket sold
-
-
-		mov eax, offset report
-		mov ebx, lengthof report
-		call PrintHeader
-
-		 call CRLF				; new line
-
-		 mov al, TAB   ; Load tab character
-		 call WriteChar  ; Print tab
-		 call WriteChar  ; Print tab
-		 call WriteChar  ; Print tab
-		 
-
-
-
-		;call WaitMsg
-		;call Clrscr
-		;call LOGIN
+	
 	exit
 main ENDP
 
@@ -204,23 +122,10 @@ customerLogin proc
 		;when user is undefined
 			mov eax,offset cUsername
 			cmp byte ptr [eax],0
-			je registerPage
+			je jumpRegisterPage
 
 
-			lea edx,cusername
-			call WriteString
-			call CRLF
-			lea edx,cpassword
-			call WriteString
-			call CRLF
-
-
-			lea edx,loginMsg
-			call WriteString
-
-
-
-
+			
 			mov edx, offset inputUsername
 			mov ecx, MAX	;to ensure the user only input 20 char?
 			call ReadString
@@ -284,6 +189,47 @@ customerLogin proc
 
 customerLogin endp
 
+JumpRegisterPage proc
+		
+		lea edx,needToReg
+		call WriteString
+		call Crlf
+		call registerPage
+
+JumpRegisterPage endp
+registerPage proc
+	rStart:
+		call WaitMsg
+		call Clrscr
+		mov eax,offset register
+		mov ebx, lengthof register
+		call PrintHeader
+		call CRLF
+
+		lea edx,loginMsg
+		call WriteString
+		mov edx, OFFSET inputUsername  ; use username as buffer
+		mov ecx, MAX	;to ensure the user only input 20 char
+		call ReadString
+		call CRLF
+		invoke Str_copy,ADDR inputUsername,ADDR cUsername
+
+		lea edx,passMsg
+		call WriteString
+		mov edx, OFFSET inputPassword
+		mov ecx, 20	;to ensure the user only input 20 char
+		call ReadString
+		call CRLF
+		
+		invoke Str_copy,ADDR inputPassword,ADDR cPassword	;save string
+		;mov cPassword,dh
+
+		call customerLogin 
+
+
+		ret
+
+registerPage endp
 
 adminLogin proc
 
@@ -353,39 +299,7 @@ adminLogin endp
 
 
 
-registerPage proc
-	rStart:
-		call WaitMsg
-		call Clrscr
-		mov eax,offset register
-		mov ebx, lengthof register
-		call PrintHeader
-		call CRLF
 
-		lea edx,loginMsg
-		call WriteString
-		mov edx, OFFSET inputUsername  ; use username as buffer
-		mov ecx, MAX	;to ensure the user only input 20 char
-		call ReadString
-		call CRLF
-		invoke Str_copy,ADDR inputUsername,ADDR cUsername
-
-		lea edx,passMsg
-		call WriteString
-		mov edx, OFFSET inputPassword
-		mov ecx, 20	;to ensure the user only input 20 char
-		call ReadString
-		call CRLF
-		
-		invoke Str_copy,ADDR inputPassword,ADDR cPassword	;save string
-		;mov cPassword,dh
-
-		call customerLogin 
-
-
-		ret
-
-registerPage endp
 
 customerPage proc
 	customerPageStart:

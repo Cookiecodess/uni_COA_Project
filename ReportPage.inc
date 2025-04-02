@@ -7,7 +7,8 @@
 .code
 
 ReportPage proc
-
+call WaitMsg
+call CRLF
 		ReportStart:
 		;ticket price * ticket sold
 

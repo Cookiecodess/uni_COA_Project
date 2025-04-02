@@ -1,7 +1,4 @@
-include irvine32.inc
-INCLUDE generalFunctions.inc
-INCLUDE coolMenu.inc
-INCLUDE TicketingPage.inc
+
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
 	TAB = 09h
@@ -25,11 +22,6 @@ INCLUDE TicketingPage.inc
     headerReceipt		byte "Receipt",0
 
 .code
-
-main proc
-	call GenerateReceipt
-exit
-main endp
 
 
 GenerateReceipt proc
@@ -84,7 +76,7 @@ GenerateReceipt proc
 
 GenerateReceipt endp
 
-end main
+
 
 
 

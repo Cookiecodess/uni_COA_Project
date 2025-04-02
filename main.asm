@@ -2,7 +2,7 @@ INCLUDE Irvine32.inc
 INCLUDE generalFunctions.inc
 INCLUDE coolMenu.inc
 INCLUDE TicketingPage.inc
-
+INCLUDE ReportPage.inc
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
 	TAB = 09h
@@ -35,8 +35,8 @@ INCLUDE TicketingPage.inc
 	cUsername		byte	MAX+1 DUP(0)
 	cPassword		byte	MAX+1 DUP(0)
 
-	aUsername		byte	"bbb",0
-	aPassword		byte	"zzz",0
+	aUsername		byte	"a",0
+	aPassword		byte	"1",0
 
 
 	loginMsg		byte	"Enter Username: ", 0
@@ -50,8 +50,8 @@ INCLUDE TicketingPage.inc
 	inputPassword	byte	MAX+1 DUP(?)	;but user only can type 19 word since at 20 need to store the 0(to stop)
 	
 	;ADMIN LOGIN
-	admin byte "ADMIN",0
-	adminSelection byte "View Today Earning Report",0,"View Month Earning Report",0,"View Year Earning Report",0,"log out",0,0
+	headerAdmin byte "ADMIN",0
+	adminSelectionArr byte "View Today Earning Report",0,"View Month Earning Report",0,"View Year Earning Report",0,"log out",0,0
 
 	;CUSOTMER LOGIN
 	headerCustomer byte "CUSTOMER",0
@@ -60,7 +60,7 @@ INCLUDE TicketingPage.inc
 	customerSelectionArrLength dword ?
 	promptCustomerPageHead byte "Please select an action (1-",0
 	promptCustomerPageTail byte "): ",0
-	promptCustomerPage byte "Select an action to continue.",0
+	promptUserPage byte "Select an action to continue.",0
 
 	;REGISTER
 	register byte "REGISTER",0
@@ -100,9 +100,9 @@ startPage proc
 		mov loginChoose, al
 				call CRLF
 		cmp loginChoose, '1'	; If user chose Admin
-		call 	customerLogin		;je=jump if equal to
+			je customerLogin		;je=jump if equal to
 		cmp loginChoose, '2'	; If user chose Customer
-		call adminLogin
+			je adminLogin
 
 	
 	ret
@@ -237,8 +237,8 @@ registerPage endp
 adminLogin proc
 
 	alstart:
-		mov eax, offset admin
-		mov ebx, lengthof admin
+		mov eax, offset headerAdmin
+		mov ebx, lengthof headerAdmin
 		call PrintHeader
 
 		lea edx,loginMsg
@@ -306,7 +306,7 @@ adminLogin endp
 
 customerPage proc
 	customerPageStart:
-			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, offset promptCustomerPage, 0, 0
+			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, offset promptUserPage, 0, 0
 			; EAX = index of selected option
 
 			cmp eax, 1		; selection: Ticketing
@@ -327,23 +327,36 @@ customerPage endp
 
 adminPage proc
 		adminStartPage:
-		mov eax, offset admin
-		mov ebx, lengthof admin
-		call PrintHeader
-		call CRLF
-		mov edx, offset successMsg
-		call WriteString
-		call CRLF
-		push OFFSET adminSelection
-		call WriteStrArr
+		; mov eax, offset admin
+		; mov ebx, lengthof admin
+		; call PrintHeader
+		; call CRLF
+		; mov edx, offset successMsg
+		; call WriteString
+		; call CRLF
+		; push OFFSET adminSelection
+		; call WriteStrArr
 
-		mov al, TAB   ; Load tab character
-		call WriteChar  ; Print tab
-		lea edx,choose
-		call WriteString
-		call ReadChar
-		mov loginChoose, al
-				call CRLF
+		; mov al, TAB   ; Load tab character
+		; call WriteChar  ; Print tab
+		; lea edx,choose
+		; call WriteString
+		; call ReadChar
+		; mov loginChoose, al
+				; call CRLF
+
+			invoke InitMenu, offset headerAdmin, offset adminSelectionArr, offset promptUserPage, 0, 0
+			; EAX = index of selected option
+
+			cmp eax, 0		; selection: report
+			je report
+			
+			jmp adminStartPage		; TEMP: redraw customerPage if user selects an option that hasn't been implemented
+
+		report:
+			call ReportPage
+			jmp backToAdminPage
+
 
 
 		backToAdminPage:

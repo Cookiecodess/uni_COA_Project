@@ -1,27 +1,12 @@
-include irvine32.inc
-INCLUDE generalFunctions.inc
-INCLUDE coolMenu.inc
 
-
-	CR = 0Dh	; Carriage Return
-	LF = 0Ah	; Line Feed
-	TAB = 09h
-	SPACE = 20h
 .data
 		totalprice byte ?
 		totalticketsold byte ?
 
 		report byte "Report",0
 .code
-main proc
-	call generateReport
 
-
-exit
-
-main endp
-
-generateReport proc
+ReportPage proc
 
 		ReportStart:
 		;ticket price * ticket sold
@@ -45,10 +30,7 @@ generateReport proc
 		;call Clrscr
 		;call LOGIN
 		ret
-generateReport endp
-
-end main
-
+ReportPage endp
 
 
 

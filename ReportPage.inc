@@ -3,7 +3,7 @@
 		totalprice byte ?
 		totalticketsold byte ?
 
-		report byte "Report",0
+		reportHeader byte "Report",0
 .code
 
 ReportPage proc
@@ -12,8 +12,8 @@ ReportPage proc
 		;ticket price * ticket sold
 
 
-		mov eax, offset report
-		mov ebx, lengthof report
+		mov eax, offset reportHeader
+		mov ebx, lengthof reportHeader
 		call PrintHeader
 
 		 call CRLF				; new line
@@ -26,7 +26,7 @@ ReportPage proc
 
 
 
-		;call WaitMsg
+		call WaitMsg
 		;call Clrscr
 		;call LOGIN
 		ret

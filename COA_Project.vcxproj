@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <MASM Include="calculateProfit.asm" />
-    <MASM Include="main.asm" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

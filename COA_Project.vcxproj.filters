@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="main.asm">
-      <Filter>Source Files</Filter>
-    </MASM>
     <MASM Include="calculateProfit.asm">
       <Filter>Source Files</Filter>
     </MASM>

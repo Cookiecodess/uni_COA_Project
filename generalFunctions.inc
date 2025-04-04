@@ -8,6 +8,7 @@ SetConsoleCursorInfo PROTO,
 	hConsoleOutput:DWORD, 
 	lpConsoleCursorInfo:PTR CONSOLE_CURSOR_INFO
 SetCursorVisibility PROTO isVisible:DWORD
+WriteAlignCenter PROTO
 WriteAlignRight PROTO
 WriteMenu PROTO
 WriteStrArr PROTO
@@ -295,6 +296,10 @@ SetCursorVisibility ENDP
 
 
 
+; EDX = offset of string
+WriteAlignCenter PROC
+	
+WriteAlignCenter ENDP
 
 
 

@@ -19,4 +19,18 @@
       <Filter>Source Files</Filter>
     </MASM>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="coolMenu.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="generalFunctions.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="myproc.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="TicketingPage.inc">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

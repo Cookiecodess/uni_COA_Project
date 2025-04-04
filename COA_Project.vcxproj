@@ -19,6 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="coolMenu.inc" />
+    <None Include="generalFunctions.inc" />
+    <None Include="myproc.inc" />
+    <None Include="TicketingPage.inc" />
+  </ItemGroup>
+  <ItemGroup>
     <MASM Include="calculateProfit.asm" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -15,22 +15,34 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="calculateProfit.asm">
-      <Filter>Source Files</Filter>
-    </MASM>
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="myproc.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="calculateProfit.inc">
+      <Filter>Header Files</Filter>
+    </None>
     <None Include="coolMenu.inc">
       <Filter>Header Files</Filter>
     </None>
     <None Include="generalFunctions.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="myproc.inc">
+    <None Include="ReceiptPage.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="ReportPage.inc">
       <Filter>Header Files</Filter>
     </None>
     <None Include="TicketingPage.inc">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="newfile.inc">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="main.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

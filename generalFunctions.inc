@@ -454,7 +454,7 @@ WriteAlignRight ENDP
 
 
 
-
+; NOTE: THIS FUNCTION IS LEGACY CODE
 ;--------------------------------------------------------
 ; WriteStrArr
 ;
@@ -553,6 +553,15 @@ WriteAlignRight ENDP
 ; WriteStrArr ENDP
 
 
+
+
+
+
+
+
+
+
+
 ;--------------------------------------------------------
 ; WriteStrArr
 ;
@@ -594,7 +603,7 @@ WriteStrArr PROC
 		mov ebx, 1		; initialize index counter
 
 		mov ecx, [ebp+8]	; load the length of array to ecx (times to loop)
-	writeShitsOut:
+	writeAllDatShitOut:
 		; print tab character
 		mov al, TAB  
 		call WriteChar
@@ -618,7 +627,7 @@ WriteStrArr PROC
 		inc ebx
 		add esi, 4	; the array is an array of offset addresses, which are 4 bytes each. We add 4 ESI to make it point to the next string's offset address.
 		
-		loop writeShitsOut
+		loop writeAllDatShitOut
 
 	done:
 		; restore values of registers used

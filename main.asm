@@ -315,7 +315,7 @@ customerPage proc
 			jmp customerPageStart		; TEMP: redraw customerPage if user selects an option that hasn't been implemented
 
 		Ticketing:
-			call TicketingPage
+			call TicketingPage ; return a dword representing whether to simply go back to customer page or proceed to receipt?
 			jmp backToCustomerPage
 
 		backToCustomerPage:

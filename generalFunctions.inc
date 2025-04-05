@@ -17,7 +17,10 @@ WriteStringInRed PROTO
 	
 
 
-
+.data
+	; FOR PrintHeader -------------------------------------------------------------------
+	equalSign           byte '='
+    leftRightPadding    dword 40
 
 
 .code

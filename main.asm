@@ -86,9 +86,9 @@ INCLUDE calculateProfit.inc
 	
 
 
-
 .code
 main PROC
+	exit
 	call startPage
 
 	

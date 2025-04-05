@@ -11,17 +11,13 @@
 	;TICKETING--------------------------------------------------------------------
 	headerBookTicket	BYTE	"Book ticket",0
 
-	
+	; The byte arrays stored in this dword array are all defined in globalData.inc
 	ticketTypeOptions		DWORD	OFFSET tcktSingleJourney, OFFSET tcktWeeklyPass, OFFSET tcktMonthlyPass, OFFSET backOption
-
 	backIndex			DWORD   3		; note that this is an index. Index 3 = 4th element
 	ticketTypeOptionsCount	DWORD	?
-	; promptChooseHead	BYTE	"Please select a ticket for more options (1-",0")"
-	; promptChooseTail	BYTE	"): ",0
 	promptChoose	BYTE	"Please select a ticket for more options.",0
 
 	msgChose			BYTE	"You chose ",0
-	; selectionIndex		DWORD	?
 	
 	boughtTicket TicketStruct <>
 

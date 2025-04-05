@@ -36,7 +36,7 @@ INCLUDE calculateProfit.inc
 	cUsername		byte	MAX+1 DUP(0)
 	cPassword		byte	MAX+1 DUP(0)
 
-	aUsername		byte	"a",0
+	aUsername		byte	"1",0
 	aPassword		byte	"1",0
 
 

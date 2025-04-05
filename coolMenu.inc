@@ -1,6 +1,6 @@
 ; coolMenu.inc
 
-InitMenu PROTO STDCALL :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
+InitMenu PROTO STDCALL :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
 DrawDefaultMenu PROTO
 GetInput PROTO
 MoveCursorUp PROTO
@@ -36,10 +36,10 @@ SelectItem PROTO
 .code
 
 ; Call args:
-;       None
+;       (Lazy to list out rn, maybe next time)
 ; Return arg:
 ;       EAX - (DWORD) index of selected option
-InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, selectionPromptOffset:DWORD, customDrawMenuFunc:DWORD, customGetInputFunc:DWORD
+InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, optionListLength:DWORD, selectionPromptOffset:DWORD, customDrawMenuFunc:DWORD, customGetInputFunc:DWORD
         LOCAL drawMenuFunc :DWORD
         LOCAL getInputFunc :DWORD
 
@@ -61,9 +61,8 @@ InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, sele
         ; Initialize current selection
         mov currentSelection, 0
 
-        ; Calculate number of options
-        mov edx, globalOptionListOffset
-        call CalcStrArrSize
+        ; Store number of options
+        mov eax, optionListLength
         mov totalOptions, eax
 
         ; Set draw menu function
@@ -207,27 +206,22 @@ DrawDefaultMenu PROC USES eax ebx ecx edx esi
         .ENDIF
 
         ; Write menu item
-        mov edx, esi
+        mov edx, dword ptr [esi]
         call WriteString
 
         ; Move to next item
         call CrLf
 
-        ; Find null terminator of current string
-    FindStringEnd:
-        .IF BYTE PTR [esi] != 0
-            inc esi
-            jmp FindStringEnd
-        .ENDIF
-        inc esi    ; Move past null terminator
-
+        ; Move pointer to next string's offset address
+        add esi, 4
         ; Increment loop counter
         inc ecx
 
         ; Check if we've drawn all items
-        cmp BYTE PTR [esi], 0
+        cmp ecx, totalOptions       ; When all items have been drawn, ecx = totalOptions
         jne DrawMenuLoop 
 
+    done:
         ; Reset text color
         mov eax, NORMAL_COLOR
         call SetTextColor

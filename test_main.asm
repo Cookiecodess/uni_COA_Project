@@ -9,10 +9,38 @@ INCLUDE coolMenu.inc
     testPrompt BYTE "Non-coders will never understand the sheer joy and relief of seeing the words ""Build Succeeded"".",0
 
     msgChose BYTE "You chose ",0
+
+    float1 REAL4 3.14
+    float2 REAL4 2.71
+    result REAL4 ?
+
+.const
+    NUM DWORD 2
+
 .code
 
 main PROC
-    INVOKE InitMenu, offset testHeader, offset testList, offset testPrompt      ; returns selecion index in EAX
+    ; constants work in MASM!
+    mov eax, NUM
+    call WriteDec
+
+    inc eax         ; try to modify NUM...
+    mov NUM, eax    ; but compiler will throw an exception! prob bcuz constants are stored in protected memory
+    exit
+
+    ; tried to print a floating-point number but it's not as simple as i thought
+    ; there are built-in instructions for doing addition and subtraction on FP numbers, but not for PRINTING them.
+    fld float1
+    fld float2
+    fadd
+    fstp result
+
+    
+
+    call waitMsg
+    exit
+
+    INVOKE InitMenu, offset testHeader, offset testList, offset testPrompt, 0, 0      ; returns selecion index in EAX
     
     ; Print selection index
     call CrLf

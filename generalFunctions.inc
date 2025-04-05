@@ -10,37 +10,15 @@ SetConsoleCursorInfo PROTO,
 SetCursorVisibility PROTO isVisible:DWORD
 WriteAlignCenter PROTO
 WriteAlignRight PROTO
-WriteMenu PROTO
+; WriteMenu PROTO
+; WriteStrArr PROTO
 WriteStrArr PROTO
 WriteStringInRed PROTO
 	
 
-CONSOLE_CURSOR_INFO STRUCT
-	dwSize DWORD ?
-	bVisible DWORD ?
-CONSOLE_CURSOR_INFO ENDS
 
-.data
-	; cursorInfo CONSOLE_CURSOR_INFO <10, 1>  ; Size 10, Visible = FALSE (0)
-	; consoleHandle DWORD ?
 
-	;GENERAL------------------------------------------------------------------
-	CR = 0Dh	; Carriage Return
-	LF = 0Ah	; Line Feed
-	TAB = 09h
-	SPACE = 20h
 
-	MAX	= 20								; max characters to read
-	inputBuffer			byte  MAX+1 dup(?)  ; room for null character
-
-	; FOR PrintHeader -------------------------------------------------------------------
-	equalSign           byte '='
-    leftRightPadding    dword 40
-
-	; ERROR MESSAGES -------------------------------------------------------------------
-	errorCode			DWORD	0
-	errorMessages		DWORD	OFFSET err1 
-	err1				BYTE	"Invalid option: Selected number not in list!",0
 
 .code
 ; USAGE EXAMPLE:
@@ -413,61 +391,61 @@ WriteAlignRight ENDP
 ;       mov stringArrayLength, ebx		; stringArrayLength = 4
 ;		
 ;--------------------------------------------------------
-WriteMenu PROC
-		push ebp
-		mov ebp, esp
+; WriteMenu PROC
+		; push ebp
+		; mov ebp, esp
 
 		; save old values of registers
-		push edx
+		; push edx
 
 		; print list of ticket types
-		push dword ptr [ebp+16]
-		call WriteStrArr				; EAX = length of string array
-		mov ebx, eax					; EBX = EAX = length of string array; EBX is the second return value
+		; push dword ptr [ebp+16]
+		; call WriteStrArr				; EAX = length of string array
+		; mov ebx, eax					; EBX = EAX = length of string array; EBX is the second return value
 	
 
-		call CRLF
+		; call CRLF
 
 		; print selection prompt
-		mov edx, dword ptr [ebp+12]
-		call WriteString
+		; mov edx, dword ptr [ebp+12]
+		; call WriteString
 		; Print the value in EAX, which is the length of string array
-		call WriteDec
-		mov edx, dword ptr [ebp+8]
-		call WriteString
+		; call WriteDec
+		; mov edx, dword ptr [ebp+8]
+		; call WriteString
 
 		; read input (number of selected option)
-		mov edx, offset inputBuffer		; offet of input buffer 
-		mov ecx, MAX					; number of non-null chars to read
-		call ReadString
-		call ParseDecimal32				; parse input (a signed decimal integer string) 
+		; mov edx, offset inputBuffer		; offet of input buffer
+		; mov ecx, MAX					; number of non-null chars to read
+		; call ReadString
+		; call ParseDecimal32				; parse input (a signed decimal integer string)
 										; into 4-byte binary, 
 										; stored in EAX.
-		dec eax							; minus 1 to get array index (0-based)
+		; dec eax							; minus 1 to get array index (0-based)
 
 		; Check for out-of-bounds error
-		cmp eax, 0
-		jl abort
-		cmp eax, ebx	; EBX is the length of the string array
-		jge abort
+		; cmp eax, 0
+		; jl abort
+		; cmp eax, ebx	; EBX is the length of the string array
+		; jge abort
 
 		; If able to reach this point, then index is good.
 		; EAX will be returned as the selected index.
 
-		call CrLf
-		jmp done
+		; call CrLf
+		; jmp done
 
-	abort:
-		mov eax, -1		; EAX = -1 indicates out-of-bounds error!
+	; abort:
+		; mov eax, -1		; EAX = -1 indicates out-of-bounds error!
 						; Note: EBX will still be returned as the length of string array.
 
-	done:
+	; done:
 		; restore old values of registers
-		pop edx
+		; pop edx
 
-		pop ebp
-		ret 12
-WriteMenu ENDP
+		; pop ebp
+		; ret 12
+; WriteMenu ENDP
 
 
 
@@ -506,76 +484,153 @@ WriteMenu ENDP
 ;       call WriteStrArr
 ;       mov stringArrayLength, eax		; stringArrayLength = eax = 5
 ;--------------------------------------------------------
+; WriteStrArr PROC
+		; push ebp		; save current base pointer first
+		; mov ebp, esp	; move sp to bp for us to access the parameters stored in the stack
+
+		; save old values of ESI and EDX
+		; push esi
+		; push edx
+
+		; mov esi, [ebp+8] ; load the address of the string array to esi
+		; mov al, TAB
+		; call WriteChar
+
+		; printing the index number
+		; mov edx, 1
+		; mov eax, edx
+		; call writeDec
+		; mov al, ")"
+		; call writeChar
+		; mov al, " "
+		; call writeChar
+	
+	; writeDatShitOut:
+
+		; mov al, [esi]		; load character into al then compare is it 0
+		; cmp al, 0			; if its 0, we know to print new line and write next string
+		; je nextShit
+
+		; call writeChar		; write that char out if not equal
+		; inc esi
+		; jmp writeDatShitOut
+
+
+	; nextShit:
+		; call crlf
+		; inc esi
+
+		; cmp byte ptr [esi], 0		; if the next char is also 0 then we know its the end of the array
+		; je done
+
+		; mov al, TAB
+		; call WriteChar
+
+		; inc edx				; writing the index number
+		; mov eax, edx
+		; call writeDec
+		; mov al, ")"
+		; call writeChar
+		; mov al, " "
+		; call writeChar
+
+		; jmp writeDatShitOut
+
+
+
+	; done:
+
+		; store return value (length of the string array) in EAX
+		; mov eax, edx
+
+		; restore old ESI and EDX
+		; pop edx
+		; pop esi
+
+		; pop ebp			; restore the initial base pointer before returning back to caller
+		; ret 4			; clear the stack pointer before returning
+
+; WriteStrArr ENDP
+
+
+;--------------------------------------------------------
+; WriteStrArr
+;
+; Description:
+;   Prints a numbered list of an array
+;
+; Call args:
+;   [EBP+12]  - (DWORD) Offset address of the string array
+;   [EBP+8]   - (DWORD) Length of the string array
+;
+; Returns:
+;   None
+;
+; Example usage:
+;   .data
+;   string1				BYTE  "hello",0
+;	string2				BYTE  "world",0
+;	string3				BYTE  "this",0
+;	string4				BYTE  "test",0
+;	string5				BYTE  "dope",0
+;	stringArr			DWORD OFFSET string1, OFFSET string2, OFFSET string3, OFFSET string4, OFFSET string5
+;
+;   .code
+;       push offset stringArr
+;       push lengthof stringArr
+;       call WriteStrArr
+;--------------------------------------------------------
 WriteStrArr PROC
 		push ebp		; save current base pointer first
 		mov ebp, esp	; move sp to bp for us to access the parameters stored in the stack
 
-		; save old values of ESI and EDX
+		; save old values of registers that will be used
 		push esi
+		push eax
+		push ebx
 		push edx
 
-		mov esi, [ebp+8] ; load the address of the string array to esi
+		mov esi, [ebp+12] ; load the address of the string array to esi
+		mov ebx, 1		; initialize index counter
+
+		mov ecx, [ebp+8]	; load the length of array to ecx (times to loop)
+	writeShitsOut:
+		; print tab character
 		mov al, TAB  
 		call WriteChar
 
-		; printing the index number
-		mov edx, 1
-		mov eax, edx
-		call writeDec
-		mov al, ")"
-		call writeChar
-		mov al, " "
-		call writeChar
-	
-	writeDatShitOut:
-
-		mov al, [esi]		; load character into al then compare is it 0
-		cmp al, 0			; if its 0, we know to print new line and write next string
-		je nextShit
-
-		call writeChar		; write that char out if not equal
-		inc esi
-		jmp writeDatShitOut
-
-
-	nextShit:
-		call crlf
-		inc esi
-
-		cmp byte ptr [esi], 0		; if the next char is also 0 then we know its the end of the array
-		je done
-
-		mov al, TAB  
-		call WriteChar
-
-		inc edx				; writing the index number
-		mov eax, edx
+		; print the index number
+		mov eax, ebx
 		call writeDec
 		mov al, ")"
 		call writeChar
 		mov al, " "
 		call writeChar
 
-		jmp writeDatShitOut
+		; print one string
+		mov edx, dword ptr [esi]	; ESI points to the offset of a string element. We dereference ESI to get that offset, and store the offset in EDX.
+		call WriteString
 
+		; print newline
+		call CrLf
 
+		; Increment index number and ESI
+		inc ebx
+		add esi, 4	; the array is an array of offset addresses, which are 4 bytes each. We add 4 ESI to make it point to the next string's offset address.
+		
+		loop writeShitsOut
 
 	done:
-
-		; store return value (length of the string array) in EAX
-		mov eax, edx
-
-		; restore old ESI and EDX
+		; restore values of registers used
 		pop edx
+		pop ebx
+		pop eax
 		pop esi
 
 		pop ebp			; restore the initial base pointer before returning back to caller
-		ret 4			; clear the stack pointer before returning
+		ret 8			; clear the 2 arguments that were pushed to stack from the stack
 
 WriteStrArr ENDP
-
-
-
 
 
 

@@ -1,4 +1,5 @@
 INCLUDE Irvine32.inc
+INCLUDE globalData.inc
 INCLUDE generalFunctions.inc
 INCLUDE coolMenu.inc
 INCLUDE TicketingPage.inc
@@ -30,7 +31,11 @@ INCLUDE calculateProfit.inc
 	;USER LOGIN----------------------------------------------------------------
 	welcome			byte	" Welcome,here is a login page",0
 	choose			byte	"Please select your role to continue : ",0
-	user			byte	"Customer",0,"Admin",0,"Back",0,0
+
+	userOption1		byte	"Customer",0
+	userOption2		byte	"Admin",0
+	userOptions		dword	OFFSET userOption1, OFFSET userOption2, OFFSET backOption
+
 	loginChoose		byte	?
 
 	cUsername		byte	MAX+1 DUP(0)
@@ -52,12 +57,25 @@ INCLUDE calculateProfit.inc
 	
 	;ADMIN LOGIN
 	headerAdmin byte "ADMIN",0
-	adminSelectionArr byte "View Today Earning Report",0,"View Month Earning Report",0,"View Year Earning Report",0,"log out",0,0
+
+	adminOption1		byte	"View Today Earning Report",0
+	adminOption2		byte	"View Month Earning Report",0
+	adminOption3		byte	"View Year Earning Report",0
+	adminOption4		byte	"Log out",0
+
+	adminSelectionArr	dword	OFFSET adminOption1, OFFSET adminOption2, OFFSET adminOption3, OFFSET adminOption4
 
 	;CUSOTMER LOGIN
 	headerCustomer byte "CUSTOMER",0
 	needToReg byte "Sorry you need to register first",0
-	customerSelectionArr byte "View Schedule",0,"Ticketing",0,"Buy Member",0,"Check Nearby Station",0,"log out",0,0
+
+	customerOption1			byte	"View Schedule",0
+	customerOption2			byte	"Ticketing",0
+	customerOption3			byte	"Check Nearby Station",0
+	customerOption4			byte	"log out",0
+
+	customerSelectionArr	dword	OFFSET customerOption1, OFFSET customerOption2, OFFSET customerOption3, OFFSET customerOption4
+
 	customerSelectionArrLength dword ?
 	promptCustomerPageHead byte "Please select an action (1-",0
 	promptCustomerPageTail byte "): ",0
@@ -88,7 +106,8 @@ startPage proc
 		call WriteString
 		call CRLF
 
-		push OFFSET user
+		push OFFSET userOptions
+		push LENGTHOF userOptions
 		call WriteStrArr
 
 		mov al, TAB   ; Load tab character
@@ -307,7 +326,7 @@ adminLogin endp
 
 customerPage proc
 	customerPageStart:
-			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, offset promptUserPage, 0, 0
+			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, lengthof customerSelectionArr, offset promptUserPage, 0, 0
 			; EAX = index of selected option
 
 			cmp eax, 1		; selection: Ticketing
@@ -336,6 +355,7 @@ adminPage proc
 		; call WriteString
 		; call CRLF
 		; push OFFSET adminSelection
+		; push LENGTHOF adminSelection
 		; call WriteStrArr
 
 		; mov al, TAB   ; Load tab character
@@ -346,7 +366,7 @@ adminPage proc
 		; mov loginChoose, al
 				; call CRLF
 
-			invoke InitMenu, offset headerAdmin, offset adminSelectionArr, offset promptUserPage, 0, 0
+			invoke InitMenu, offset headerAdmin, offset adminSelectionArr, lengthof adminSelectionArr, offset promptUserPage, 0, 0
 			; EAX = index of selected option
 
 			cmp eax, 0		; selection: report

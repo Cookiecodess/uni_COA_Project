@@ -1,12 +1,13 @@
 	SPACE = 20h
 .data
-	location1 BYTE "Penang",0 
-	location2 BYTE "Perak",0 
-	location3 BYTE "Kuala Lumpur",0 
-	location4 BYTE "Melaka",0 
-	location5 BYTE "Johor",0 
-	locations DWORD OFFSET location1, OFFSET location2, OFFSET location3, OFFSET location4, OFFSET location5
-	distances DWORD 1000, 580, 350, 200, 0
+	; The LOCATIONS array and DISTANCES array are defined in globalData.inc
+	; location1 BYTE "Penang",0
+	; location2 BYTE "Perak",0
+	; location3 BYTE "Kuala Lumpur",0
+	; location4 BYTE "Melaka",0
+	; location5 BYTE "Johor",0
+	; locations DWORD OFFSET location1, OFFSET location2, OFFSET location3, OFFSET location4, OFFSET location5
+	; distances DWORD 1000, 580, 350, 200, 0
 	totalSold DWORD 100,223,324,134,150,223,324,134,130,323,124,224,130,523,224,232,120,233,323,233
 .code
 

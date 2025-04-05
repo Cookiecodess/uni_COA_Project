@@ -22,6 +22,7 @@
     <None Include="calculateProfit.inc" />
     <None Include="coolMenu.inc" />
     <None Include="generalFunctions.inc" />
+    <None Include="globalData.inc" />
     <None Include="myproc.inc" />
     <None Include="newfile.inc" />
     <None Include="ReceiptPage.inc" />

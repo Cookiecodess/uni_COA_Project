@@ -1,13 +1,6 @@
 ; INCLUDE generalFunctions.inc
 
-SINGLE_JOURNEY EQU 0	; Single journey
-WEEKLY_PASS	EQU 1	; Weekly pass
-MONTHLY_PASS EQU 2	; Monthly pass
 
-TicketStruct STRUCT
-	custPtr DWORD ?
-	ticketType BYTE ?
-TicketStruct ENDS
 
 .data
 	; SPACE = 32
@@ -17,13 +10,12 @@ TicketStruct ENDS
 
 	;TICKETING--------------------------------------------------------------------
 	headerBookTicket	BYTE	"Book ticket",0
-	ticketTypeArr		BYTE	"Single Journey",0,
-								"Weekly Pass",0,
-								"Monthly Pass",0,
-								"Back",0,
-								0	; null terminator for array
+
+	
+	ticketTypeOptions		DWORD	OFFSET tcktSingleJourney, OFFSET tcktWeeklyPass, OFFSET tcktMonthlyPass, OFFSET backOption
+
 	backIndex			DWORD   3		; note that this is an index. Index 3 = 4th element
-	ticketTypeArrLength	DWORD	?
+	ticketTypeOptionsCount	DWORD	?
 	; promptChooseHead	BYTE	"Please select a ticket for more options (1-",0")"
 	; promptChooseTail	BYTE	"): ",0
 	promptChoose	BYTE	"Please select a ticket for more options.",0
@@ -31,32 +23,47 @@ TicketStruct ENDS
 	msgChose			BYTE	"You chose ",0
 	; selectionIndex		DWORD	?
 	
-
+	boughtTicket TicketStruct <>
 
 
 .code 
 TicketingPage PROC USES eax ebx edx
 		; Ticket type menu
-		invoke InitMenu, offset headerBookTicket, offset ticketTypeArr, offset promptChoose, 0, 0
+		invoke InitMenu, offset headerBookTicket, offset ticketTypeOptions, lengthof ticketTypeOptions, offset promptChoose, 0, 0
 
 		; Did user select "Back"? If so, let's not print anything and just return.
-		mov eax, currentSelection	; Note: currentSelection is a global var defined in coolMenu.inc
-		cmp eax, backIndex
-		je go_back_whence_you_came
+		; mov eax, currentSelection	; Note: currentSelection is a global var defined in coolMenu.inc
+		; cmp eax, backIndex
+		; je go_back_whence_you_came
 
 		; Actions for each selection
 		cmp eax, SINGLE_JOURNEY		; Single journey ticket chosen
-		;je 		
+		je SelectSingleJourney
 		cmp eax, WEEKLY_PASS		; Weekly pass selected
-		;je pass
+		je SelectWeeklyPass
 		cmp eax, MONTHLY_PASS		; Weekly pass selected
-		;je 
+		je SelectMonthlyPass
 
+		; Selected Back
+		jmp go_back_whence_you_came
+
+	SelectSingleJourney:
+		mov boughtTicket.ticketType, SINGLE_JOURNEY
+		jmp Continue
+	SelectWeeklyPass:
+		mov boughtTicket.ticketType, WEEKLY_PASS
+		jmp Continue
+	SelectMonthlyPass:
+		mov boughtTicket.ticketType, MONTHLY_PASS
+		jmp Continue
+	
+	Continue:
+		mov boughtTicket.custName, OFFSET cUsername 
 
 		; mov edx, offset msgChose
 		; call WriteString
 		;Write the string from the array
-		; mov edx, offset ticketTypeArr
+		; mov edx, offset ticketTypeOptions
 		; mov eax, currentSelection
 		; call GetStrArrElem
 		; call WriteString

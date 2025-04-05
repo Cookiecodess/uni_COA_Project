@@ -21,6 +21,10 @@
 
     headerReceipt		byte "Receipt",0
 
+	;output receipt to file
+		receiptFile byte "receipt.txt",0
+		filehandle dword ?	;save the line
+
 .code
 
 
@@ -71,19 +75,39 @@ GenerateReceipt proc
 		mov  eax,1000 ;delay 1 sec
 		call Delay
 
-
+		call saveReceipt
 		ret
 
 GenerateReceipt endp
 
+saveReceipt proc
+
+	;Create file
+		mov edx, offset receiptFile
+		call CreateOutputFile      ; Irvine32 function to create file
+		mov filehandle, eax 
+
+    ; Check if file was created successfully
+		cmp eax, INVALID_HANDLE_VALUE
+		je error_exit
+
+	;Write to file 
+		mov edx,offset headerReceipt
+		mov ecx, lengthOf headerReceipt- 1
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
 
 
 
 
+	; Close file
+		mov eax, filehandle   
+		call CloseFile  
+		call ExitProcess
 
-
-
-
-
+	error_exit:
+    call WriteString         ; Print error message
+    call ExitProcess
+saveReceipt endp
 
 

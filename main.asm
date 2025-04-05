@@ -3,6 +3,8 @@ INCLUDE generalFunctions.inc
 INCLUDE coolMenu.inc
 INCLUDE TicketingPage.inc
 INCLUDE ReportPage.inc
+INCLUDE ReceiptPage.inc
+INCLUDE calculateProfit.inc
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
 	TAB = 09h
@@ -14,12 +16,11 @@ INCLUDE ReportPage.inc
 	;HEADERS-------------------------------------------------------------------
 	header1             byte "Main Menu",0
     headerLogin			byte "Login",0
-    headerReceipt		byte "Receipt",0
     header3             byte "Register",0
 	; NOTE: To modify the border pattern and left-and-right padding,
 	;       go to the .DATA segment in generalFunctions.asm
 	;       and look for "FOR PrintHeader".
-
+	
 	;GENERAL------------------------------------------------------------------
 	; NOTE: These are defined in generalFunctions.inc
 	; MAX	= 20								; max characters to read
@@ -35,7 +36,7 @@ INCLUDE ReportPage.inc
 	cUsername		byte	MAX+1 DUP(0)
 	cPassword		byte	MAX+1 DUP(0)
 
-	aUsername		byte	"a",0
+	aUsername		byte	"1",0
 	aPassword		byte	"1",0
 
 
@@ -349,14 +350,20 @@ adminPage proc
 			; EAX = index of selected option
 
 			cmp eax, 0		; selection: report
-			je report
+			je callReport
 			
-			jmp adminStartPage		; TEMP: redraw customerPage if user selects an option that hasn't been implemented
+			cmp eax, 1		; test
+			je callReceipt
+			jmp adminStartPage		; TEMP: redraw adminPage if user selects an option that hasn't been implemented
 
-		report:
+		callReport:
 			call ReportPage
 			jmp backToAdminPage
 
+
+		callReceipt:
+			call Profit
+			jmp backToAdminPage
 
 
 		backToAdminPage:

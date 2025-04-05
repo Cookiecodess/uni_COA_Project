@@ -19,9 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="calculateProfit.inc" />
     <None Include="coolMenu.inc" />
     <None Include="generalFunctions.inc" />
     <None Include="myproc.inc" />
+    <None Include="newfile.inc" />
+    <None Include="ReceiptPage.inc" />
+    <None Include="ReportPage.inc" />
     <None Include="TicketingPage.inc" />
   </ItemGroup>
   <ItemGroup>

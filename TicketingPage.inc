@@ -29,7 +29,9 @@
 	boughtTicket TicketStruct <>
 
 	; State flag for the menu for booking single journey tickets
-	menuState			BYTE	0		; bit 1 set: origin station selected; bit 2 set: dest station selected
+	menuState			BYTE	0		; Bit 1 set: origin station selected
+										; Bit 2 set: dest station selected
+										; Bit 3 of menuState ensures that the setting of currentSelection to 1 only happens on the first draw of this menu. Bit 3 is set on first redraw.
 	originStnIdx		DWORD	0
 	destStnIdx		DWORD	0
 
@@ -249,6 +251,16 @@ CustomMenuBookSingleJourney PROC USES eax ebx ecx edx esi
         ; Prepare to draw menu items
         mov ecx, 0                      ; Loop counter
         mov esi, globalOptionListOffset ; Start of menu items
+
+		; If first item has been selected as ORIGIN, set the currentSelection to 1 (index 1 = 2nd element)
+		test menuState, 00000001b
+		jz DrawMenuLoop		; If ORIGIN has NOT been selected, then ignore this part and proceed to the DrawMenuLoop.
+		cmp originStnIdx, 0	; If the ORIGIN is NOT the first item, also ignore this section.
+		jne DrawMenuLoop
+		test menuState, 00000100b	; Bit 3 of menuState ensures that the setting of currentSelection to 1 only happens on the first draw of this menu.
+		jnz DrawMenuLoop
+		mov currentSelection, 1
+		or menuState, 00000100b
 
     DrawMenuLoop:
         ; Position cursor
@@ -593,6 +605,60 @@ SingleJrnyConfmMenu PROC USES eax ebx ecx edx esi
 SingleJrnyConfmMenu ENDP
 
 
+GetInputForDestStnPage PROC
+        push ebp
+        mov ebp, esp
+        
+    ; Input handling loop
+    InputLoop:
+        ; Get keyboard input
+        call ReadChar
+
+        ; Check for specific keys
+        .IF al == 'k' || al == 'K' || ax == UP          ; Move up
+				mov eax, currentSelection
+				dec eax
+				cmp eax, originStnIdx
+				jne no_need_to_skip_over1
+				dec eax		; skip over disabled option
+			no_need_to_skip_over1:
+				cmp eax, 0
+				jge no_wrapping_to_bottom
+				add eax, totalOptions		; wrap to bottom
+			no_wrapping_to_bottom:
+				mov currentSelection, eax
+        .ELSEIF al == 'j' || al == 'J' || ax == DOWN    ; Move down
+				mov eax, currentSelection
+				inc eax
+				cmp eax, originStnIdx
+				jne no_need_to_skip_over2
+				inc eax		; skip over disabled option
+			no_need_to_skip_over2:
+				cmp eax, totalOptions		; wrap to top
+				jl no_wrapping_to_top
+				xor eax, eax
+			no_wrapping_to_top:
+				mov currentSelection, eax
+        .ELSEIF al == 13                                ; Enter key
+            jmp EnterPressed
+        ;.ELSEIF al == 'q' || al == 'Q'                  ; Quit
+        ;    jmp ExitProgram
+        .ENDIF
+
+        ; Redraw menu after potential changes
+        call dword ptr [ebp+8]
+
+        jmp InputLoop
+
+    EnterPressed:
+        ; Show cursor on return
+        INVOKE SetCursorVisibility, 1
+        mov eax, currentSelection     ; Returns selection index in EAX
+
+        mov esp, ebp
+        pop ebp
+        ret 4
+GetInputForDestStnPage ENDP
 
 
 
@@ -668,7 +734,7 @@ TicketingPage PROC USES ebx edx
 
 		; print menu letting user choose dest station. NOT PRINTING or MUTED-COLOR-HIGHLIGHT the origin station based on EAX
 		; (might need a custom getInput func to handle skipping over the origin station during menu navigation)
-		invoke InitMenu, offset headerBookTicket, offset locations, lengthof locations, offset promptLocDest, offset CustomMenuBookSingleJourney, 0
+		invoke InitMenu, offset headerBookTicket, offset locations, lengthof locations, offset promptLocDest, offset CustomMenuBookSingleJourney, offset GetInputForDestStnPage 
 
 		mov destStnIdx, eax
 		; Record station name (offset of the string) in boughtTicket.destStn based on EAX
@@ -678,7 +744,7 @@ TicketingPage PROC USES ebx edx
 		or menuState, 00000010b
 
 		; confirmation page with all ticket details and a route map
-		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, offset promptChoose, offset SingleJrnyConfmMenu, 0 
+		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, offset promptChoose, offset SingleJrnyConfmMenu, 0
 
 		test eax, eax		; EAX = 0 --> Selected "Confirm purchase"
 		jz return_but_proceed

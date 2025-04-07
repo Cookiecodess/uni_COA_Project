@@ -412,7 +412,7 @@ PrintStationMapCfm PROC USES eax ebx ecx edx esi
 			mov symbolInsideBox, 'v'
 			mov specificTextColor, NORMAL_COLOR
 		; Arrow should go up
-		.ELSEIF ebx < originStnIdx && esi > destStnIdx 
+		.ELSEIF esi < originStnIdx && esi > destStnIdx 
 			mov symbolInsideBox, '^'
 			mov specificTextColor, NORMAL_COLOR
 		; DESTINATION station

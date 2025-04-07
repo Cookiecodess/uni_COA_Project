@@ -85,10 +85,8 @@ INCLUDE calculateProfit.inc
 	register byte "REGISTER",0
 	
 
-
 .code
 main PROC
-	exit
 	call startPage
 
 	
@@ -336,7 +334,10 @@ customerPage proc
 
 		Ticketing:
 			call TicketingPage ; return a dword representing whether to simply go back to customer page or proceed to receipt?
-			jmp backToCustomerPage
+			cmp eax, -1	; If EAX = -1, redraw customer menu
+			je backToCustomerPage
+			; Else, proceed to receipt module
+		ProceedToReceipt:
 
 		backToCustomerPage:
 			jmp customerPageStart

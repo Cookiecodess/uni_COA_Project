@@ -17,21 +17,216 @@
 	ticketTypeOptionsCount	DWORD	?
 	promptChoose	BYTE	"Please select a ticket for more options.",0
 
+	; Option list for confirmation page
+	optionCfmPur	BYTE	"Confirm purchase",0
+	optionCancel	BYTE	"Cancel",0
+	confirmationOptions	DWORD	OFFSET optionCfmPur, OFFSET optionCancel
+
 	msgChose			BYTE	"You chose ",0
 	
 	boughtTicket TicketStruct <>
 
 
 .code 
-TicketingPage PROC USES eax ebx edx
+; Prints out information contained in the TicketStruct struct variable boughtTicket.
+; Excluding null values.
+PrintTicketInfo PROC USES eax ecx edx esi 
+		; Print customer name
+		mov al, TAB
+		call WriteChar
+		mov edx, TicketStructKeys[0*4]
+		call WriteString
+		mov al, TAB
+		call WriteChar
+		call WriteChar
+		mov edx, boughtTicket.custName
+		test edx, edx
+		jz SkipPrintingName
+		call WriteString
+	SkipPrintingName:
+		call CrLf
+	
+
+		; Print ticket type
+		mov al, TAB
+		call WriteChar
+		mov edx, TicketStructKeys[1*4]
+		call WriteString
+		mov al, TAB
+		call WriteChar
+		call WriteChar
+		mov edx, boughtTicket.ticketType
+		test edx, edx
+		jz SkipPrintingType
+		call WriteString
+	SkipPrintingType:
+		call CrLf
+
+
+		; Print price
+		mov al, TAB
+		call WriteChar
+		mov edx, TicketStructKeys[2*4]
+		call WriteString
+		mov al, TAB
+		call WriteChar
+		call WriteChar
+		call WriteChar
+		mov edx, offset RINGGIT
+		call WriteString
+		mov eax, boughtTicket.price
+		call WriteDec
+		call CrLf
+
+
+		; IF boughtTicket.originStn NOT NULL, print it
+		mov eax, boughtTicket.originStn
+		test eax, eax
+		jz SkipPrintingStations
+		
+		mov al, TAB
+		call WriteChar
+		mov edx, TicketStructKeys[3*4]
+		call WriteString
+		mov al, TAB
+		call WriteChar
+		call WriteChar
+		mov edx, boughtTicket.originStn
+		call WriteString
+		call CrLf
+
+		; IF boughtTicket.destStn NOT NULL, print it
+		mov eax, boughtTicket.destStn
+		test eax, eax
+		jz SkipPrintingStations
+		
+		mov al, TAB
+		call WriteChar
+		mov edx, TicketStructKeys[4*4]
+		call WriteString
+		mov al, TAB
+		call WriteChar
+		call WriteChar
+		mov edx, boughtTicket.destStn
+		call WriteString
+
+	SkipPrintingStations:
+		call CrLf
+
+
+		ret
+PrintTicketInfo ENDP
+
+
+DrawBookTicketMenu PROC USES eax ebx ecx edx esi
+	; Clear screen
+        call Clrscr
+
+        ; Print header
+        mov eax, globalHeaderOffset
+        mov ebx, globalHeaderLength
+        call PrintHeader
+        call CrLf
+
+		; Print ticket info
+		call PrintTicketInfo
+
+        ; Print selection prompt
+        ; mov edx, globalSelectionPromptOffset
+        ; call WriteString
+        ; call CrLf
+        ; call CrLf
+
+        ; Print error message IF errorCode != 0
+        call PrintErrorMessage
+
+        ; Reset text color
+        mov eax, NORMAL_COLOR
+        call SetTextColor
+
+        ; Prepare to draw menu items
+        mov ecx, 0                      ; Loop counter
+        mov esi, globalOptionListOffset ; Start of menu items
+
+    DrawMenuLoop:
+        ; Position cursor
+        ;mov dh, cl                  ; Row = counter
+        ;mov dl, 0                   ; Column 0
+        ;call Gotoxy
+
+        ; Compare current item with current selection
+        .IF ecx == currentSelection
+            ; Highlight selected item
+            mov eax, HIGHLIGHT_COLOR
+            call SetTextColor
+
+            ; Print tab
+            mov al, TAB
+            call WriteChar
+        
+            ; Draw cursor indicator
+            mov al, '>'
+            call WriteChar
+            mov al, ' '
+            call WriteChar
+        .ELSE
+            ; Normal color for non-selected items
+            mov eax, NORMAL_COLOR
+            call SetTextColor
+        
+            ; Print tab
+            mov al, TAB
+            call WriteChar
+
+            ; Spacing for non-selected items
+            mov al, ' '
+            call WriteChar
+            call WriteChar
+        .ENDIF
+
+        ; Write menu item
+        mov edx, dword ptr [esi]
+        call WriteString
+
+        ; Move to next item
+        call CrLf
+
+        ; Move pointer to next string's offset address
+        add esi, 4
+        ; Increment loop counter
+        inc ecx
+
+        ; Check if we've drawn all items
+        cmp ecx, totalOptions       ; When all items have been drawn, ecx = totalOptions
+        jne DrawMenuLoop 
+
+    done:
+        ; Reset text color
+        mov eax, NORMAL_COLOR		
+        call SetTextColor
+
+        ret
+DrawBookTicketMenu ENDP
+
+; return EAX: -1 means redraw customer menu after returning
+TicketingPage PROC USES ebx edx
+	start:
+		; clear boughtTicket struct
+		mov ecx, sizeof boughtTicket / 4
+		lea edi, boughtTicket
+		xor eax, eax						; EAX = 0 = the dword we want to store
+		rep stosd
+
 		; Ticket type menu
 		invoke InitMenu, offset headerBookTicket, offset ticketTypeOptions, lengthof ticketTypeOptions, offset promptChoose, 0, 0
 
 		; Did user select "Back"? If so, let's not print anything and just return.
-		; mov eax, currentSelection	; Note: currentSelection is a global var defined in coolMenu.inc
-		; cmp eax, backIndex
-		; je go_back_whence_you_came
+		cmp eax, backIndex
+		je return_and_redraw_cust_menu
 
+		; User selected a ticket. Record their username
+		mov boughtTicket.custName, OFFSET cUsername 
+		
 		; Actions for each selection
 		cmp eax, SINGLE_JOURNEY		; Single journey ticket chosen
 		je SelectSingleJourney
@@ -39,22 +234,47 @@ TicketingPage PROC USES eax ebx edx
 		je SelectWeeklyPass
 		cmp eax, MONTHLY_PASS		; Weekly pass selected
 		je SelectMonthlyPass
-
-		; Selected Back
-		jmp go_back_whence_you_came
+		
+		; User should NEVER reach this point. If they do, maybe you accidentally added an option to the menu but forgot to account for it here.
+		mov edx, offset errWeird
+		call WriteString
+		call WaitMsg
+		jmp start
 
 	SelectSingleJourney:
 		mov boughtTicket.ticketType, SINGLE_JOURNEY
-		jmp Continue
+		jmp ContinueForSingleJourney
 	SelectWeeklyPass:
-		mov boughtTicket.ticketType, WEEKLY_PASS
-		jmp Continue
+		mov edx, ticketTypes[WEEKLY_PASS * 4]
+		mov boughtTicket.ticketType, edx
+		mov edx, ticketPrices[WEEKLY_PASS * 4]
+		mov boughtTicket.price, edx
+		jmp ContinueForLimitedTimePass
 	SelectMonthlyPass:
-		mov boughtTicket.ticketType, MONTHLY_PASS
-		jmp Continue
+		mov edx, ticketTypes[MONTHLY_PASS * 4]
+		mov boughtTicket.ticketType, edx
+		mov edx, ticketPrices[MONTHLY_PASS * 4]
+		mov boughtTicket.price, edx
+		jmp ContinueForLimitedTimePass
 	
-	Continue:
-		mov boughtTicket.custName, OFFSET cUsername 
+	ContinueForSingleJourney:
+		; call InitMenu
+
+
+
+	ContinueForLimitedTimePass:
+		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, offset promptChoose, offset DrawBookTicketMenu, 0
+
+
+		test eax, eax		; EAX = 0 --> Selected "Buy"
+		jz return_but_proceed
+
+		; Else, user selected "Cancel", so go back to ticket type menu.
+		jmp BackToTicketTypeMenu 
+	
+	BackToTicketTypeMenu:
+		; go back to Ticket Type menu.
+		jmp start
 
 		; mov edx, offset msgChose
 		; call WriteString
@@ -66,6 +286,9 @@ TicketingPage PROC USES eax ebx edx
 		
 		; exit	; TEMP. TO-DO: Implement actions for each selection.
 	
-	go_back_whence_you_came:
+	return_and_redraw_cust_menu:
+		mov eax, -1		; EAX = 0 acts as a signal to redraw customer menu after returning, instead of proceed to receipt module.
+	return_but_proceed:
 		ret
 TicketingPage ENDP
+

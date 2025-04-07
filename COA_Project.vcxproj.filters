@@ -39,6 +39,9 @@
     <None Include="newfile.inc">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="globalData.inc">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="main.asm">

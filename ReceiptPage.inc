@@ -29,8 +29,13 @@
 
 
 GenerateReceipt proc
+	
 
 	receiptStart:
+		
+
+		;mov edx, boughtTicket.custName
+			;call WriteString
 		mov eax, offset headerReceipt
 		mov ebx, lengthof headerReceipt
 		call PrintHeader

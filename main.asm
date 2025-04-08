@@ -34,7 +34,8 @@ INCLUDE calculateProfit.inc
 
 	userOption1		byte	"Customer",0
 	userOption2		byte	"Admin",0
-	userOptions		dword	OFFSET userOption1, OFFSET userOption2, OFFSET backOption
+	userOption3		byte	"Exit",0
+	userOptions		dword	OFFSET userOption1, OFFSET userOption2, OFFSET userOption3
 
 	loginChoose		byte	?
 
@@ -99,32 +100,16 @@ main ENDP
 
 startPage proc
 	start:
-		mov eax, offset headerLogin
-		mov ebx, lengthof headerLogin
-		call PrintHeader
+	invoke InitMenu, offset headerLogin, offset userOptions, lengthof userOptions, offset choose, 0, 0
 
-		lea edx,choose
-		call WriteString
-		call CRLF
-
-		push OFFSET userOptions
-		push LENGTHOF userOptions
-		call WriteStrArr
-
-		mov al, TAB   ; Load tab character
-		call WriteChar  ; Print tab
-		lea edx,choose
-		call WriteString
-
-
-		call ReadChar
 		mov loginChoose, al
 				call CRLF
-		cmp loginChoose, '1'	; If user chose Admin
+		cmp loginChoose, 0	; If user chose Admin
 			je customerLogin		;je=jump if equal to
-		cmp loginChoose, '2'	; If user chose Customer
+		cmp loginChoose, 1	; If user chose Customer
 			je adminLogin
-
+		cmp loginChoose, 1	; If user chose Customer
+			exit
 	
 	ret
 
@@ -331,8 +316,15 @@ customerPage proc
 			; EAX = index of selected option
 
 			cmp eax, 1		; selection: Ticketing
-			je Ticketing
+				je Ticketing
+
+
 			
+
+			cmp eax, 3		; logOut
+				je logOut	
+
+
 			jmp customerPageStart		; TEMP: redraw customerPage if user selects an option that hasn't been implemented
 
 		Ticketing:
@@ -344,6 +336,9 @@ customerPage proc
 
 		backToCustomerPage:
 			jmp customerPageStart
+
+		logOut:
+			call startPage
 
 			ret
 
@@ -378,8 +373,13 @@ adminPage proc
 			
 			cmp eax, 1		; test
 			je callReceipt
-			jmp adminStartPage		; TEMP: redraw adminPage if user selects an option that hasn't been implemented
 
+			cmp eax, 3		; logOut
+			je logOut		
+		
+			jmp adminStartPage		; TEMP: redraw adminPage if user selects an option that hasn't been implemented
+		
+		
 		callReport:
 			call ReportPage
 			jmp backToAdminPage
@@ -392,6 +392,9 @@ adminPage proc
 
 		backToAdminPage:
 			jmp adminStartPage
+
+		logOut:
+		call startPage
 
 			ret
 adminPage endp

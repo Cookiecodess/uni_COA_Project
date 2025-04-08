@@ -13,54 +13,86 @@
 
 
 profit proc
-	mov ebx,0
+	LOCAL temp1:DWORD
+	LOCAL temp2:DWORD
+
+	;mov ebx,0
 	mov esi, 0
 	mov ecx, lengthof locations
 	outterLoop:
 
-		mov edx, locations[esi]
+		mov edx, locations[esi*TYPE DWORD]
 		call writeString
 		call crlf
-		mov edi,ecx
+		;mov edi,esi
 		push ecx	;save outterLoop
-		push esi
+		;push esi
 
 		mov ecx, lengthof locations	;inner
-		mov esi, 0
+		mov edi, 0
+		mov ebx, 0
 
 		innerLoop:
-		.IF ecx != edi
-			mov edx,locations[esi]
+		.IF esi != edi
+			mov edx,locations[edi*TYPE DWORD]
 			call writeString
 			
 			mov al,':'
 			call writechar
 
 
-			mov eax,distances[edi*TYPE DWORD]
+			mov eax,distances[esi*TYPE DWORD]	
 						call writeDec
 						call crlf
-			mov edx,distances[ecx*TYPE DWORD]
-			sub eax,edx
+			mov edx,distances[edi*TYPE DWORD]
+			sub eax,edx			;eax=distance1-distance2
+			cmp eax, 0
+			jge not_negative
+			neg eax
+		not_negative:
 						call writeDec
 						call crlf
-			mul totalSold[ebx*TYPE DWORD]
+			;mov eax, totalSold[(esi*4 + ebx)*TYPE DWORD]	
+			push eax
+			lea eax, [esi*4 + ebx]
+			mov temp1, 4
+			mul temp1
+			mov edx, eax
+			pop eax
+			mul totalSold[edx]	;eax=(distance1-distance2)*totalSold
+			inc ebx
+
+		; IGNORE THIS SECTION
+			jmp EndTeleport
+	Teleport:
+		loop outterLoop
+		jmp done
+	EndTeleport:
+		; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
+
 			call writeint
-			add ebx,type totalSold
+			;add ebx,type totalSold
 
 			call crlf
-		.ENDIF
-			add esi, type locations
-			loop innerLoop
 
-		pop esi	
-		pop ecx	;resume outterLoop
-
-		add esi, type locations
-		call crlf
-		loop outterLoop
 		
 
+		.ENDIF
+			;add esi, type locations
+			inc edi
+			loop innerLoop
+
+		;pop esi	
+		pop ecx	;resume outterLoop
+
+		;add esi, type locations
+		inc esi
+		call crlf
+		jmp Teleport ; LOOP OUTER LOOP
+
+		
+		
+	done:
 		call waitmsg
 
 		ret

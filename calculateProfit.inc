@@ -9,6 +9,7 @@
 	; locations DWORD OFFSET location1, OFFSET location2, OFFSET location3, OFFSET location4, OFFSET location5
 	; distances DWORD 1000, 580, 350, 200, 0
 	totalSold DWORD 100,223,324,134,150,223,324,134,130,323,124,224,130,523,224,232,120,233,323,233
+	cost DWORD ?
 .code
 
 
@@ -52,6 +53,19 @@ profit proc
 		not_negative:
 						call writeDec
 						call crlf
+			
+			
+			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
+			push ebx
+			push eax
+			push edx
+			mov ebx, 20
+			mul ebx
+			mov cost, eax
+			pop ebx
+			pop eax
+			pop edx
+
 			;mov eax, totalSold[(esi*4 + ebx)*TYPE DWORD]	
 			push eax
 			lea eax, [esi*4 + ebx]

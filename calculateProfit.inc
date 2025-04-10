@@ -50,14 +50,23 @@ profit proc
 			call writeString
 			mov al,':'
 			call writechar
-							; IGNORE THIS SECTION
-			jmp EndTeleport
-	Teleport:
+
+	; IGNORE THIS SECTION
+		jmp EndTeleportForOuter
+	TeleportForOuter:
 		loop outterLoop
 		jmp done
-	EndTeleport:
-		; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
+	EndTeleportForOuter:
+	; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
 
+
+	; IGNORE THIS SECTION
+		jmp EndTeleportForInner
+	TeleportForInner:
+		loop innerLoop
+		jmp doneInnerLoop
+	EndTeleportForInner:
+	; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
 
 			mov eax,distances[esi*TYPE DWORD]	
 						call writeDec
@@ -109,15 +118,16 @@ profit proc
 		.ENDIF
 			;add esi, type locations
 			inc edi
-			loop innerLoop
+			jmp TeleportForInner
 
+	doneInnerLoop:
 		;pop esi	
 		pop ecx	;resume outterLoop
 
 		;add esi, type locations
 		inc esi
 		call crlf
-		jmp Teleport ; LOOP OUTER LOOP
+		jmp TeleportForOuter ; LOOP OUTER LOOP
 
 		
 		

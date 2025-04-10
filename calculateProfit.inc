@@ -10,6 +10,7 @@
 	; distances DWORD 1000, 580, 350, 200, 0
 	totalSold DWORD 100,223,324,134,150,223,324,134,130,323,124,224,130,523,224,232,120,233,323,233
 	cost DWORD ?
+	distance DWORD ?
 	distanceWord byte "Distance",0
 	totalSoldWod byte "Total Sold",0
 	costWord byte "Cost",0
@@ -20,6 +21,11 @@
 profit proc
 	LOCAL temp1:DWORD
 	LOCAL temp2:DWORD
+	call Clrscr
+			mov eax, offset profitWord
+		mov ebx, lengthof profitWord
+		call PrintHeader
+
 
 	;mov ebx,0
 	mov esi, 0
@@ -61,7 +67,19 @@ profit proc
 		jmp doneInnerLoop
 	EndTeleportForInner:
 	; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
-				
+		
+	
+			; IGNORE THIS SECTION
+			jmp EndTeleport
+	Teleport:
+		loop outterLoop
+		jmp done
+	EndTeleport:
+		; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
+
+
+
+
 			call crlf
 			mov al,TAB
 			call writechar
@@ -70,10 +88,7 @@ profit proc
 			call writeString
 			mov al,':'
 			call writechar
-	Teleport:
-		loop outterLoop
-		jmp done
-	EndTeleport:
+
 
 			mov eax,distances[esi*TYPE DWORD]	
 						;call writeDec
@@ -86,47 +101,73 @@ profit proc
 		not_negative:
 						call writeDec
 						call crlf
+						mov distance,eax
 			
 			
-			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
-			push ebx
 			push eax
+				push ebx
+					push eax
+						call crlf
+						mov al,TAB
+						call writechar
+						call writechar
+
+						lea edx,totalSoldWod
+						call writeString
+						mov al,':'
+						call writechar
+
+					pop eax
+
+					;mov eax, totalSold[(esi*4 + ebx)*TYPE DWORD]	
+					push eax
+						lea eax, [esi*4 + ebx]
+						mov temp1, 4
+						mul temp1
+						mov edx, eax
+					pop eax
+			
+					mul totalSold[edx]	;eax=((distance1-distance2)/2?)*totalSold
+				
+					call writeint
+					mov temp2, eax
+				pop ebx
+
+			pop eax
+			push eax
+
 			call crlf
 			mov al,TAB
 			call writechar
 			call writechar
-
-			lea edx,totalSoldWod
+			lea edx,costWord
 			call writeString
 			mov al,':'
 			call writechar
 
-			pop eax
+			mov eax, distance
+			mov edx, 20
+			mul edx                     
+			mov edx, 3				;for now, multiply by 3: 1 day 3 times.
+			mul edx
+			call writeint               
+			mov cost, eax               
 
-			;mov eax, totalSold[(esi*4 + ebx)*TYPE DWORD]	
-			push eax
-			lea eax, [esi*4 + ebx]
-			mov temp1, 4
-			mul temp1
-			mov edx, eax
-			pop eax
-			
-			mul totalSold[edx]	;eax=((distance1-distance2)/2?)*totalSold
-				
-			call writeint
+			; Calculate and display PROFIT (earnings - cost)
+			call crlf
+			mov al,TAB
+			call writechar
+			call writechar
+			lea edx,profitWord
+			call writeString
+			mov al,':'
+			call writechar
 
-							
-			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
-			;push ebx
-			;push eax
-			;push edx
-			;mov ebx, 20
-			;mul ebx
-			;mov cost, eax
-			;pop ebx
-			;pop eax
-			;pop edx
-			;inc ebx
+			pop eax                     
+			mov eax, temp2              
+			sub eax, cost               
+			call writeint               
+
 
 
 			call crlf

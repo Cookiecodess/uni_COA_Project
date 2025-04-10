@@ -9,7 +9,7 @@ INCLUDE ReportPage.inc
 INCLUDE ReceiptPage.inc
 INCLUDE calculateProfit.inc
 INCLUDE test.inc
-;INCLUDE NearStationPage.inc
+INCLUDE NearStationPage.inc
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
 	TAB = 09h
@@ -63,9 +63,9 @@ INCLUDE test.inc
 	;ADMIN LOGIN
 	headerAdmin byte "ADMIN",0
 
-	adminOption1		byte	"View Today Earning Report",0
-	adminOption2		byte	"View Month Earning Report",0
-	adminOption3		byte	"View Year Earning Report",0
+	adminOption1		byte	"Report",0
+	adminOption2		byte	"Profit",0
+	adminOption3		byte	"-",0
 	adminOption4		byte	"Log out",0
 
 	adminSelectionArr	dword	OFFSET adminOption1, OFFSET adminOption2, OFFSET adminOption3, OFFSET adminOption4
@@ -344,6 +344,9 @@ customerPage proc
 			je backToCustomerPage
 			; Else, proceed to receipt module
 		ProceedToReceipt:
+			; TODO: Integrate the receipt printing module here
+			;       and THEN remove `jmp backToCustomerPage`.
+			jmp backToCustomerPage
 
 		NearStation:
 			; call NearStationPage

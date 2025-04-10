@@ -70,7 +70,10 @@ profit proc
 			call writeString
 			mov al,':'
 			call writechar
-
+	Teleport:
+		loop outterLoop
+		jmp done
+	EndTeleport:
 
 			mov eax,distances[esi*TYPE DWORD]	
 						;call writeDec
@@ -116,10 +119,7 @@ profit proc
 
 		; IGNORE THIS SECTION
 			jmp EndTeleport
-	Teleport:
-		loop outterLoop
-		jmp done
-	EndTeleport:
+	
 		; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
 
 					

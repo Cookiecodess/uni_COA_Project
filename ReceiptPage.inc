@@ -1,0 +1,118 @@
+
+	CR = 0Dh	; Carriage Return
+	LF = 0Ah	; Line Feed
+	TAB = 09h
+	SPACE = 20h
+
+.data
+
+		receipt byte "Receipt",0
+		
+		person	byte ?
+		personS	byte "Name : ",0
+		total	byte ?
+		totalS	byte "Total : ",0
+		price	byte ?
+		priceS	byte "Price : ",0
+		detail	byte ?
+		detailS byte "Details : ",0
+		bookingS	byte "Your booking number is : ",0
+		bookingnum	dword ?
+
+    headerReceipt		byte "Receipt",0
+
+	;output receipt to file
+		receiptFile byte "receipt.txt",0
+		filehandle dword ?	;save the line
+
+.code
+
+
+GenerateReceipt proc
+	
+
+	receiptStart:
+		
+
+		;mov edx, boughtTicket.custName
+			;call WriteString
+		mov eax, offset headerReceipt
+		mov ebx, lengthof headerReceipt
+		call PrintHeader
+
+		mov al, TAB 
+		call WriteChar 
+
+		lea edx,bookingS
+		call WriteString
+
+
+		;call Random32
+		call Randomize
+		mov eax, 90000000			;since rand is from 0 to n-1 so it will generate 0 - 89999999
+		call RandomRange		; EAX = random number in range 0-89999999
+		add eax, 10000000			; adjust to range 10000000-99999999
+		mov bookingnum,eax
+		call WriteDec
+		call CRLF
+
+		mov al, TAB
+		call WriteChar
+		lea edx,personS
+		call WriteString
+		call CRLF
+
+		mov al, TAB
+		call WriteChar
+		lea edx,priceS
+		call WriteString
+		call CRLF
+
+		mov al, TAB
+		call WriteChar
+		lea edx,detailS
+		call WriteString
+		
+
+
+
+		call CRLF
+		mov  eax,1000 ;delay 1 sec
+		call Delay
+
+		call saveReceipt
+		ret
+
+GenerateReceipt endp
+
+saveReceipt proc
+
+	;Create file
+		mov edx, offset receiptFile
+		call CreateOutputFile      ; Irvine32 function to create file
+		mov filehandle, eax 
+
+    ; Check if file was created successfully
+		cmp eax, INVALID_HANDLE_VALUE
+		je error_exit
+
+	;Write to file 
+		mov edx,offset headerReceipt
+		mov ecx, lengthOf headerReceipt- 1
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
+
+
+
+
+	; Close file
+		mov eax, filehandle   
+		call CloseFile  
+		call ExitProcess
+
+	error_exit:
+    call WriteString         ; Print error message
+    call ExitProcess
+saveReceipt endp
+
+

@@ -1,32 +1,50 @@
 INCLUDE Irvine32.inc
+INCLUDE globalData.inc
+INCLUDE generalFunctions.inc
+INCLUDE coolMenu.inc
+INCLUDE TicketingPage.inc
+INCLUDE ReportPage.inc
+INCLUDE ReceiptPage.inc
+INCLUDE calculateProfit.inc
+;INCLUDE NearStationPage.inc
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
-	SPACE =09h
+	TAB = 09h
+	SPACE = 20h
+
 .data
-	;HEADER-------------------------------------------------------------------
+	;STATUS FLAGS--------------------------------------------------------------
+	showLoginSuccessMsg	byte 0
+	;HEADERS-------------------------------------------------------------------
 	header1             byte "Main Menu",0
     headerLogin			byte "Login",0
-    headerReceipt		byte "Receipt",0
     header3             byte "Register",0
-    equalSign           byte '='
-    leftRightPadding    dword 40
-
+	; NOTE: To modify the border pattern and left-and-right padding,
+	;       go to the .DATA segment in generalFunctions.asm
+	;       and look for "FOR PrintHeader".
+	
 	;GENERAL------------------------------------------------------------------
-	MAX	= 20								; max characters to read
-	inputBuffer			byte  MAX+1 dup(?)  ; room for null character
+	; NOTE: These are defined in generalFunctions.inc
+	; MAX	= 20								; max characters to read
+	; inputBuffer			byte  MAX+1 dup(?)  ; room for null character
 
 
 	;USER LOGIN----------------------------------------------------------------
 	welcome			byte	" Welcome,here is a login page",0
-	choose			byte	"Choose a number to login : ",0
-	user			byte	"Customer",0,"Admin",0,"Back",0,0
+	choose			byte	"Please select your role to continue : ",0
+
+	userOption1		byte	"Customer",0
+	userOption2		byte	"Admin",0
+	userOption3		byte	"Exit",0
+	userOptions		dword	OFFSET userOption1, OFFSET userOption2, OFFSET userOption3
+
 	loginChoose		byte	?
 
-	cUsername		byte	"aaa",0
-	cPassword		byte	"123",0
+	cUsername		byte	MAX+1 DUP(0)
+	cPassword		byte	MAX+1 DUP(0)
 
-	aUsername		byte	"bbb",0
-	aPassword		byte	"zzz",0
+	aUsername		byte	"1",0
+	aPassword		byte	"1",0
 
 
 	loginMsg		byte	"Enter Username: ", 0
@@ -40,69 +58,194 @@ INCLUDE Irvine32.inc
 	inputPassword	byte	MAX+1 DUP(?)	;but user only can type 19 word since at 20 need to store the 0(to stop)
 	
 	;ADMIN LOGIN
-	admin byte "ADMIN",0
-	adminSelection byte "View Today Earning Report",0,"View Month Earning Report",0,"View Year Earning Report",0,"log out",0,0
+	headerAdmin byte "ADMIN",0
+
+	adminOption1		byte	"View Today Earning Report",0
+	adminOption2		byte	"View Month Earning Report",0
+	adminOption3		byte	"View Year Earning Report",0
+	adminOption4		byte	"Log out",0
+
+	adminSelectionArr	dword	OFFSET adminOption1, OFFSET adminOption2, OFFSET adminOption3, OFFSET adminOption4
 
 	;CUSOTMER LOGIN
-	customer byte "CUSTOMER",0
-	customerSelection byte "View Schedule",0,"Ticketing",0,"Buy Member",0,"Check Nearby Station",0,"log out",0,0
+	headerCustomer byte "CUSTOMER",0
+	needToReg byte "Sorry you need to register first",0
+
+	customerOption1			byte	"View Schedule",0
+	customerOption2			byte	"Ticketing",0
+	customerOption3			byte	"Check Nearby Station",0
+	customerOption4			byte	"log out",0
+
+	customerSelectionArr	dword	OFFSET customerOption1, OFFSET customerOption2, OFFSET customerOption3, OFFSET customerOption4
+
+	customerSelectionArrLength dword ?
+	promptCustomerPageHead byte "Please select an action (1-",0
+	promptCustomerPageTail byte "): ",0
+	promptUserPage byte "Select an action to continue.",0
 
 	;REGISTER
 	register byte "REGISTER",0
-	;RECEIPT--------------------------------
-		receipt byte "Receipt",0
-		
-		person	byte ?
-		personS	byte "Name : ",0
-		total	byte ?
-		totalS	byte "Total : ",0
-		price	byte ?
-		priceS	byte "Price : ",0
-		detail	byte ?
-		detailS byte "Details : ",0
-		bookingS	byte "Your booking number is : ",0
-		bookingnum	dword ?
-	;REPORT--------------------------------------------------------------------
-		totalprice byte ?
-		totalticketsold byte ?
 
-		report byte "Report",0
-
-		;REPORT--------------------------------------------------------------------
+	
 
 .code
 main PROC
+	call startPage
 
-	;USER LOGIN------------------------------
-		LOGIN:
-		mov eax, offset headerLogin
-		mov ebx, lengthof headerLogin
-		call PrintHeader
-
-		lea edx,choose
-		call WriteString
-		call CRLF
-
-		push OFFSET user
-		call WriteStrArr
-
-		mov al, SPACE   ; Load tab character
-		call WriteChar  ; Print tab
-		lea edx,choose
-		call WriteString
+	
+	exit
+main ENDP
 
 
-		call ReadChar
+
+
+startPage proc
+	start:
+	invoke InitMenu, offset headerLogin, offset userOptions, lengthof userOptions, offset choose, 0, 0
+
 		mov loginChoose, al
 				call CRLF
-		cmp loginChoose, '1'	; If user chose Admin
-		je 	customerLogin		;je=jump if equal to
-		cmp loginChoose, '2'	; If user chose Customer
-		je adminLogin
+		cmp loginChoose, 0	; If user chose Admin
+			je customerLogin		;je=jump if equal to
+		cmp loginChoose, 1	; If user chose Customer
+			je adminLogin
+		cmp loginChoose, 1	; If user chose Customer
+			exit
+	
+	ret
 
-		adminLogin:		;=======================================================
-		mov eax, offset admin
-		mov ebx, lengthof admin
+startPage endp
+
+
+
+customerLogin proc
+	clstart:
+			mov eax, offset headerCustomer
+			mov ebx, lengthof headerCustomer
+			call PrintHeader
+			call CRLF
+			
+
+		;when user is undefined
+			mov eax,offset cUsername
+			cmp byte ptr [eax],0
+			je jumpRegisterPage
+
+			
+			lea edx,loginMsg
+			call WriteString
+
+			
+			mov edx, offset inputUsername
+			mov ecx, MAX	;to ensure the user only input 20 char?
+			call ReadString
+			call CRLF
+			; lea edx,username
+
+			lea edx,passMsg
+			call WriteString
+
+			mov edx, offset inputPassword
+			mov ecx, MAX	;to ensure the user only input 20 char
+			call ReadString
+			call CRLF
+			; lea edx,password
+			
+			jmp check_customer
+
+
+
+
+	check_customer:	
+			push OFFSET inputUsername
+			push OFFSET cUsername
+			call Str_compare			
+			jne Clogin_failed
+
+			push OFFSET inputPassword
+			push OFFSET cPassword
+			call Str_compare		
+			jne Clogin_failed
+
+			; at this point, customer is successfully authenticated
+			mov showLoginSuccessMsg, 1
+			call customerPage
+
+
+		call WaitMsg
+
+		call Clrscr
+
+		;JMP LOGIN
+
+	Clogin_failed:		;==============================
+		mov edx, OFFSET failMsg
+		call WriteString
+		call Crlf
+		jmp clstart  ; Retry Customer login
+
+		; clear user-input username, password
+		mov edi, OFFSET inputUsername
+		mov ecx, MAX
+		mov al, 0
+		rep stosb
+
+		mov edi, OFFSET inputPassword
+		mov ecx, MAX
+		mov al, 0
+		rep stosb
+
+
+
+customerLogin endp
+
+JumpRegisterPage proc
+		
+		lea edx,needToReg
+		call WriteString
+		call Crlf
+		call registerPage
+
+JumpRegisterPage endp
+registerPage proc
+	rStart:
+		call WaitMsg
+		call Clrscr
+		mov eax,offset register
+		mov ebx, lengthof register
+		call PrintHeader
+		call CRLF
+
+		lea edx,loginMsg
+		call WriteString
+		mov edx, OFFSET inputUsername  ; use username as buffer
+		mov ecx, MAX	;to ensure the user only input 20 char
+		call ReadString
+		call CRLF
+		invoke Str_copy,ADDR inputUsername,ADDR cUsername
+
+		lea edx,passMsg
+		call WriteString
+		mov edx, OFFSET inputPassword
+		mov ecx, 20	;to ensure the user only input 20 char
+		call ReadString
+		call CRLF
+		
+		invoke Str_copy,ADDR inputPassword,ADDR cPassword	;save string
+		;mov cPassword,dh
+
+		call customerLogin 
+
+
+		ret
+
+registerPage endp
+
+adminLogin proc
+
+	alstart:
+		mov eax, offset headerAdmin
+		mov ebx, lengthof headerAdmin
 		call PrintHeader
 
 		lea edx,loginMsg
@@ -135,57 +278,8 @@ main PROC
 			call Str_compare
 			jne Alogin_failed
 
-			jmp adminPage
-		
-		
-		
-		customerLogin:		;===================================
-			mov eax, offset customer
-			mov ebx, lengthof customer
-			call PrintHeader
-			call CRLF
-			
-			lea edx,loginMsg
-			call WriteString
-
-			mov edx, offset inputUsername
-			mov ecx, MAX	;to ensure the user only input 20 char?
-			call ReadString
-			call CRLF
-			; lea edx,username
-
-			lea edx,passMsg
-			call WriteString
-
-			mov edx, offset inputPassword
-			mov ecx, MAX	;to ensure the user only input 20 char
-			call ReadString
-			call CRLF
-			; lea edx,password
-			
-			jmp check_customer
-
-
-		check_customer:		;====================================
-			push OFFSET inputUsername
-			push OFFSET cUsername
-			call Str_compare			
-			jne Clogin_failed
-
-			push OFFSET inputPassword
-			push OFFSET cPassword
-			call Str_compare		
-			jne Clogin_failed
-
-			jmp customerPage
-
-
-		call WaitMsg
-
-		call Clrscr
-
-		;JMP LOGIN
-
+			call adminPage
+	
 
 	Alogin_failed:		;==============================
 
@@ -207,320 +301,112 @@ main PROC
 		rep stosb		; Fill buffer (inputPassword) with MAX number of zeroes
 
 
-		jmp adminLogin   ; Retry Admin login
+		jmp alstart   ; Retry Admin login
 
-	Clogin_failed:		;==============================
-		mov edx, OFFSET failMsg
-		call WriteString
-		call Crlf
-		jmp customerLogin  ; Retry Customer login
 
-		; clear user-input username, password
-		mov edi, OFFSET inputUsername
-		mov ecx, 20
-		mov al, 0
-		rep stosb
+adminLogin endp
 
-		mov edi, OFFSET inputPassword
-		mov ecx, 20
-		mov al, 0
-		rep stosb
 
-	;CUSTOMER PAGE--------------------------
-	customerPage:
-		mov eax, offset customer
-		mov ebx, lengthof customer
-		call PrintHeader
 
-		mov edx, offset successMsg
-		call WriteString
-		call CRLF
-		push OFFSET customerSelection
-		call WriteStrArr
 
-		exit
 
-	adminPage:
-		mov eax, offset admin
-		mov ebx, lengthof admin
-		call PrintHeader
-		call CRLF
-		mov edx, offset successMsg
-		call WriteString
-		call CRLF
-		push OFFSET adminSelection
-		call WriteStrArr
 
-		exit
+customerPage proc
+	customerPageStart:
+			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, lengthof customerSelectionArr, offset promptUserPage, 0, 0
+			; EAX = index of selected option
 
-	;REGISTER
-		;register:
-		mov eax,offset register
-		mov ebx, lengthof register
-		call PrintHeader
-		call CRLF
+			cmp eax, 1		; selection: Ticketing
+				je Ticketing
 
-		lea edx,loginMsg
-		call WriteString
-		mov edx, OFFSET inputUsername  ; use username as buffer
-		mov ecx, MAX	;to ensure the user only input 20 char
-		call ReadString
-		call CRLF
+			
+			;cmp eax, 2		; selection: NearStation
+			;	je NearStation
+
+			cmp eax, 3		; logOut
+				je logOut	
+
+
+			jmp customerPageStart		; TEMP: redraw customerPage if user selects an option that hasn't been implemented
+
+		Ticketing:
+			call TicketingPage ; return a dword representing whether to simply go back to customer page or proceed to receipt?
+			cmp eax, -1	; If EAX = -1, redraw customer menu
+			je backToCustomerPage
+			; Else, proceed to receipt module
+		ProceedToReceipt:
+
+		;NearStation:
+			;call NearStationPage
+			;cmp eax, -1	; If EAX = -1, redraw customer menu
+			;je backToCustomerPage
+
+		backToCustomerPage:
+			jmp customerPageStart
+
+		logOut:
+			call startPage
+
+			ret
+
+customerPage endp
+
+adminPage proc
+		adminStartPage:
+		; mov eax, offset admin
+		; mov ebx, lengthof admin
+		; call PrintHeader
+		; call CRLF
+		; mov edx, offset successMsg
+		; call WriteString
+		; call CRLF
+		; push OFFSET adminSelection
+		; push LENGTHOF adminSelection
+		; call WriteStrArr
+
+		; mov al, TAB   ; Load tab character
+		; call WriteChar  ; Print tab
+		; lea edx,choose
+		; call WriteString
+		; call ReadChar
+		; mov loginChoose, al
+				; call CRLF
+
+			invoke InitMenu, offset headerAdmin, offset adminSelectionArr, lengthof adminSelectionArr, offset promptUserPage, 0, 0
+			; EAX = index of selected option
+
+			cmp eax, 0		; selection: report
+			je callReport
+			
+			cmp eax, 1		; test
+			je callReceipt
+
+			cmp eax, 3		; logOut
+			je logOut		
 		
-
-		lea edx,passMsg
-		call WriteString
-		mov edx, OFFSET inputPassword
-		mov ecx, 20	;to ensure the user only input 20 char
-		call ReadString
-		call CRLF
-		; lea edx,password
-
-
-		jmp check_admin 
-
-
-
-
-
-	;RECEIPT--------------------------------
-		mov eax, offset headerReceipt
-		mov ebx, lengthof headerReceipt
-		call PrintHeader
-
-		mov al, SPACE 
-		call WriteChar 
-
-		lea edx,bookingS
-		call WriteString
-
-
-		;call Random32
-		call Randomize
-		mov eax, 90000000			;since rand is from 0 to n-1 so it will generate 0 - 89999999
-		call RandomRange		; EAX = random number in range 0-89999999
-		add eax, 10000000			; adjust to range 10000000-99999999
-		mov bookingnum,eax
-		call WriteDec
-		call CRLF
-
-		mov al, SPACE
-		call WriteChar
-		lea edx,personS
-		call WriteString
-		call CRLF
-
-		mov al, SPACE
-		call WriteChar
-		lea edx,priceS
-		call WriteString
-		call CRLF
-
-		mov al, SPACE
-		call WriteChar
-		lea edx,detailS
-		call WriteString
+			jmp adminStartPage		; TEMP: redraw adminPage if user selects an option that hasn't been implemented
 		
+		
+		callReport:
+			call ReportPage
+			jmp backToAdminPage
 
 
-
-		call CRLF
-		mov  eax,1000 ;delay 1 sec
-		call Delay
-
-	;REPORT---------------------------------
-		;Report:
-		;ticket price * ticket sold
+		callReceipt:
+			call Profit
+			jmp backToAdminPage
 
 
-		mov eax, offset report
-		mov ebx, lengthof report
-		call PrintHeader
+		backToAdminPage:
+			jmp adminStartPage
 
-		 call CRLF				; new line
+		logOut:
+		call startPage
 
-		 mov al, SPACE   ; Load tab character
-		 call WriteChar  ; Print tab
-		 call WriteChar  ; Print tab
-		 call WriteChar  ; Print tab
-		 
+			ret
+adminPage endp
 
 
-
-		;call WaitMsg
-		;call Clrscr
-		;call LOGIN
-	exit
-main ENDP
-
-;--------------------------------------------------------
-; PrintHeader
-;
-; Description:
-;   Prints a formatted header with top and bottom borders of `=` characters.
-;
-; Parameters:
-;   EAX  - (DWORD) Address of the header string (offset)
-;   EBX  - (DWORD) Length of the header string
-;
-; Returns:
-;   None
-;
-; Example usage:
-;   mov eax, offset header
-;   mov ebx, lengthof header
-;   call PrintHeader
-;--------------------------------------------------------
-PrintHeader proc
-    push ebp        ; save old base pointer
-    mov ebp, esp    ; store the base address of the stack frame
-    sub esp, 8      ; allocate memory for local variables
-
-    ; store local variables
-    mov dword ptr [ebp-4], eax
-    mov dword ptr [ebp-8], ebx
-
-    ; print top border
-    ; for (2*leftRightPadding + lengthof(header)) { print('='); }
-    mov eax, leftRightPadding
-    mov ecx, 2
-    mul ecx
-    add eax, dword ptr [ebp-8]  
-    mov ecx, eax
-PrintLoop:
-    mov al, equalSign
-    call WriteChar
-    loop PrintLoop
-
-    ; print newline
-    call Crlf  ; Irvine32 provides this
-
-    ; print left padding spaces
-    mov ecx, leftRightPadding
-SpaceLoop:
-    mov al, ' '
-    call WriteChar
-    loop SpaceLoop
-
-    ; print header text
-    mov edx, [ebp-4]  ; Adjusted stack offset
-    call WriteString
-
-    ; print newline
-    call Crlf
-
-    ; print bottom border
-    ; for (2*leftRightPadding + lengthof(header)) { print('='); }
-    mov eax, leftRightPadding
-    mov ebx, 2
-    mul ebx
-    add eax, [ebp-8]  ; Adjusted
-    mov ecx, eax
-PrintLoop2:
-    mov al, equalSign
-    call WriteChar
-    loop PrintLoop2
-
-    ; print newline
-    call Crlf
-    
-    ; restore stack pointer
-    mov esp, ebp
-    ; restore base pointer
-    pop ebp
-    ret
-PrintHeader endp
-
-
-;--------------------------------------------------------
-; WriteStrArr
-;
-; Description:
-;   Prints a numbered list of an array
-;
-; Parameters:
-;   [EBP+8]  - (DWORD) Offset address of the string array
-;
-; Returns:
-;   EAX  - (DWORD) Length of the string array
-;
-; Example usage:
-;   .data
-;   stringArray		  BYTE  "hello",0,"world",0,"this",0,"test",0,"dope",0,0
-;   stringArrayLength DWORD ?
-;
-;   .code
-;       push offset stringArray
-;       call WriteStrArr
-;       mov stringArrayLength, eax		; stringArrayLength = eax = 5
-;--------------------------------------------------------
-WriteStrArr PROC
-	push ebp		; save current base pointer first
-	mov ebp, esp	; move sp to bp for us to access the parameters stored in the stack
-
-	; save old values of ESI and EDX
-	push esi
-	push edx
-
-	mov esi, [ebp+8] ; load the address of the string array to esi
-	mov al, SPACE  
-	call WriteChar
-
-	; printing the index number
-	mov edx, 1
-	mov eax, edx
-	call writeDec
-	mov al, ")"
-	call writeChar
-	mov al, " "
-	call writeChar
-	
-	writeDatShitOut:
-
-		mov al, [esi]		; load character into al then compare is it 0
-		cmp al, 0			; if its 0, we know to print new line and write next string
-		je nextShit
-
-		call writeChar		; write that char out if not equal
-		inc esi
-		jmp writeDatShitOut
-
-
-	nextShit:
-		call crlf
-		inc esi
-
-		cmp byte ptr [esi], 0		; if the next char is also 0 then we know its the end of the array
-		je done
-
-		mov al, SPACE  
-		call WriteChar
-
-		inc edx				; writing the index number
-		mov eax, edx
-		call writeDec
-		mov al, ")"
-		call writeChar
-		mov al, " "
-		call writeChar
-
-		jmp writeDatShitOut
-
-
-
-	done:
-
-	; store return value (length of the string array) in EAX
-	mov eax, edx
-
-	; restore old ESI and EDX
-	pop edx
-	pop esi
-
-	pop ebp			; restore the initial base pointer before returning back to caller
-	ret 4			; clear the stack pointer before returning
-
-WriteStrArr ENDP
 
 
 END main

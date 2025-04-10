@@ -22,6 +22,7 @@
     <None Include="calculateProfit.inc" />
     <None Include="coolMenu.inc" />
     <None Include="coolStationMap.inc" />
+    <None Include="displayScheduleAndCalculations.inc" />
     <None Include="generalFunctions.inc" />
     <None Include="globalData.inc" />
     <None Include="myproc.inc" />
@@ -31,7 +32,7 @@
     <None Include="TicketingPage.inc" />
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="test.asm" />
+    <MASM Include="main.asm" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

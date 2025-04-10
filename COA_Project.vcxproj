@@ -22,12 +22,14 @@
     <None Include="calculateProfit.inc" />
     <None Include="coolMenu.inc" />
     <None Include="coolStationMap.inc" />
+    <None Include="displayScheduleAndCalculations.inc" />
     <None Include="generalFunctions.inc" />
     <None Include="globalData.inc" />
     <None Include="myproc.inc" />
     <None Include="newfile.inc" />
     <None Include="ReceiptPage.inc" />
     <None Include="ReportPage.inc" />
+    <None Include="SchedulePage.inc" />
     <None Include="TicketingPage.inc" />
   </ItemGroup>
   <ItemGroup>

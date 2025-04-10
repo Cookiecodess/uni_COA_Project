@@ -45,9 +45,12 @@
     <None Include="coolStationMap.inc">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="displayScheduleAndCalculations.inc">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="test.asm">
+    <MASM Include="main.asm">
       <Filter>Source Files</Filter>
     </MASM>
   </ItemGroup>

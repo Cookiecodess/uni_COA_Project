@@ -1,4 +1,4 @@
-include irvine32.inc
+; include irvine32.inc
 
 .data
 	promptAsk BYTE "Please Enter Your Current Location: ", 0
@@ -11,19 +11,15 @@ include irvine32.inc
 	msgDistance BYTE "Distance to Travel: ", 0
 	msgDistanceUnit BYTE "KM", 0
 
-	; === NOTE: locations and distances data will have to be commented
-	; ===       once this file becomes an .inc to prevent redefinition
-	; ===       since these data are already defined in globalData.inc
-	; STATION LOCATIONS AND DISTANCES (FROM JOHOR)
-	location1				BYTE	"Penang",0
-	location2				BYTE	"Perak",0
-	location3				BYTE	"Kuala Lumpur",0
-	location4				BYTE	"Melaka",0
-	location5				BYTE	"Johor",0
-	locations				DWORD	OFFSET location1, OFFSET location2, OFFSET location3, OFFSET location4, OFFSET location5
-	;locations BYTE "Penang", 0,"Perak", 0, "Kuala Lumpur", 0, "Melaka", 0, "Johor", 0, 0
+	; === NOTE: the location and distance arrays are defined in globalData.inc ===
+	; location1				BYTE	"Penang",0
+	; location2				BYTE	"Perak",0
+	; location3				BYTE	"Kuala Lumpur",0
+	; location4				BYTE	"Melaka",0
+	; location5				BYTE	"Johor",0
+	; locations				DWORD	OFFSET location1, OFFSET location2, OFFSET location3, OFFSET location4, OFFSET location5
 
-	distances DWORD 1000, 580, 350, 200, 0
+	; distances DWORD 1000, 580, 350, 200, 0
 	distanceToTravel DWORD ?
 	speed DWORD 320	
 
@@ -36,7 +32,7 @@ include irvine32.inc
 	;----Cost Variables----
 	msgCost	BYTE "Total Cost: RM", 0
 	msgCurrency BYTE ".00", 0
-	cost DWORD ?
+	cost_viewsched DWORD ?			; suffixed the name with "_viewsched" to prevent redefinition of a "cost" variable in calculateProfit.inc (as of 10/4/2025)
     
     ; ---Time Variables---
     msgTime BYTE "Travel Time: ", 0
@@ -54,16 +50,19 @@ include irvine32.inc
 
 
 .code
-main proc
+; main proc
 	
 
-	call schedule
-	exit
-main endp
+	; call schedule
+	; exit
+; main endp
 
 
-schedule proc
+ViewSchedulePage proc
 	start:
+	; clear screen
+	call ClrScr
+
 	; display all the locations
 	mov ebx, 1
 	mov esi, OFFSET locations
@@ -277,13 +276,13 @@ schedule proc
 			call CalculateTrainCost
 			call CalculateTravelTime
 			call CalculateFee
-			ret
+			jmp EndViewSchedulePage
 
 	; --- calculate cost: distance x 20, stores in a variable (Cost) for future use ---
 		CalculateTrainCost PROC
 			mov ebx, 20
 			mul ebx
-			mov cost, eax
+			mov cost_viewsched, eax
 
 			mov	edx, OFFSET msgCost
 			call writestring
@@ -365,9 +364,17 @@ schedule proc
 
 		CalculateFee ENDP
 
+	EndViewSchedulePage:
+		call WaitMsg
+
+		; Clear variables
+		mov currentChoice, 0
+		mov currentChoice2, 0
+
+		ret
 			
-schedule endp
+ViewSchedulePage endp
 
 
 
-end main
+; end main

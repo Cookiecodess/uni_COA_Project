@@ -60,6 +60,9 @@
 
 ViewSchedulePage proc
 	start:
+	; clear screen
+	call ClrScr
+
 	; display all the locations
 	mov ebx, 1
 	mov esi, OFFSET locations
@@ -273,7 +276,7 @@ ViewSchedulePage proc
 			call CalculateTrainCost
 			call CalculateTravelTime
 			call CalculateFee
-			ret
+			jmp EndViewSchedulePage
 
 	; --- calculate cost: distance x 20, stores in a variable (Cost) for future use ---
 		CalculateTrainCost PROC
@@ -361,6 +364,14 @@ ViewSchedulePage proc
 
 		CalculateFee ENDP
 
+	EndViewSchedulePage:
+		call WaitMsg
+
+		; Clear variables
+		mov currentChoice, 0
+		mov currentChoice2, 0
+
+		ret
 			
 ViewSchedulePage endp
 

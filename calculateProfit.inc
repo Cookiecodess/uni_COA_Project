@@ -111,18 +111,7 @@ profit proc
 
 			call writeint
 
-
-
-
-		; IGNORE THIS SECTION
-			jmp EndTeleport
-	Teleport:
-		loop outterLoop
-		jmp done
-	EndTeleport:
-		; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
-
-					
+							
 			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
 			push ebx
 			push eax

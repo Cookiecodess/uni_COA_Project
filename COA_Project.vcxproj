@@ -30,6 +30,7 @@
     <None Include="ReceiptPage.inc" />
     <None Include="ReportPage.inc" />
     <None Include="SchedulePage.inc" />
+    <None Include="test.inc" />
     <None Include="TicketingPage.inc" />
   </ItemGroup>
   <ItemGroup>

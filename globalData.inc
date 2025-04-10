@@ -72,7 +72,7 @@ CONSOLE_CURSOR_INFO ENDS
 		destStn			DWORD	?	; points to a location string (only applicable for single-journey)
 	TicketStruct ENDS
 
-	boughtTicket			TicketStruct <>
+	boughtTicket			TicketStruct <0>
 ; ========= Global variables =========
 .data
 	; ERROR MESSAGES -------------------------------------------------------------------

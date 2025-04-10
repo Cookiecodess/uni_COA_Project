@@ -8,6 +8,7 @@ INCLUDE TicketingPage.inc
 INCLUDE ReportPage.inc
 INCLUDE ReceiptPage.inc
 INCLUDE calculateProfit.inc
+INCLUDE test.inc
 ;INCLUDE NearStationPage.inc
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
@@ -334,7 +335,7 @@ customerPage proc
 			jmp customerPageStart		; TEMP: redraw customerPage if user selects an option that hasn't been implemented
 
 		ViewSchedule:
-			call ViewSchedulePage
+			call show
 			jmp backToCustomerPage
 
 		Ticketing:

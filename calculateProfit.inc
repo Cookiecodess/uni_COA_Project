@@ -70,10 +70,10 @@ profit proc
 			call writeString
 			mov al,':'
 			call writechar
-	Teleport:
-		loop outterLoop
-		jmp done
-	EndTeleport:
+	; Teleport:
+		; loop outterLoop
+		; jmp done
+	; EndTeleport:
 
 			mov eax,distances[esi*TYPE DWORD]	
 						;call writeDec
@@ -90,32 +90,32 @@ profit proc
 			
 			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
 			push ebx
-			push eax
-			call crlf
-			mov al,TAB
-			call writechar
-			call writechar
+				push eax
+					call crlf
+					mov al,TAB
+					call writechar
+					call writechar
 
-			lea edx,totalSoldWod
-			call writeString
-			mov al,':'
-			call writechar
+					lea edx,totalSoldWod
+					call writeString
+					mov al,':'
+					call writechar
 
-			pop eax
+				pop eax
 
-			;mov eax, totalSold[(esi*4 + ebx)*TYPE DWORD]	
-			push eax
-			lea eax, [esi*4 + ebx]
-			mov temp1, 4
-			mul temp1
-			mov edx, eax
-			pop eax
+				;mov eax, totalSold[(esi*4 + ebx)*TYPE DWORD]	
+				push eax
+					lea eax, [esi*4 + ebx]
+					mov temp1, 4
+					mul temp1
+					mov edx, eax
+				pop eax
 			
-			mul totalSold[edx]	;eax=((distance1-distance2)/2?)*totalSold
+				mul totalSold[edx]	;eax=((distance1-distance2)/2?)*totalSold
 				
-			call writeint
+				call writeint
 
-							
+			pop ebx		
 			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
 			;push ebx
 			;push eax

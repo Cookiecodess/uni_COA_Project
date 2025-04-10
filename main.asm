@@ -318,9 +318,6 @@ customerPage proc
 			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, lengthof customerSelectionArr, offset promptUserPage, 0, 0
 			; EAX = index of selected option
 
-			cmp eax, 0
-				je ViewSchedule
-
 			cmp eax, 1		; selection: Ticketing
 				je Ticketing
 
@@ -332,10 +329,6 @@ customerPage proc
 				je logOut	
 
 			jmp customerPageStart		; TEMP: redraw customerPage if user selects an option that hasn't been implemented
-		
-		ViewSchedule:
-			call ViewSchedulePage
-			jmp backToCustomerPage
 
 		Ticketing:
 			call TicketingPage ; return a dword representing whether to simply go back to customer page or proceed to receipt?

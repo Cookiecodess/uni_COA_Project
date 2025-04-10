@@ -29,6 +29,7 @@
     <None Include="newfile.inc" />
     <None Include="ReceiptPage.inc" />
     <None Include="ReportPage.inc" />
+    <None Include="SchedulePage.inc" />
     <None Include="TicketingPage.inc" />
   </ItemGroup>
   <ItemGroup>

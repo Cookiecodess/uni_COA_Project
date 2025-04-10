@@ -31,7 +31,7 @@ GetInputForDestStnPage PROTO
 
 	msgChose			BYTE	"You chose ",0
 	
-	boughtTicket TicketStruct <>
+	
 
 	; COLORS
 	ORIGIN_COLOR = lightCyan

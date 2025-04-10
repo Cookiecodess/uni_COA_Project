@@ -328,7 +328,6 @@ customerPage proc
 			cmp eax, 3		; logOut
 				je logOut	
 
-
 			jmp customerPageStart		; TEMP: redraw customerPage if user selects an option that hasn't been implemented
 
 		Ticketing:

@@ -53,6 +53,14 @@ profit proc
 		not_negative:
 						call writeDec
 						call crlf
+
+		; IGNORE THIS SECTION
+			jmp EndTeleport
+	Teleport:
+		loop outterLoop
+		jmp done
+	EndTeleport:
+		; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
 			
 			
 			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
@@ -76,13 +84,7 @@ profit proc
 			mul totalSold[edx]	;eax=(distance1-distance2)*totalSold
 			inc ebx
 
-		; IGNORE THIS SECTION
-			jmp EndTeleport
-	Teleport:
-		loop outterLoop
-		jmp done
-	EndTeleport:
-		; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
+		
 
 			call writeint
 			;add ebx,type totalSold

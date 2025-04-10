@@ -29,9 +29,9 @@
 	boughtTicket TicketStruct <>
 
 	; State flag for the menu for booking single journey tickets
-	menuState			BYTE	0		; Bit 1 set: origin station selected
-										; Bit 2 set: dest station selected
-										; Bit 3 of menuState ensures that the setting of currentSelection to 1 only happens on the first draw of this menu. Bit 3 is set on first redraw.
+	stationMenuState			BYTE	0		; bit 0 set: origin station selected
+										; bit 1 set: dest station selected
+										; bit 2 of stationMenuState ensures that the setting of currentSelection to 1 only happens on the first draw of this menu. bit 2 is set on first redraw.
 	originStnIdx		DWORD	0
 	destStnIdx		DWORD	0
 
@@ -222,53 +222,24 @@ TimedPassConfmMenu ENDP
 
 
 
-CustomMenuBookSingleJourney PROC USES eax ebx ecx edx esi
-	; Clear screen
-        call Clrscr
+DrawStationSelectionMap PROC USES eax ecx esi, stationListOffset:DWORD, currentSlctn:DWORD
 
-        ; Print header
-        mov eax, globalHeaderOffset
-        mov ebx, globalHeaderLength
-        call PrintHeader
-        call CrLf
-
-		; Print ticket info
-		call PrintTicketInfo
-
-        ; Print selection prompt
-        mov edx, globalSelectionPromptOffset
-        call WriteString
-        call CrLf
-        call CrLf
-
-        ; Print error message IF errorCode != 0
-        call PrintErrorMessage
-
-        ; Reset text color
-        mov eax, NORMAL_COLOR
-        call SetTextColor
-
-        ; Prepare to draw menu items
+	; Prepare to draw menu items
         mov ecx, 0                      ; Loop counter
-        mov esi, globalOptionListOffset ; Start of menu items
+        mov esi, stationListOffset ; Start of menu items
 
 		; If first item has been selected as ORIGIN, set the currentSelection to 1 (index 1 = 2nd element)
-		test menuState, 00000001b
+		test stationMenuState, 00000001b
 		jz DrawMenuLoop		; If ORIGIN has NOT been selected, then ignore this part and proceed to the DrawMenuLoop.
 		cmp originStnIdx, 0	; If the ORIGIN is NOT the first item, also ignore this section.
 		jne DrawMenuLoop
-		test menuState, 00000100b	; Bit 3 of menuState ensures that the setting of currentSelection to 1 only happens on the first draw of this menu.
+		test stationMenuState, 00000100b	; bit 2 of stationMenuState ensures that the setting of currentSelection to 1 only happens on the first draw of this menu.
 		jnz DrawMenuLoop
-		mov currentSelection, 1
-		or menuState, 00000100b
+		mov currentSlctn, 1
+		or stationMenuState, 00000100b
 
     DrawMenuLoop:
-        ; Position cursor
-        ;mov dh, cl                  ; Row = counter
-        ;mov dl, 0                   ; Column 0
-        ;call Gotoxy
-
-        ; Compare current item with current selection
+	; Compare current item with current selection
         .IF ecx == currentSelection
             ; Highlight selected item
             mov eax, HIGHLIGHT_COLOR
@@ -284,7 +255,7 @@ CustomMenuBookSingleJourney PROC USES eax ebx ecx edx esi
             mov al, ' '
             call WriteChar
         .ELSE
-			test menuState, 00000001b	; Check if ORIGIN station has been selected
+			test stationMenuState, 00000001b	; Check if ORIGIN station has been selected
 			jz SetNormalColor
 			cmp ecx, originStnIdx		; Check if the item currently being printed is the ORIGIN
 			je SetColorForOriginStn
@@ -315,7 +286,7 @@ CustomMenuBookSingleJourney PROC USES eax ebx ecx edx esi
 		mov al, '['
 		call WriteChar
 		; If user has selected an origin station...
-		test menuState, 00000001b
+		test stationMenuState, 00000001b
 		jz PrintBlankBox
 		; ...and current item being printed is the origin station, print "*"
 		cmp ecx, originStnIdx
@@ -326,7 +297,7 @@ CustomMenuBookSingleJourney PROC USES eax ebx ecx edx esi
 
 	IsItDest:
 		; If user has selected a destination station...
-		test menuState, 00000010b
+		test stationMenuState, 00000010b
 		jz PrintBlankBox
 		; ...and current item being printed is the destination station, print "X"
 		cmp ecx, destStnIdx
@@ -379,13 +350,52 @@ CustomMenuBookSingleJourney PROC USES eax ebx ecx edx esi
 
 		jmp DrawMenuLoop
 
-    done:
+	done:
         ; Reset text color
         mov eax, NORMAL_COLOR		
         call SetTextColor
+		ret
+DrawStationSelectionMap ENDP
+
+
+
+DrawStationMenuCanSelectOrigAndDest PROC USES eax ebx ecx edx esi
+	; Clear screen
+        call Clrscr
+
+        ; Print header
+        mov eax, globalHeaderOffset
+        mov ebx, globalHeaderLength
+        call PrintHeader
+        call CrLf
+
+		; Print ticket info
+		call PrintTicketInfo
+
+        ; Print selection prompt
+        mov edx, globalSelectionPromptOffset
+        call WriteString
+        call CrLf
+        call CrLf
+
+        ; Print error message IF errorCode != 0
+        call PrintErrorMessage
+
+        ; Reset text color
+        mov eax, NORMAL_COLOR
+        call SetTextColor
+
+		; Draw station map menu based on current selection
+        invoke DrawStationSelectionMap, globalOptionListOffset, currentSelection
+
+    
 
         ret	
-CustomMenuBookSingleJourney ENDP
+DrawStationMenuCanSelectOrigAndDest ENDP
+
+
+
+
 
 
 
@@ -672,7 +682,7 @@ TicketingPage PROC USES ebx edx
 		rep stosd
 
 		; clear menu state flag
-		mov menuState, 0
+		mov stationMenuState, 0
 		
 		; clear origin and destination station selection
 		mov originStnIdx, 0
@@ -721,7 +731,7 @@ TicketingPage PROC USES ebx edx
 	
 	ContinueForSingleJourney:
 		; print menu letting user choose origin station
-		invoke InitMenu, offset headerBookTicket, offset locations, lengthof locations, offset promptLocOrigin, offset CustomMenuBookSingleJourney, 0
+		invoke InitMenu, offset headerBookTicket, offset locations, lengthof locations, offset promptLocOrigin, offset DrawStationMenuCanSelectOrigAndDest, 0
 
 
 		; EAX = index of station
@@ -729,22 +739,22 @@ TicketingPage PROC USES ebx edx
 		; Record station name (offset of the string) in boughtTicket.originStn
 		mov edx, locations[eax*4]
 		mov boughtTicket.originStn, edx
-		; Set bit 1 of menuState flag, to indicate that ORIGIN has been selected
-		or menuState, 00000001b
+		; Set bit 0 of stationMenuState flag, to indicate that ORIGIN has been selected
+		or stationMenuState, 00000001b
 
 		; print menu letting user choose dest station. NOT PRINTING or MUTED-COLOR-HIGHLIGHT the origin station based on EAX
 		; (might need a custom getInput func to handle skipping over the origin station during menu navigation)
-		invoke InitMenu, offset headerBookTicket, offset locations, lengthof locations, offset promptLocDest, offset CustomMenuBookSingleJourney, offset GetInputForDestStnPage 
+		invoke InitMenu, offset headerBookTicket, offset locations, lengthof locations, offset promptLocDest, offset DrawStationMenuCanSelectOrigAndDest, offset GetInputForDestStnPage 
 
 		mov destStnIdx, eax
 		; Record station name (offset of the string) in boughtTicket.destStn based on EAX
 		mov edx, locations[eax*4]
 		mov boughtTicket.destStn, edx
-		; Set bit 1 of menuState flag, to indicate that DESTINATION has been selected
-		or menuState, 00000010b
+		; Set bit 1 of stationMenuState flag, to indicate that DESTINATION has been selected
+		or stationMenuState, 00000010b
 
 		; confirmation page with all ticket details and a route map
-		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, offset promptChoose, offset SingleJrnyConfmMenu, 0
+		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, 0, offset SingleJrnyConfmMenu, 0
 
 		test eax, eax		; EAX = 0 --> Selected "Confirm purchase"
 		jz return_but_proceed
@@ -753,7 +763,7 @@ TicketingPage PROC USES ebx edx
 		jmp BackToTicketTypeMenu 
 
 	ContinueForLimitedTimePass:
-		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, offset promptChoose, offset TimedPassConfmMenu, 0
+		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, 0, offset TimedPassConfmMenu, 0
 
 
 		test eax, eax		; EAX = 0 --> Selected "Confirm purchase"

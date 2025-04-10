@@ -26,10 +26,12 @@
     <None Include="generalFunctions.inc" />
     <None Include="globalData.inc" />
     <None Include="myproc.inc" />
+    <None Include="NearStationPage.inc" />
     <None Include="newfile.inc" />
     <None Include="ReceiptPage.inc" />
     <None Include="ReportPage.inc" />
     <None Include="SchedulePage.inc" />
+    <None Include="test.inc" />
     <None Include="TicketingPage.inc" />
   </ItemGroup>
   <ItemGroup>

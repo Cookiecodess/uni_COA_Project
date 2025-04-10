@@ -39,17 +39,11 @@ profit proc
 
 		innerLoop:
 		.IF esi != edi
-			mov al,SPACE
+			mov al,TAB
 			call writechar
 			mov edx,locations[edi*TYPE DWORD]
 			call writeString
-			call crlf
-			mov al,SPACE
-			call writechar
-			lea edx,distanceWord
-			call writeString
-			mov al,':'
-			call writechar
+
 
 	; IGNORE THIS SECTION
 		jmp EndTeleportForOuter
@@ -67,10 +61,20 @@ profit proc
 		jmp doneInnerLoop
 	EndTeleportForInner:
 	; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
+				
+			call crlf
+			mov al,TAB
+			call writechar
+			call writechar
+			lea edx,distanceWord
+			call writeString
+			mov al,':'
+			call writechar
+
 
 			mov eax,distances[esi*TYPE DWORD]	
-						call writeDec
-						call crlf
+						;call writeDec
+						;call crlf
 			mov edx,distances[edi*TYPE DWORD]
 			sub eax,edx			;eax=distance1-distance2
 			cmp eax, 0
@@ -79,15 +83,41 @@ profit proc
 		not_negative:
 						call writeDec
 						call crlf
+		
 
 
-
-			call writeint
+			;call writeint
 			;add ebx,type totalSold
 
-			call crlf	
+			push eax
+			call crlf
+			mov al,TAB
+			call writechar
+			call writechar
 
-		
+			lea edx,totalSoldWod
+			call writeString
+			mov al,':'
+			call writechar
+
+			pop eax
+
+			;mov eax, totalSold[(esi*4 + ebx)*TYPE DWORD]	
+			push eax
+			lea eax, [esi*4 + ebx]
+			mov temp1, 4
+			mul temp1
+			mov edx, eax
+			pop eax
+			mul totalSold[edx]	;eax=(distance1-distance2)*totalSold
+
+			call writeint
+
+
+
+
+
+					
 			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
 			push ebx
 			push eax
@@ -98,22 +128,10 @@ profit proc
 			pop ebx
 			pop eax
 			pop edx
-
-
-
-
-			;mov eax, totalSold[(esi*4 + ebx)*TYPE DWORD]	
-			push eax
-			lea eax, [esi*4 + ebx]
-			mov temp1, 4
-			mul temp1
-			mov edx, eax
-			pop eax
-			mul totalSold[edx]	;eax=(distance1-distance2)*totalSold
 			inc ebx
 
 
-
+			call crlf
 
 		.ENDIF
 			;add esi, type locations

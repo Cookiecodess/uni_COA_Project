@@ -8,7 +8,7 @@ INCLUDE TicketingPage.inc
 INCLUDE ReportPage.inc
 INCLUDE ReceiptPage.inc
 INCLUDE calculateProfit.inc
-;INCLUDE NearStationPage.inc
+INCLUDE NearStationPage.inc
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
 	TAB = 09h
@@ -325,8 +325,8 @@ customerPage proc
 				je Ticketing
 
 			
-			;cmp eax, 2		; selection: NearStation
-			;	je NearStation
+			cmp eax, 2		; selection: NearStation
+				je NearStation
 
 			cmp eax, 3		; logOut
 				je logOut	
@@ -344,10 +344,10 @@ customerPage proc
 			; Else, proceed to receipt module
 		ProceedToReceipt:
 
-		;NearStation:
-			;call NearStationPage
-			;cmp eax, -1	; If EAX = -1, redraw customer menu
-			;je backToCustomerPage
+		NearStation:
+			call NearStationPage
+			cmp eax, -1	; If EAX = -1, redraw customer menu
+			je backToCustomerPage
 
 		backToCustomerPage:
 			jmp customerPageStart

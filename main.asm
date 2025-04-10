@@ -346,7 +346,7 @@ customerPage proc
 		ProceedToReceipt:
 
 		NearStation:
-			call NearStationPage
+			; call NearStationPage
 			cmp eax, -1	; If EAX = -1, redraw customer menu
 			je backToCustomerPage
 

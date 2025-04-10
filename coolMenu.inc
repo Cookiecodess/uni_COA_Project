@@ -40,6 +40,7 @@ SelectItem PROTO
 ;       (Lazy to list out rn, maybe next time)
 ; Return arg:
 ;       EAX - (DWORD) index of selected option
+
 InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, optionListLength:DWORD, selectionPromptOffset:DWORD, customDrawMenuFunc:DWORD, customGetInputFunc:DWORD
         LOCAL drawMenuFunc :DWORD
         LOCAL getInputFunc :DWORD

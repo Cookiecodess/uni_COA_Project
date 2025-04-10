@@ -9,7 +9,7 @@
 	; locations DWORD OFFSET location1, OFFSET location2, OFFSET location3, OFFSET location4, OFFSET location5
 	; distances DWORD 1000, 580, 350, 200, 0
 	totalSold DWORD 100,223,324,134,150,223,324,134,130,323,124,224,130,523,224,232,120,233,323,233
-	cost DWORD ?
+	;cost DWORD ?
 .code
 
 
@@ -54,7 +54,12 @@ profit proc
 						call writeDec
 						call crlf
 			
-			
+		
+		Teleport:
+		loop outterLoop
+		jmp done
+		EndTeleport:
+
 			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
 			push ebx
 			push eax
@@ -78,10 +83,7 @@ profit proc
 
 		; IGNORE THIS SECTION
 			jmp EndTeleport
-	Teleport:
-		loop outterLoop
-		jmp done
-	EndTeleport:
+	
 		; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
 
 			call writeint

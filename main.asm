@@ -2,6 +2,7 @@ INCLUDE Irvine32.inc
 INCLUDE globalData.inc
 INCLUDE generalFunctions.inc
 INCLUDE coolMenu.inc
+INCLUDE SchedulePage.inc
 INCLUDE TicketingPage.inc
 INCLUDE ReportPage.inc
 INCLUDE ReceiptPage.inc
@@ -316,6 +317,9 @@ customerPage proc
 			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, lengthof customerSelectionArr, offset promptUserPage, 0, 0
 			; EAX = index of selected option
 
+			cmp eax, 0		; selection: Display Schedules
+				je Schedules
+
 			cmp eax, 1		; selection: Ticketing
 				je Ticketing
 
@@ -328,6 +332,11 @@ customerPage proc
 
 
 			jmp customerPageStart		; TEMP: redraw customerPage if user selects an option that hasn't been implemented
+
+
+		Schedules:
+			call schedule
+
 
 		Ticketing:
 			call TicketingPage ; return a dword representing whether to simply go back to customer page or proceed to receipt?

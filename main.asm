@@ -9,7 +9,7 @@ INCLUDE ReportPage.inc
 INCLUDE ReceiptPage.inc
 INCLUDE calculateProfit.inc
 INCLUDE test.inc
-;INCLUDE NearStationPage.inc
+INCLUDE NearStationPage.inc
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
 	TAB = 09h

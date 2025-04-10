@@ -63,9 +63,9 @@ INCLUDE NearStationPage.inc
 	;ADMIN LOGIN
 	headerAdmin byte "ADMIN",0
 
-	adminOption1		byte	"View Today Earning Report",0
-	adminOption2		byte	"View Month Earning Report",0
-	adminOption3		byte	"View Year Earning Report",0
+	adminOption1		byte	"Report",0
+	adminOption2		byte	"Profit",0
+	adminOption3		byte	"-",0
 	adminOption4		byte	"Log out",0
 
 	adminSelectionArr	dword	OFFSET adminOption1, OFFSET adminOption2, OFFSET adminOption3, OFFSET adminOption4

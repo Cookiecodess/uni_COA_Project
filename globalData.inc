@@ -63,7 +63,7 @@ CONSOLE_CURSOR_INFO ENDS
 	key4				BYTE	"Origin station",0
 	key5				BYTE	"Destination station",0
 	TicketStructKeys	DWORD	OFFSET key1, OFFSET key2, OFFSET key3, OFFSET key4, OFFSET key5 
-	; TICKET STRUCT - Stores information of a single ticket bought by a customer
+	; TICKET STRUCT DEFINITION - Stores information of a single ticket bought by a customer
 	TicketStruct STRUCT
 		custName		DWORD	?	; points to a customer username string
 		ticketType		DWORD	?	; points to a ticket type string
@@ -72,7 +72,6 @@ CONSOLE_CURSOR_INFO ENDS
 		destStn			DWORD	?	; points to a location string (only applicable for single-journey)
 	TicketStruct ENDS
 
-	boughtTicket			TicketStruct <0>
 ; ========= Global variables =========
 .data
 	; ERROR MESSAGES -------------------------------------------------------------------
@@ -81,3 +80,7 @@ CONSOLE_CURSOR_INFO ENDS
 	err1					BYTE	"Invalid option: Selected number not in list!",0
 
 	errWeird				BYTE	"Weird error! Devs, pls look into this. Prob some sneaky logic error.",0
+
+
+	; TICKET STRUCT VARIABLE - Stores information of a single ticket bought by a customer
+	boughtTicket			TicketStruct <>

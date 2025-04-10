@@ -344,6 +344,9 @@ customerPage proc
 			je backToCustomerPage
 			; Else, proceed to receipt module
 		ProceedToReceipt:
+			; TODO: Integrate the receipt printing module here
+			;       and THEN remove `jmp backToCustomerPage`.
+			jmp backToCustomerPage
 
 		NearStation:
 			call NearStationPage

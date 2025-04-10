@@ -109,8 +109,9 @@ profit proc
 			mul temp1
 			mov edx, eax
 			pop eax
-			mul totalSold[edx]	;eax=(distance1-distance2)*totalSold
-
+			
+			mul totalSold[edx]	;eax=((distance1-distance2)/2?)*totalSold
+				
 			call writeint
 
 
@@ -119,16 +120,16 @@ profit proc
 
 					
 			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
-			push ebx
-			push eax
-			push edx
-			mov ebx, 20
-			mul ebx
-			mov cost, eax
-			pop ebx
-			pop eax
-			pop edx
-			inc ebx
+			;push ebx
+			;push eax
+			;push edx
+			;mov ebx, 20
+			;mul ebx
+			;mov cost, eax
+			;pop ebx
+			;pop eax
+			;pop edx
+			;inc ebx
 
 
 			call crlf

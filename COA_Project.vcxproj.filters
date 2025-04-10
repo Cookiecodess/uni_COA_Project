@@ -42,6 +42,12 @@
     <None Include="globalData.inc">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="coolStationMap.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="displayScheduleAndCalculations.inc">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="main.asm">

@@ -1,4 +1,4 @@
-include irvine32.inc
+; include irvine32.inc
 
 .data
 	promptAsk BYTE "Please Enter Your Current Location: ", 0
@@ -11,8 +11,15 @@ include irvine32.inc
 	msgDistance BYTE "Distance to Travel: ", 0
 	msgDistanceUnit BYTE "KM", 0
 
-	locations BYTE "Penang", 0,"Perak", 0, "Kuala Lumpur", 0, "Melaka", 0, "Johor", 0, 0
-	distances DWORD 1000, 580, 350, 200, 0
+	; === NOTE: the location and distance arrays are defined in globalData.inc ===
+	; location1				BYTE	"Penang",0
+	; location2				BYTE	"Perak",0
+	; location3				BYTE	"Kuala Lumpur",0
+	; location4				BYTE	"Melaka",0
+	; location5				BYTE	"Johor",0
+	; locations				DWORD	OFFSET location1, OFFSET location2, OFFSET location3, OFFSET location4, OFFSET location5
+
+	; distances DWORD 1000, 580, 350, 200, 0
 	distanceToTravel DWORD ?
 	speed DWORD 320	
 
@@ -25,7 +32,7 @@ include irvine32.inc
 	;----Cost Variables----
 	msgCost	BYTE "Total Cost: RM", 0
 	msgCurrency BYTE ".00", 0
-	cost DWORD ?
+	cost_viewsched DWORD ?			; suffixed the name with "_viewsched" to prevent redefinition of a "cost" variable in calculateProfit.inc (as of 10/4/2025)
     
     ; ---Time Variables---
     msgTime BYTE "Travel Time: ", 0
@@ -43,55 +50,41 @@ include irvine32.inc
 
 
 .code
-main proc
+; main proc
 	
 
-	call schedule
-	exit
-main endp
+	; call schedule
+	; exit
+; main endp
 
 
-schedule proc
+ViewSchedulePage proc
 	start:
 	; display all the locations
 	mov ebx, 1
 	mov esi, OFFSET locations
 	mov ecx, LENGTHOF locations
 
-	;generate index number
-	mov eax, ebx
-	call writedec
-	mov al, ' '    ; Print a space after the number
-	call writechar
-
 	print_locations:
-		mov al, [esi]
-		call writechar
-		inc esi
-		cmp byte ptr [esi], 0
-		je nextString
-
-		loop print_locations
-		jmp done
-
-	nextString:
-		call crlf		; new line
-		inc esi
-		cmp byte ptr [esi],0
-		je done
-		inc ebx
-
 		;generate index number
 		mov eax, ebx
 		call writedec
 		mov al, ' '    ; Print a space after the number
 		call writechar
 
-		jmp print_locations
+		mov edx, dword ptr [esi]
+		call WriteString
+		call CrLf
 
+		; increment location pointer
+		add esi, type locations
 
+		; increment index number
+		inc ebx
 
-	done: 
+		loop print_locations
+
+	; done:
 	call crlf
 	cmp dword ptr [currentChoice], 0	; comparing if currentChoice is 0
 	jne read2							; if not equals 0 means its set and this is the second time we're reading input
@@ -124,16 +117,21 @@ schedule proc
 
 
 		
-	lea esi, locations			; points esi to the first location
-	findChoice:
-		dec eax
-		jz writeChoice							; if we're at the right choice now
+	; lea esi, locations			; points esi to the first location's string offset'
+	dec eax		
+	mov esi, dword ptr locations[eax * type locations]
+	; findChoice:
+		
+		; jz writeChoice							; if we're at the right choice now'
 
-		moveNextString:							; point to the next location starting address
-			inc esi
-			cmp byte ptr [esi-1], 0
-			je findChoice
-			jmp moveNextString
+		; add esi, type locations
+		; jmp findChoice
+
+		; moveNextString:							; point to the next location starting address
+			; add esi, type locations
+			; cmp dword ptr [esi-1], 0
+			; je findChoice
+			; jmp moveNextString
 
 		
 	
@@ -152,10 +150,10 @@ schedule proc
 		mov ecx, LENGTHOF locations
 
 		;generate index number
-		mov eax, ebx
-		call writedec
-		mov al, ' '    ; Print a space after the number
-		call writechar
+		; mov eax, ebx
+		; call writedec
+		; mov al, ' '    ; Print a space after the number
+		; call writechar
 
 		jmp print_locations
 
@@ -191,16 +189,19 @@ schedule proc
 		call clrscr
 		mov currentChoice2, eax
 
-	lea esi, locations			; points esi to the first location
-	findChoice2:
-		dec eax
-		jz writeChoice2						; if we're at the right choice now
+	; lea esi, locations			; points esi to the first location's string offset
+	dec eax		
+	mov esi, dword ptr locations[eax * type locations]
 
-		moveNextString2:							; point to the next location starting address
-			inc esi
-			cmp byte ptr [esi-1], 0
-			je findChoice2
-			jmp moveNextString2
+	; findChoice2:
+		; dec eax
+		; jz writeChoice2						; if we're at the right choice now'
+
+		; moveNextString2:							; point to the next location starting address
+			; inc esi
+			; cmp byte ptr [esi-1], 0
+			; je findChoice2
+			; jmp moveNextString2
 
 		
 	
@@ -278,7 +279,7 @@ schedule proc
 		CalculateTrainCost PROC
 			mov ebx, 20
 			mul ebx
-			mov cost, eax
+			mov cost_viewsched, eax
 
 			mov	edx, OFFSET msgCost
 			call writestring
@@ -361,8 +362,8 @@ schedule proc
 		CalculateFee ENDP
 
 			
-schedule endp
+ViewSchedulePage endp
 
 
 
-end main
+; end main

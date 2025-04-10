@@ -21,6 +21,7 @@
   <ItemGroup>
     <None Include="calculateProfit.inc" />
     <None Include="coolMenu.inc" />
+    <None Include="coolStationMap.inc" />
     <None Include="generalFunctions.inc" />
     <None Include="globalData.inc" />
     <None Include="myproc.inc" />

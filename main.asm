@@ -2,6 +2,7 @@ INCLUDE Irvine32.inc
 INCLUDE globalData.inc
 INCLUDE generalFunctions.inc
 INCLUDE coolMenu.inc
+INCLUDE coolStationMap.inc
 INCLUDE TicketingPage.inc
 INCLUDE ReportPage.inc
 INCLUDE ReceiptPage.inc

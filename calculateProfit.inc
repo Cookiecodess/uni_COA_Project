@@ -61,7 +61,19 @@ profit proc
 		jmp doneInnerLoop
 	EndTeleportForInner:
 	; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
-				
+		
+	
+			; IGNORE THIS SECTION
+			jmp EndTeleport
+	Teleport:
+		loop outterLoop
+		jmp done
+	EndTeleport:
+		; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
+
+
+
+
 			call crlf
 			mov al,TAB
 			call writechar
@@ -70,10 +82,7 @@ profit proc
 			call writeString
 			mov al,':'
 			call writechar
-	Teleport:
-		loop outterLoop
-		jmp done
-	EndTeleport:
+
 
 			mov eax,distances[esi*TYPE DWORD]	
 						;call writeDec
@@ -115,7 +124,11 @@ profit proc
 				
 			call writeint
 
-							
+
+
+
+
+					
 			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
 			;push ebx
 			;push eax

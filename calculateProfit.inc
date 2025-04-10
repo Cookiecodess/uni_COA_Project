@@ -21,6 +21,11 @@
 profit proc
 	LOCAL temp1:DWORD
 	LOCAL temp2:DWORD
+	call Clrscr
+			mov eax, offset profitWord
+		mov ebx, lengthof profitWord
+		call PrintHeader
+
 
 	;mov ebx,0
 	mov esi, 0

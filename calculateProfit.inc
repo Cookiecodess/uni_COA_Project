@@ -10,6 +10,10 @@
 	; distances DWORD 1000, 580, 350, 200, 0
 	totalSold DWORD 100,223,324,134,150,223,324,134,130,323,124,224,130,523,224,232,120,233,323,233
 	cost DWORD ?
+	distanceWord byte "Distance",0
+	totalSoldWod byte "Total Sold",0
+	costWord byte "Cost",0
+	profitWord byte "Profit",0
 .code
 
 
@@ -35,11 +39,24 @@ profit proc
 
 		innerLoop:
 		.IF esi != edi
+			mov al,SPACE
+			call writechar
 			mov edx,locations[edi*TYPE DWORD]
 			call writeString
-			
+			call crlf
+			mov al,SPACE
+			call writechar
+			lea edx,distanceWord
+			call writeString
 			mov al,':'
 			call writechar
+							; IGNORE THIS SECTION
+			jmp EndTeleport
+	Teleport:
+		loop outterLoop
+		jmp done
+	EndTeleport:
+		; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
 
 
 			mov eax,distances[esi*TYPE DWORD]	
@@ -54,15 +71,14 @@ profit proc
 						call writeDec
 						call crlf
 
-		; IGNORE THIS SECTION
-			jmp EndTeleport
-	Teleport:
-		loop outterLoop
-		jmp done
-	EndTeleport:
-		; THIS IS JUST TO SOLVE THE "JUMP TOO FAR" ISSUE
-			
-			
+
+
+			call writeint
+			;add ebx,type totalSold
+
+			call crlf	
+
+		
 			; --- calculate cost then moving it to 'cost', to be used to output then stored by subsequent loops again
 			push ebx
 			push eax
@@ -74,6 +90,9 @@ profit proc
 			pop eax
 			pop edx
 
+
+
+
 			;mov eax, totalSold[(esi*4 + ebx)*TYPE DWORD]	
 			push eax
 			lea eax, [esi*4 + ebx]
@@ -84,14 +103,8 @@ profit proc
 			mul totalSold[edx]	;eax=(distance1-distance2)*totalSold
 			inc ebx
 
-		
 
-			call writeint
-			;add ebx,type totalSold
 
-			call crlf
-
-		
 
 		.ENDIF
 			;add esi, type locations

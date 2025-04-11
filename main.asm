@@ -391,8 +391,10 @@ adminPage proc
 			je callReport
 			
 			cmp eax, 1		; test
-			je callReceipt
+			je callProfit
 
+			cmp eax,2
+			je callTest
 			cmp eax, 3		; logOut
 			je logOut		
 		
@@ -404,10 +406,13 @@ adminPage proc
 			jmp backToAdminPage
 
 
-		callReceipt:
+		callProfit:
 			call Profit
 			jmp backToAdminPage
 
+		callTest:
+			call GenerateReceipt
+			jmp backToAdminPage
 
 		backToAdminPage:
 			jmp adminStartPage

@@ -6,18 +6,23 @@
 
 .data
 
-		receipt byte "Receipt",0
-		
-		person	byte ?
+		receipt byte "=================== Receipt ===================",0
+		emptyLine BYTE 13, 10
+
 		personS	byte "Name : ",0
-		total	byte ?
-		totalS	byte "Total : ",0
-		price	byte ?
+
 		priceS	byte "Price : ",0
-		detail	byte ?
 		detailS byte "Details : ",0
 		bookingS	byte "Your booking number is : ",0
 		bookingnum	dword ?
+		ticketTypeWord byte "Ticket Type : ",0
+		toWord byte " to ",0
+
+		askMsg byte "Do you want to save your receipt",0
+			optionSaveR	BYTE	"YES",0
+			optionCancelS	BYTE	"No and Quit",0
+			confPrintOptions	DWORD	OFFSET optionSaveR, OFFSET optionSaveR
+
 
     headerReceipt		byte "Receipt",0
 
@@ -55,26 +60,50 @@ GenerateReceipt proc
 		mov bookingnum,eax
 		call WriteDec
 		call CRLF
-
+		
+		;Name
 		mov al, TAB
 		call WriteChar
 		lea edx,personS
 		call WriteString
+		mov edx,boughtTicket.custName
+		call WriteString
 		call CRLF
 
+		;Price
 		mov al, TAB
 		call WriteChar
 		lea edx,priceS
 		call WriteString
+		;mov edx,boughtTicket.price
+		call WriteString
 		call CRLF
 
+		;TicketType
+		mov al, TAB
+		call WriteChar
+		lea edx,ticketTypeWord
+		call WriteString
+		mov edx,boughtTicket.ticketType
+		call WriteString
+		call CRLF
+
+
+		;from to destination
 		mov al, TAB
 		call WriteChar
 		lea edx,detailS
 		call WriteString
-		
+		mov edx,boughtTicket.originStn
+		call WriteString
+		lea edx,toWord
+		call WriteString
+		mov edx,boughtTicket.destStn
+		call WriteString
+		call CRLF
 
 
+		;INVOKE InitMenu, 0, offset confPrintOptions, lengthof offset confPrintOptions, offset askMsg, 0, 0
 
 		call CRLF
 		mov  eax,1000 ;delay 1 sec
@@ -97,10 +126,75 @@ saveReceipt proc
 		je error_exit
 
 	;Write to file 
-		mov edx,offset headerReceipt
-		mov ecx, lengthOf headerReceipt- 1
+		mov edx,offset receipt
+		mov ecx, lengthOf receipt- 1
 		mov eax, filehandle      ; Load file handle
 		call WriteToFile
+		
+		call newline
+
+		;name
+		mov edx,offset personS
+		mov ecx, lengthOf personS- 1
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
+
+		mov edx,boughtTicket.custName
+		mov ecx, lengthOf boughtTicket.custName
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
+		call newline
+
+		;Price
+		mov edx,offset priceS
+		mov ecx, lengthOf priceS- 1
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
+
+		mov edx,boughtTicket.custName
+		mov ecx, lengthOf boughtTicket.custName
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
+		call newline
+
+
+		;Ticket Type
+		mov edx,offset ticketTypeWord
+		mov ecx, lengthOf ticketTypeWord- 1
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
+
+		mov edx,boughtTicket.ticketType
+		mov ecx, lengthOf boughtTicket.ticketType
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
+		call newline
+
+
+		;Detail
+		mov edx,offset detailS
+		mov ecx, lengthOf detailS- 1
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
+
+		mov edx,boughtTicket.originStn
+		mov ecx, lengthOf boughtTicket.originStn
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
+
+		mov edx,offset toWord
+		mov ecx, lengthOf toWord
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
+
+		mov edx,boughtTicket.destStn
+		mov ecx, lengthOf boughtTicket.destStn
+		mov eax, filehandle      ; Load file handle
+		call WriteToFile
+
+
+
+		call newline
 
 
 
@@ -113,6 +207,15 @@ saveReceipt proc
 	error_exit:
     call WriteString         ; Print error message
     call ExitProcess
+
+	ret
 saveReceipt endp
 
+newLine proc
+		mov edx,offset emptyLine
+		mov ecx, 2
+		mov eax, filehandle  
+		call WriteToFile
+		ret
+newLine endp
 

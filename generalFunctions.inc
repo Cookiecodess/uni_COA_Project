@@ -1,6 +1,8 @@
 ; generalFunctions.inc
 
 CalcStrArrSize PROTO
+CalculateDistanceBetweenStations PROTO
+CalculateFeeNew PROTO
 GetStrArrElem PROTO
 PrintErrorMessage PROTO
 PrintHeader PROTO
@@ -42,6 +44,68 @@ CalcStrArrSize PROC uses esi edx
 		jne FindNextString			; No? Ok, then we're at the start of a new string. Let's find its null terminator.			
 		ret							; Yes? That means it's the end of the array. EAX now stores the no. of strings in the array.
 CalcStrArrSize ENDP
+
+
+
+
+; Example:
+;		push 0
+;		push 2
+;		call CalculateDistanceBetweenStations 
+;		mov distanceVar, eax
+;
+; TODO: Still lacks validation, must improve in future
+CalculateDistanceBetweenStations PROC 
+	push ebp
+	mov ebp, esp
+
+		push esi
+
+			mov esi, dword ptr [ebp+8]
+			mov eax, dword ptr distances[esi*4]
+			mov esi, dword ptr [ebp+12]
+			sub eax, distances[esi*4]
+			jge not_negative
+			neg eax		; convert to positive if it's a negative number
+		not_negative:	
+
+		pop esi
+
+	mov esp, ebp
+	pop ebp
+	ret 8
+CalculateDistanceBetweenStations ENDP
+
+
+
+; Example:
+;		push 0
+;		push 2
+;		call CalculateFeeNew 
+;		mov ticketPrice, eax
+CalculateFeeNew PROC
+	push ebp
+	mov ebp, esp
+    
+		push ebx
+		push edx
+		
+			push dword ptr [ebp+8]
+			push dword ptr [ebp+12]
+			call CalculateDistanceBetweenStations	; EAX = distance to travel
+			
+			;calculate fee (distance / 2)
+			mov ebx, 2					
+			xor edx, edx
+			div ebx						; EAX = Ticket fee
+
+		pop edx ;restore edx
+		pop ebx
+	
+	mov esp, ebp
+	pop ebp
+	ret 8
+CalculateFeeNew ENDP
 
 
 

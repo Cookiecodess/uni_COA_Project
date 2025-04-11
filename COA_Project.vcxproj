@@ -35,7 +35,7 @@
     <None Include="TicketingPage.inc" />
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="testSchedule.asm" />
+    <MASM Include="main.asm" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

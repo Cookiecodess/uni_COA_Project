@@ -6,6 +6,9 @@ DrawSingleJrnyStationSelectionMenu PROTO
 DrawSingleJrnyConfirmationMenu PROTO
 GetInputForDestStnPage PROTO
 
+CalculateDistanceBetweenStations PROTO
+CalculateFeeNew PROTO
+
 
 .data
 	; SPACE = 32
@@ -99,6 +102,7 @@ TicketingPage PROC USES ebx edx
 
 		; EAX = index of station
 		mov originStnIdx, eax
+		mov boughtTicket.originStnIdx, eax
 		; Record station name (offset of the string) in boughtTicket.originStn
 		mov edx, locations[eax*4]
 		mov boughtTicket.originStn, edx
@@ -109,15 +113,23 @@ TicketingPage PROC USES ebx edx
 		invoke InitMenu, offset headerBookTicket, offset locations, lengthof locations, offset promptLocDest, offset DrawSingleJrnyStationSelectionMenu, offset GetInputForDestStnPage 
 
 		mov destStnIdx, eax
+		mov boughtTicket.destStnIdx, eax
 		; Record station name (offset of the string) in boughtTicket.destStn based on EAX
 		mov edx, locations[eax*4]
 		mov boughtTicket.destStn, edx
+		; Record ticket price
+		push boughtTicket.originStnIdx
+		push boughtTicket.destStnIdx
+		call CalculateFeeNew
+		mov boughtTicket.price, eax
 		; Set bit 1 of stationMenuState flag, to indicate that DESTINATION has been selected
 		or stationMenuState, 00000010b
 
 		; confirmation page with all ticket details and a route map
 		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, 0, offset DrawSingleJrnyConfirmationMenu, 0
 
+		
+		
 		test eax, eax		; EAX = 0 --> Selected "Confirm purchase"
 		jz return_but_proceed
 
@@ -523,5 +535,54 @@ GetInputForDestStnPage PROC
         pop ebp
         ret 4
 GetInputForDestStnPage ENDP
+
+
+; TODO: Still lacks validation, must improve in future
+CalculateDistanceBetweenStations PROC 
+	push ebp
+	mov ebp, esp
+
+		push esi
+
+			mov esi, dword ptr [ebp+8]
+			mov eax, dword ptr distances[esi*4]
+			mov esi, dword ptr [ebp+12]
+			sub eax, distances[esi*4]
+			jge not_negative
+			neg eax		; convert to positive if it's a negative number
+		not_negative:	
+
+		pop esi
+
+	mov esp, ebp
+	pop ebp
+	ret 8
+CalculateDistanceBetweenStations ENDP
+
+
+
+CalculateFeeNew PROC
+	push ebp
+	mov ebp, esp
+    
+		push ebx
+		push edx
+		
+			push dword ptr [ebp+8]
+			push dword ptr [ebp+12]
+			call CalculateDistanceBetweenStations	; EAX = distance to travel
+			
+			;calculate fee (distance / 2)
+			mov ebx, 2					
+			xor edx, edx
+			div ebx						; EAX = Ticket fee
+
+		pop edx ;restore edx
+		pop ebx
+	
+	mov esp, ebp
+	pop ebp
+	ret 8
+CalculateFeeNew ENDP
 
 

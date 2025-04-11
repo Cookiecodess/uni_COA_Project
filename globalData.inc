@@ -70,6 +70,8 @@ CONSOLE_CURSOR_INFO ENDS
 		price			DWORD	?
 		originStn		DWORD	?	; points to a location string (only applicable for single-journey)
 		destStn			DWORD	?	; points to a location string (only applicable for single-journey)
+		originStnIdx	DWORD	?
+		destStnIdx		DWORD	?
 	TicketStruct ENDS
 
 ; ========= Global variables =========

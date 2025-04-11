@@ -155,7 +155,7 @@ DrawDefaultMenu PROC USES eax ebx ecx edx esi
         ; Don't print header if globalHeaderOffset is a null pointer
         mov eax, globalHeaderOffset
         test eax, eax
-        jz dontPrintHeader
+        jz SkipPrintHeader
 
         ; Print header
         ; (Here, EAX = globalHeaderOffset. One of the arguments of PrintHeader)
@@ -163,13 +163,19 @@ DrawDefaultMenu PROC USES eax ebx ecx edx esi
         call PrintHeader
         call CrLf
 
-    dontPrintHeader:
+    SkipPrintHeader:
+
+        ; Don't print selection prompt if globalSelectionPromptOffset is a null pointer
+        mov edx, globalSelectionPromptOffset
+        test edx, edx
+        jz SkipPrintPrompt
 
         ; Print selection prompt
-        mov edx, globalSelectionPromptOffset
         call WriteString
         call CrLf
         call CrLf
+
+    SkipPrintPrompt:
 
         ; Print error message IF errorCode != 0
         call PrintErrorMessage

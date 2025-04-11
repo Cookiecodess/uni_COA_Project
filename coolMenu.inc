@@ -53,12 +53,16 @@ InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, opti
         mov globalOptionListOffset, eax
 
         mov eax, selectionPromptOffset
-        mov globalSelectionPromptOffset, eax
+        mov globalSelectionPromptOffset, eax 
 
         ; Calculate string lengths
         mov edx, globalHeaderOffset
+        test edx, edx       ; If EDX = 0, globalHeaderOffset is a null pointer, so skip this section.
+        jz SkipCalcStrLength
         call StrLength
         mov globalHeaderLength, eax
+
+    SkipCalcStrLength:
 
         ; Initialize current selection
         mov currentSelection, 0
@@ -148,11 +152,18 @@ DrawDefaultMenu PROC USES eax ebx ecx edx esi
         ; Clear screen
         call Clrscr
 
-        ; Print header
+        ; Don't print header if globalHeaderOffset is a null pointer
         mov eax, globalHeaderOffset
+        test eax, eax
+        jz dontPrintHeader
+
+        ; Print header
+        ; (Here, EAX = globalHeaderOffset. One of the arguments of PrintHeader)
         mov ebx, globalHeaderLength
         call PrintHeader
         call CrLf
+
+    dontPrintHeader:
 
         ; Print selection prompt
         mov edx, globalSelectionPromptOffset

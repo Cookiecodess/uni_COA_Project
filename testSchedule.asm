@@ -19,6 +19,8 @@ include irvine32.inc
 		price			DWORD	?
 		originStn		DWORD	?	; points to a location string (only applicable for single-journey)
 		destStn			DWORD	?	; points to a location string (only applicable for single-journey)
+		originStnIdx	DWORD	?
+		destStnIdx		DWORD	?
 	TicketStruct ENDS
 
 	; --------- dummy data -----------
@@ -34,6 +36,7 @@ include irvine32.inc
 	emptyMSG BYTE "Currently no ticket bought",0
 	msgTime BYTE "Current Time : ",0
 	msgTimeArrival BYTE "Train Arrival Time : ",0
+	
 
 	mytime SYSTEMTIME <>
 	arrivaltime SYSTEMTIME <>
@@ -51,6 +54,8 @@ main proc
     mov boughtTicket.originStn, eax
     mov eax, OFFSET des
     mov boughtTicket.destStn, eax
+	mov boughtTicket.originStnIdx, 3
+	mov boughtTicket.destStnIdx, 3
 
 	
 	INVOKE GetLocalTime, OFFSET mytime
@@ -114,35 +119,37 @@ showSchedule PROC
 			mov edx, OFFSET msgTimeArrival
 			call writeString
 
-			
-			movzx eax, mytime.wMinute
-			add eax, minuteArrive
-			cmp eax, 60
-			jb noOverflow ;if no overflow
-
-			;if overflow we subtract 60 and add 1 to hour
-			sub eax, 60
-			mov mytime.wMinute, ax
-
+			; if the current time is more than 10, we display train at 3,
 			movzx eax, mytime.wHour
-			inc eax
-			cmp eax, 24
-			jb noHourOverflow
-			mov mytime.wHour, 0		; reset hour to 0 if overflow
+			cmp eax, 10
+			ja secondTrain
+			mov arrivaltime.wHour, 10
+			mov arrivaltime.wMinute, 0
+			jmp writeTime
 
+			secondTrain:
+				cmp eax, 3
+				ja thirdTrain
+				mov arrivaltime.wHour, 15
+				mov arrivaltime.wMinute, 0
+				jmp writeTime
+
+			thirdTrain:
+				mov arrivaltime.wHour, 18
+				mov arrivaltime.wMinute, 0
+		
 			
-			
-
-			noOverflow:
-				; movzx eax, mytime.wMinute
-				mov arrivaltime.wMinute, ax
-
-			noHourOverflow:
-				movzx eax, mytime.wHour
-				mov arrivaltime.wHour, ax
-			
+			writeTime:
+				movzx eax, arrivaltime.wHour
+				call writeDec
+				mov al, ':'
+				call writeChar
+				movzx eax, arrivaltime.wMinute
+				call writeDec
+				call writeDec
 
 
+				
 
 			jmp done
 

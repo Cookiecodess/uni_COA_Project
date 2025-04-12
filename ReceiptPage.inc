@@ -6,6 +6,7 @@
 
 .data
 
+
 		receipt byte "=================== Receipt ===================",0
 		emptyLine BYTE 13, 10
 
@@ -27,7 +28,7 @@
     headerReceipt		byte "Receipt",0
 
 	;output receipt to file
-		receiptFile byte "receipt.txt",0
+		receiptFile byte "OutputReceipt.txt",0
 		filehandle dword ?	;save the line
 
 	errorNoData			byte	"No ticket data available.",0
@@ -118,7 +119,7 @@ GenerateReceipt proc
 		call CRLF
 
 
-		;INVOKE InitMenu, 0, offset confPrintOptions, lengthof offset confPrintOptions, offset askMsg, 0, 0
+		;INVOKE InitMenu, 0, offset confPrintOptions, lengthof offset confPrintOptions, offset askMsg,Â 0,Â 0
 
 		call CRLF
 		mov  eax,1000 ;delay 1 sec
@@ -200,7 +201,7 @@ saveReceipt proc
 		call WriteToFile
 
 		mov edx,offset toWord
-		mov ecx, lengthOf toWord
+		mov ecx, lengthOf toWord-1
 		mov eax, filehandle      ; Load file handle
 		call WriteToFile
 
@@ -224,6 +225,8 @@ saveReceipt proc
 	error_exit:
     call WriteString         ; Print error message
     call ExitProcess
+
+
 
 	ret
 saveReceipt endp

@@ -158,7 +158,8 @@ saveReceipt proc
 		call WriteToFile
 
 		mov edx,boughtTicket.custName
-		mov ecx, lengthOf boughtTicket.custName
+		call strLength
+		mov ecx, eax
 		mov eax, filehandle      ; Load file handle
 		call WriteToFile
 		call newline
@@ -170,7 +171,8 @@ saveReceipt proc
 		call WriteToFile
 
 		mov edx,boughtTicket.custName
-		mov ecx, lengthOf boughtTicket.custName
+		call strLength
+		mov ecx, eax
 		mov eax, filehandle      ; Load file handle
 		call WriteToFile
 		call newline
@@ -183,7 +185,8 @@ saveReceipt proc
 		call WriteToFile
 
 		mov edx,boughtTicket.ticketType
-		mov ecx, lengthOf boughtTicket.ticketType
+		call strLength
+		mov ecx, eax
 		mov eax, filehandle      ; Load file handle
 		call WriteToFile
 		call newline
@@ -196,7 +199,8 @@ saveReceipt proc
 		call WriteToFile
 
 		mov edx,boughtTicket.originStn
-		mov ecx, lengthOf boughtTicket.originStn
+		call strLength
+		mov ecx, eax
 		mov eax, filehandle      ; Load file handle
 		call WriteToFile
 
@@ -206,7 +210,8 @@ saveReceipt proc
 		call WriteToFile
 
 		mov edx,boughtTicket.destStn
-		mov ecx, lengthOf boughtTicket.destStn
+		call strLength
+		mov ecx, eax
 		mov eax, filehandle      ; Load file handle
 		call WriteToFile
 

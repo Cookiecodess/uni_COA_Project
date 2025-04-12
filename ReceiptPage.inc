@@ -30,6 +30,8 @@
 		receiptFile byte "receipt.txt",0
 		filehandle dword ?	;save the line
 
+	errorNoData			byte	"No ticket data available.",0
+
 .code
 
 
@@ -44,6 +46,18 @@ GenerateReceipt proc
 		mov eax, offset headerReceipt
 		mov ebx, lengthof headerReceipt
 		call PrintHeader
+
+		; If boughtTicket.custName = 0 (points to null), then skip the printing of all this
+		cmp boughtTicket.custName, 0
+		jne continuePrint
+		mov edx, offset errorNoData
+		call WriteString
+		call CrLf
+		call CrLf
+		call WaitMsg
+		jmp return
+		
+	continuePrint:
 
 		mov al, TAB 
 		call WriteChar 
@@ -60,6 +74,7 @@ GenerateReceipt proc
 		mov bookingnum,eax
 		call WriteDec
 		call CRLF
+
 		
 		;Name
 		mov al, TAB
@@ -110,6 +125,8 @@ GenerateReceipt proc
 		call Delay
 
 		call saveReceipt
+
+	return:
 		ret
 
 GenerateReceipt endp

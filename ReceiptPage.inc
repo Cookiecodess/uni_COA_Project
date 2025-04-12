@@ -211,9 +211,6 @@ saveReceipt proc
 
 
 
-    call ExitProcess
-
-
 	ret
 saveReceipt endp
 

@@ -9,7 +9,7 @@
 
 		receipt byte "=================== Receipt ===================",0
 		emptyLine BYTE 13, 10
-
+		waitSec byte "Please wait for 5 seconds...",0
 		personS	byte "Name : ",0
 
 		priceS	byte "Price : ",0
@@ -22,7 +22,7 @@
 		askMsg byte "Do you want to save your receipt",0
 			optionSaveR	BYTE	"YES",0
 			optionCancelS	BYTE	"No and Quit",0
-			confPrintOptions	DWORD	OFFSET optionSaveR, OFFSET optionSaveR
+			confPrintOptions	DWORD	OFFSET optionSaveR, OFFSET optionCancelS
 
 
     headerReceipt		byte "Receipt",0
@@ -91,8 +91,8 @@ GenerateReceipt proc
 		call WriteChar
 		lea edx,priceS
 		call WriteString
-		;mov edx,boughtTicket.price
-		call WriteString
+		mov eax,boughtTicket.price
+		call WriteDec
 		call CRLF
 
 		;TicketType
@@ -119,13 +119,25 @@ GenerateReceipt proc
 		call CRLF
 
 
-		;INVOKE InitMenu, 0, offset confPrintOptions, lengthof offset confPrintOptions, offset askMsg, 0, 0
-
+		INVOKE InitMenu,0,offset confPrintOptions,lengthof confPrintOptions,offset askMsg,0,0
 		call CRLF
-		mov  eax,1000 ;delay 1 sec
-		call Delay
+		
+			cmp eax, 0		
+			je saveR
 
-		call saveReceipt
+			cmp eax,1
+			je return
+
+			saveR:
+				call saveReceipt
+				lea edx,waitSec
+				call writeString
+				mov  eax,5000 ;delay 1 sec
+				call Delay
+				jmp return
+
+
+		
 
 	return:
 		ret
@@ -225,14 +237,14 @@ saveReceipt proc
 	; Close file
 		mov eax, filehandle   
 		call CloseFile  
-		call ExitProcess
-
+		;call ExitProcess
+		jmp return
 	error_exit:
     call WriteString         ; Print error message
-    call ExitProcess
+    ;call ExitProcess
+	jmp return
 
-
-
+	return:
 	ret
 saveReceipt endp
 

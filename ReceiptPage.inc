@@ -76,7 +76,7 @@ GenerateReceipt proc
 		mov  eax,green+(black*16)
 			 call SetTextColor
 		call WriteDec
-		mov  eax,black+(black*16)
+		mov  eax,lightGray+(black*16)
 			 call SetTextColor
 		call CRLF
 

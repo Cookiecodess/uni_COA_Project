@@ -12,7 +12,11 @@
 	cost DWORD ?
 	distance DWORD ?
 	distanceWord byte "Distance",0
-	totalSoldWod byte "Total Sold",0
+	totalSoldWod byte "Total Sales Amount",0
+	totalTicketSold byte "Total Ticket Sold",0
+	morning byte "Morning",0
+	noon byte "Noon",0
+	evening byte "Evening",0
 	costWord byte "Cost",0
 	profitWord byte "Profit",0
 .code

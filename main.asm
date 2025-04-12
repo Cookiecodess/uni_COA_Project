@@ -190,7 +190,7 @@ customerLogin proc
 		mov edx, OFFSET failMsg
 		call WriteString
 		call Crlf
-		mov  eax,black+(black*16)
+		mov  eax,lightGray+(black*16)
 		call SetTextColor
 
 		; clear user-input username, password
@@ -217,7 +217,7 @@ JumpRegisterPage proc
 
 		lea edx,needToReg
 		call WriteString
-			mov  eax,black+(black*16)
+			mov  eax,lightGray+(black*16)
 			call SetTextColor
 		call Crlf
 		call registerPage
@@ -260,7 +260,7 @@ registerPage proc
 		mov  eax,green+(black*16)
 			 call SetTextColor
 			 call writeString
-			 mov  eax,black+(black*16)
+			 mov  eax,lightGray+(black*16)
 			 call SetTextColor
 
 			 				mov  eax,3000 ;delay 3 sec
@@ -327,7 +327,7 @@ adminLogin proc
 		call SetTextColor
 		mov edx, OFFSET failMsg
 		call WriteString
-		mov  eax,black+(black*16)
+		mov  eax,lightGray+(black*16)
 		 call SetTextColor
 		call Crlf
 
@@ -469,7 +469,7 @@ reUsername proc
 			 call SetTextColor
 			lea edx,reInputNameMSG
 			call writeString
-			mov  eax,black+(black*16)
+			mov  eax,lightGray+(black*16)
 			call SetTextColor
 			call CRLF
 			ret
@@ -481,7 +481,7 @@ rePassword proc
 			call SetTextColor
 			lea edx,reInputPasswordMSG
 			call writeString
-			mov  eax,black+(black*16)
+			mov  eax,lightGray+(black*16)
 			call SetTextColor
 			call CRLF
 			ret

@@ -46,6 +46,7 @@ CONSOLE_CURSOR_INFO ENDS
 	locations				DWORD	OFFSET location1, OFFSET location2, OFFSET location3, OFFSET location4, OFFSET location5
 
 	distances				DWORD	1000, 580, 350, 200, 0
+	speed					DWORD	320
 
 	; TICKET TYPES
 	tcktSingleJourney		BYTE	"Single Journey",0
@@ -57,11 +58,11 @@ CONSOLE_CURSOR_INFO ENDS
 	
 
 	; ASSOCIATIVE ARRAY FOR BOUGHT TICKET DATA
-	key1				BYTE	"Customer name",0
-	key2				BYTE	"Ticket type",0
-	key3				BYTE	"Price",0
-	key4				BYTE	"Origin station",0
-	key5				BYTE	"Destination station",0
+	key1				BYTE	"Customer name: ",0
+	key2				BYTE	"Ticket type: ",0
+	key3				BYTE	"Price: ",0
+	key4				BYTE	"Origin station: ",0
+	key5				BYTE	"Destination station: ",0
 	TicketStructKeys	DWORD	OFFSET key1, OFFSET key2, OFFSET key3, OFFSET key4, OFFSET key5 
 	; TICKET STRUCT DEFINITION - Stores information of a single ticket bought by a customer
 	TicketStruct STRUCT

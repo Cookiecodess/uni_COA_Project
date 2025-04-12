@@ -21,7 +21,6 @@
 
 	; distances DWORD 1000, 580, 350, 200, 0
 	distanceToTravel DWORD ?
-	speed DWORD 320	
 
 
 	currentLocationAddress DWORD ?

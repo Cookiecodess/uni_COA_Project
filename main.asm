@@ -88,7 +88,9 @@ INCLUDE NearStationPage.inc
 
 	;REGISTER
 	register byte "REGISTER",0
-
+	reInputNameMSG byte "Sorry, your username cannot leave blank.",0
+	reInputPasswordMSG byte "Sorry, your password cannot leave blank.",0
+	regSus byte "Register Suscessful! You will be redirected to the customer page in 3 seconds.",0
 	
 
 .code
@@ -123,6 +125,7 @@ startPage endp
 
 customerLogin proc
 	clstart:
+			call Clrscr
 			mov eax, offset headerCustomer
 			mov ebx, lengthof headerCustomer
 			call PrintHeader
@@ -182,10 +185,13 @@ customerLogin proc
 		;JMP LOGIN
 
 	Clogin_failed:		;==============================
+		mov  eax,red+(black*16)
+		call SetTextColor
 		mov edx, OFFSET failMsg
 		call WriteString
 		call Crlf
-		jmp clstart  ; Retry Customer login
+		mov  eax,black+(black*16)
+		call SetTextColor
 
 		; clear user-input username, password
 		mov edi, OFFSET inputUsername
@@ -198,14 +204,21 @@ customerLogin proc
 		mov al, 0
 		rep stosb
 
+call waitMSg
+		jmp clstart  ; Retry Customer login
 
-
+		ret
 customerLogin endp
 
 JumpRegisterPage proc
-		
+		mov  eax,red+(black*16)
+		call SetTextColor
+
+
 		lea edx,needToReg
 		call WriteString
+			mov  eax,black+(black*16)
+			call SetTextColor
 		call Crlf
 		call registerPage
 
@@ -225,6 +238,11 @@ registerPage proc
 		mov ecx, MAX	;to ensure the user only input 20 char
 		call ReadString
 		call CRLF
+		cmp eax, 0
+			je reInputUserName
+
+
+		
 		invoke Str_copy,ADDR inputUsername,ADDR cUsername
 
 		lea edx,passMsg
@@ -233,11 +251,30 @@ registerPage proc
 		mov ecx, 20	;to ensure the user only input 20 char
 		call ReadString
 		call CRLF
-		
+		cmp eax, 0
+			je reInputPassword
+
 		invoke Str_copy,ADDR inputPassword,ADDR cPassword	;save string
 		;mov cPassword,dh
+		lea edx,regsus
+		mov  eax,green+(black*16)
+			 call SetTextColor
+			 call writeString
+			 mov  eax,black+(black*16)
+			 call SetTextColor
 
+			 				mov  eax,3000 ;delay 3 sec
+				call Delay
 		call customerLogin 
+
+		reInputUserName:
+			call reUsername
+			jmp rStart
+
+		reInputPassword:
+			call rePassword
+			jmp rStart
+
 
 
 		ret
@@ -247,6 +284,7 @@ registerPage endp
 adminLogin proc
 
 	alstart:
+	call clrscr
 		mov eax, offset headerAdmin
 		mov ebx, lengthof headerAdmin
 		call PrintHeader
@@ -285,9 +323,12 @@ adminLogin proc
 	
 
 	Alogin_failed:		;==============================
-
+		mov  eax,red+(black*16)
+		call SetTextColor
 		mov edx, OFFSET failMsg
 		call WriteString
+		mov  eax,black+(black*16)
+		 call SetTextColor
 		call Crlf
 
 		; clear user-input username and password by using rep stosb by fill it by 0
@@ -303,7 +344,7 @@ adminLogin proc
 		mov al, 0
 		rep stosb		; Fill buffer (inputPassword) with MAX number of zeroes
 
-
+		call waitmsg
 		jmp alstart   ; Retry Admin login
 
 
@@ -423,7 +464,28 @@ adminPage proc
 			ret
 adminPage endp
 
+reUsername proc
+			mov  eax,red+(black*16)
+			 call SetTextColor
+			lea edx,reInputNameMSG
+			call writeString
+			mov  eax,black+(black*16)
+			call SetTextColor
+			call CRLF
+			ret
+reUsername endp
 
+rePassword proc
+
+			mov  eax,red+(black*16)
+			call SetTextColor
+			lea edx,reInputPasswordMSG
+			call writeString
+			mov  eax,black+(black*16)
+			call SetTextColor
+			call CRLF
+			ret
+rePassword endp
 
 
 END main

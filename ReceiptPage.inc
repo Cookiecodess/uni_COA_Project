@@ -41,7 +41,7 @@ GenerateReceipt proc
 
 	receiptStart:
 		
-
+	call Clrscr
 		;mov edx, boughtTicket.custName
 			;call WriteString
 		mov eax, offset headerReceipt
@@ -73,7 +73,11 @@ GenerateReceipt proc
 		call RandomRange		; EAX = random number in range 0-89999999
 		add eax, 10000000			; adjust to range 10000000-99999999
 		mov bookingnum,eax
+		mov  eax,green+(black*16)
+			 call SetTextColor
 		call WriteDec
+		mov  eax,black+(black*16)
+			 call SetTextColor
 		call CRLF
 
 		
@@ -117,7 +121,8 @@ GenerateReceipt proc
 		mov edx,boughtTicket.destStn
 		call WriteString
 		call CRLF
-
+		
+		call waitmsg
 
 		INVOKE InitMenu,0,offset confPrintOptions,lengthof confPrintOptions,offset askMsg,0,0
 		call CRLF
@@ -132,7 +137,7 @@ GenerateReceipt proc
 				call saveReceipt
 				lea edx,waitSec
 				call writeString
-				mov  eax,5000 ;delay 1 sec
+				mov  eax,5000 ;delay 5 sec
 				call Delay
 				jmp return
 
@@ -182,11 +187,11 @@ saveReceipt proc
 		mov eax, filehandle      ; Load file handle
 		call WriteToFile
 
-		mov edx,boughtTicket.custName
-		call strLength
-		mov ecx, eax
-		mov eax, filehandle      ; Load file handle
-		call WriteToFile
+		;mov edx,boughtTicket.custName
+		;call strLength
+		;mov ecx, eax
+		;mov eax, filehandle      ; Load file handle
+		;call WriteToFile
 		call newline
 
 

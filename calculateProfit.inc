@@ -100,7 +100,6 @@ profit proc
 			neg eax
 		not_negative:
 						call writeDec
-						call crlf
 						mov distance,eax
 			
 			

@@ -41,7 +41,7 @@ ReportPage proc
 			add esi,type totalSales
 			loop calOSales
 
-			call writeint
+			call writedec
 
 		 call crlf
 
@@ -63,7 +63,7 @@ ReportPage proc
 			add esi,type totalCost
 			loop calOCost
 
-			call writeint
+			call writedec
 
 
 
@@ -78,6 +78,8 @@ ReportPage proc
 		 mov al, TAB   
 		 call WriteChar
 
+		 mov  eax,green+(black*16)
+		call SetTextColor
 		 mov esi,0
 		 mov ecx,lengthof totalSales
 		 mov eax,initialEax
@@ -88,7 +90,8 @@ ReportPage proc
 
 			call writeint
 
-		
+		mov  eax,lightGray+(black*16)
+		call SetTextColor
 
 		 call crlf
 		call WaitMsg

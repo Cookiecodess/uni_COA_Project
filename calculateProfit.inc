@@ -29,6 +29,8 @@ profit proc
 	mov esi, 0
 	mov ecx, lengthof locations
 	outterLoop:
+		mov  eax,blue+(black*16)
+		call SetTextColor
 
 		mov edx, locations[esi*TYPE DWORD]
 		call writeString
@@ -37,17 +39,23 @@ profit proc
 		push ecx	;save outterLoop
 		;push esi
 
+		mov  eax,lightGray+(black*16)
+		call SetTextColor
+
 		mov ecx, lengthof locations	;inner
 		mov edi, 0
 		mov ebx, 0
 
 		innerLoop:
 		.IF esi != edi
+		mov  eax,lightBlue+(black*16)
+		call SetTextColor
 			mov al,TAB
 			call writechar
 			mov edx,locations[edi*TYPE DWORD]
 			call writeString
-
+mov  eax,lightGray+(black*16)
+		call SetTextColor
 
 	; IGNORE THIS SECTION
 		jmp EndTeleportForOuter
@@ -109,7 +117,7 @@ profit proc
 						call writechar
 						call writechar
 
-						lea edx,totalSoldWod
+						lea edx,totalticketsoldwod
 						call writeString
 						mov al,':'
 						call writechar
@@ -193,8 +201,8 @@ profit proc
 							call writechar
 							call writechar
 							call writechar
-							call writechar
-							lea edx,totalTicketSoldWod
+							
+							lea edx,sumWord
 							call writeString
 							mov al,':'
 							call writechar
@@ -216,10 +224,10 @@ profit proc
 							mov edx,temp3
 					mul totalSold[edx]	;eax=((distance1-distance2)/4)*totalSold
 					div temp1	
-
+					mov edx,temp3
 					mov totalSales[edx], eax
 					mov eax,totalSales[edx]
-					call writeInt
+					call writedec
 				;pop ebx
 
 			pop eax
@@ -246,7 +254,7 @@ profit proc
 			mul edx                     
 			mov edx, 3				;for now, multiply by 3: 1 day 3 times.
 			mul edx
-			call writeint                       
+			call writedec                       
 			mov edx,temp3	;save the profit
 			mov totalCost[edx],eax
 			
@@ -262,17 +270,21 @@ profit proc
 			mov al,':'
 			call writechar
 
-		  
+			mov  eax,green+(black*16)
+			call SetTextColor
 			mov edx,temp3
 			mov eax,totalSales[edx]
-			call writeint
 			sub eax, totalCost[edx]   
 			
-			call writeint               
+
+			call writeint 
+
 				;save the profit
 			mov totalProfit[edx],eax
-
+					mov  eax,lightGray+(black*16)
+		call SetTextColor
 			pop eax
+			call crlf
 			call crlf
 			inc ebx
 		.ENDIF

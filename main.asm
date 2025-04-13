@@ -64,7 +64,7 @@ INCLUDE NearStationPage.inc
 	headerAdmin byte "ADMIN",0
 
 	adminOption1		byte	"Report",0
-	adminOption2		byte	"Profit",0
+	adminOption2		byte	"Profit Detail",0
 	adminOption3		byte	"-",0
 	adminOption4		byte	"Log out",0
 

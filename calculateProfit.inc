@@ -1,30 +1,24 @@
 	SPACE = 20h
 .data
-	; The LOCATIONS array and DISTANCES array are defined in globalData.inc
-	; location1 BYTE "Penang",0
-	; location2 BYTE "Perak",0
-	; location3 BYTE "Kuala Lumpur",0
-	; location4 BYTE "Melaka",0
-	; location5 BYTE "Johor",0
-	; locations DWORD OFFSET location1, OFFSET location2, OFFSET location3, OFFSET location4, OFFSET location5
-	; distances DWORD 1000, 580, 350, 200, 0
-	totalSold DWORD 100,223,324,134,150,223,324,134,130,323,124,224,130,523,224,232,120,233,323,233
-	cost DWORD ?
+
 	distance DWORD ?
 	distanceWord byte "Distance",0
 	totalSoldWod byte "Total Sales Amount",0
-	totalTicketSold byte "Total Ticket Sold",0
+	totalTicketSoldWod byte "Total Ticket Sold",0
 	morning byte "Morning",0
 	noon byte "Noon",0
 	evening byte "Evening",0
+	sumWord byte "Sum",0
 	costWord byte "Cost",0
 	profitWord byte "Profit",0
+	initialEax dword 0
 .code
 
 
 profit proc
 	LOCAL temp1:DWORD
 	LOCAL temp2:DWORD
+	LOCAL temp3:DWORD
 	call Clrscr
 			mov eax, offset profitWord
 		mov ebx, lengthof profitWord
@@ -108,7 +102,7 @@ profit proc
 			
 			
 			push eax
-				push ebx
+				;push ebx
 					push eax
 						call crlf
 						mov al,TAB
@@ -120,6 +114,11 @@ profit proc
 						mov al,':'
 						call writechar
 
+
+
+
+
+
 					pop eax
 
 					;mov eax, totalSold[(esi*4 + ebx)*TYPE DWORD]	
@@ -127,34 +126,131 @@ profit proc
 						lea eax, [esi*4 + ebx]
 						mov temp1, 4
 						mul temp1
-						mov edx, eax
-					pop eax
-			
-					mul totalSold[edx]	;eax=((distance1-distance2)/2?)*totalSold
-				
-					call writeint
-					mov temp2, eax
-				pop ebx
+						mov temp3, eax
+					
+
+						;morning
+						
+						call crlf
+						mov al,TAB
+						call writechar
+						call writechar
+						call writechar
+						call writechar
+						lea edx,morning
+						call writeString
+						mov al,':'
+						call writechar
+						mov edx,temp3
+					
+						mov eax,time1[edx]
+						call writedec
+						mov totalSold[edx],eax
+
+
+					 ;noon
+						
+						call crlf
+						mov al,TAB
+						call writechar
+						call writechar
+						call writechar
+						call writechar
+						lea edx,noon
+						call writeString
+						mov al,':'
+						call writechar
+						mov edx,temp3
+					
+						mov eax,time2[edx]	;eax=time2[edx]
+						call writedec
+						add eax,totalSold[edx]	;eax=time1+time2
+						mov totalSold[edx],eax	;totalsold[edx]=eax
+
+
+						;evening
+						
+						call crlf
+						mov al,TAB
+						call writechar
+						call writechar
+						call writechar
+						call writechar
+						lea edx,evening
+						call writeString
+						mov al,':'
+						call writechar
+						mov edx,temp3
+					
+						mov eax,time3[edx]	;eax=time3[edx]
+						call writedec
+						add eax,totalSold[edx]	;eax=time1+time2+time3
+						mov totalSold[edx],eax	;totalsold[edx]=eax
+						call crlf
+
+						;total ticket sold 
+							mov al,TAB
+							call writechar
+							call writechar
+							call writechar
+							call writechar
+							lea edx,totalTicketSoldWod
+							call writeString
+							mov al,':'
+							call writechar
+							mov edx,temp3
+							mov eax,totalSold[edx]
+							call writedec
+							call crlf
+
+						;total sales
+						mov al,TAB
+						call writechar
+						call writechar
+						lea edx,totalSoldWod
+						call writeString
+						mov al,':'
+						call writechar
+
+						pop eax
+							mov edx,temp3
+					mul totalSold[edx]	;eax=((distance1-distance2)/4)*totalSold
+					div temp1	
+
+					mov totalSales[edx], eax
+					mov eax,totalSales[edx]
+					call writeInt
+				;pop ebx
 
 			pop eax
 			push eax
 
+			
+			
 			call crlf
 			mov al,TAB
 			call writechar
 			call writechar
+
+
+
 			lea edx,costWord
 			call writeString
 			mov al,':'
 			call writechar
+
+
 
 			mov eax, distance
 			mov edx, 20
 			mul edx                     
 			mov edx, 3				;for now, multiply by 3: 1 day 3 times.
 			mul edx
-			call writeint               
-			mov cost, eax               
+			call writeint                       
+			mov edx,temp3	;save the profit
+			mov totalCost[edx],eax
+			
+
 
 			; Calculate and display PROFIT (earnings - cost)
 			call crlf
@@ -166,20 +262,25 @@ profit proc
 			mov al,':'
 			call writechar
 
-			pop eax                     
-			mov eax, temp2              
-			sub eax, cost               
+		  
+			mov edx,temp3
+			mov eax,totalSales[edx]
+			call writeint
+			sub eax, totalCost[edx]   
+			
 			call writeint               
+				;save the profit
+			mov totalProfit[edx],eax
 
-
-
+			pop eax
 			call crlf
-
+			inc ebx
 		.ENDIF
 			;add esi, type locations
 			inc edi
-			jmp TeleportForInner
 
+			jmp TeleportForInner
+			
 	doneInnerLoop:
 		;pop esi	
 		pop ecx	;resume outterLoop
@@ -192,7 +293,7 @@ profit proc
 		
 		
 	done:
-		call waitmsg
+
 
 		ret
 profit endp

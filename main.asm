@@ -443,12 +443,14 @@ adminPage proc
 		
 		
 		callReport:
+
 			call ReportPage
 			jmp backToAdminPage
 
 
 		callProfit:
 			call Profit
+			call waitmsg
 			jmp backToAdminPage
 
 		callTest:

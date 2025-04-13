@@ -182,17 +182,17 @@ saveReceipt proc
 		call newline
 
 		;Price
-		mov edx,offset priceS
-		mov ecx, lengthOf priceS- 1
-		mov eax, filehandle      ; Load file handle
-		call WriteToFile
+		;mov edx,offset priceS
+		;mov ecx, lengthOf priceS- 1
+		;mov eax, filehandle      ; Load file handle
+		;call WriteToFile
 
 		;mov edx,boughtTicket.custName
 		;call strLength
 		;mov ecx, eax
 		;mov eax, filehandle      ; Load file handle
 		;call WriteToFile
-		call newline
+		;call newline
 
 
 		;Ticket Type

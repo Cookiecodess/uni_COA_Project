@@ -95,3 +95,12 @@ CONSOLE_CURSOR_INFO ENDS
 	totalCost DWORD 20 dup(0)
 	totalProfit DWORD 20 dup(0)
 	totalSales DWORD 20 dup(0)
+
+	MAX_USERS   = 200
+
+	userNameArray			byte MAX_USERS * MAX dup(0)
+	passwordArray			byte MAX_USERS * MAX dup(0)
+	ticketname				byte MAX_USERS * MAX dup(0)
+	ticketOrigin			dword MAX_USERS * MAX dup(0)
+	ticketDestination       dword MAX_USERS * MAX dup(0)
+	ticketTimeslot			dword MAX_USERS * MAX dup(0)

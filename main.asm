@@ -40,7 +40,7 @@ INCLUDE NearStationPage.inc
 	userOption2		byte	"Admin",0
 	userOption3		byte	"Exit",0
 	userOptions		dword	OFFSET userOption1, OFFSET userOption2, OFFSET userOption3
-
+	tryagain		byte	"Try Again",0
 	loginChoose		byte	?
 
 	cUsername		byte	MAX+1 DUP(0)
@@ -81,6 +81,17 @@ INCLUDE NearStationPage.inc
 
 	customerSelectionArr	dword	OFFSET customerOption1, OFFSET customerOption2, OFFSET customerOption3, OFFSET customerOption4
 
+	customerInOption1			byte	"Log In",0
+	customerInOption2			byte	"Register",0
+	goBack			byte	"Go Back",0
+
+	customerInSelectionArr	dword	OFFSET customerInOption1, OFFSET customerInOption2, OFFSET goBack
+
+	loginFailSelection	dword	OFFSET tryagain, OFFSET header3, OFFSET goBack
+
+
+
+
 	customerSelectionArrLength dword ?
 	promptCustomerPageHead byte "Please select an action (1-",0
 	promptCustomerPageTail byte "): ",0
@@ -91,7 +102,7 @@ INCLUDE NearStationPage.inc
 	reInputNameMSG byte "Sorry, your username cannot leave blank.",0
 	reInputPasswordMSG byte "Sorry, your password cannot leave blank.",0
 	regSus byte "Register Suscessful! You will be redirected to the customer page in 3 seconds.",0
-	
+	currentUserCount dword 0
 
 .code
 main PROC
@@ -111,7 +122,7 @@ startPage proc
 		mov loginChoose, al
 				call CRLF
 		cmp loginChoose, 0	; If user chose Admin
-			je customerLogin		;je=jump if equal to
+			je customerInterface		;je=jump if equal to
 		cmp loginChoose, 1	; If user chose Customer
 			je adminLogin
 		cmp loginChoose, 1	; If user chose Customer
@@ -121,7 +132,21 @@ startPage proc
 
 startPage endp
 
+customerInterface proc
+	call clrscr
+	invoke InitMenu, offset headerCustomer, offset customerInSelectionArr, lengthof customerInSelectionArr, offset promptUserPage, 0, 0
+	mov loginChoose, al
+				call CRLF
+		cmp loginChoose, 0	; If user chose Admin
+			je customerLogin		;je=jump if equal to
+		cmp loginChoose, 1	; If user chose Customer
+			je registerPage
+		cmp loginChoose, 2	; If user chose Customer
+			
+	
+	ret
 
+customerInterface endp
 
 customerLogin proc
 	clstart:
@@ -133,9 +158,9 @@ customerLogin proc
 			
 
 		;when user is undefined
-			mov eax,offset cUsername
-			cmp byte ptr [eax],0
-			je jumpRegisterPage
+			;mov eax,offset cUsername
+			;cmp byte ptr [eax],0
+			;je jumpRegisterPage
 
 			
 			lea edx,loginMsg
@@ -157,22 +182,72 @@ customerLogin proc
 			call CRLF
 			; lea edx,password
 			
-			jmp check_customer
+			
 
 
-
-
+			mov esi, 0 
+			;jmp check_customer
 	check_customer:	
-			push OFFSET inputUsername
-			push OFFSET cUsername
-			call Str_compare			
-			jne Clogin_failed
+			;push OFFSET inputUsername
+			;push OFFSET cUsername
+			;call Str_compare			
+			;jne Clogin_failed
 
-			push OFFSET inputPassword
-			push OFFSET cPassword
-			call Str_compare		
-			jne Clogin_failed
+			;push OFFSET inputPassword
+			;push OFFSET cPassword
+			;call Str_compare	
+			;jne Clogin_failed
 
+			cmp esi, currentUserCount
+				jg Clogin_failed	;out of log in number,meaning dont have this user
+			;get usernamearray esi
+			mov ecx, esi	;know now is check which user already
+			call GetUsernameSlot	; EDI = &userArray[esi * MAX_LENGTH]
+			
+			
+		;debug
+			;mov edx,edi
+			;call writeString
+			;call crlf
+			;lea edx,inputUsername
+			;call writeString
+			;call crlf	
+			
+
+
+			;compare inpurUsername with userarray[esi]
+			invoke Str_compare, EDI, ADDR inputUsername
+
+			jne next_user		;not same username, just skip        
+			
+
+
+			;check password
+				mov ecx, esi
+				call GetPasswordSlot
+
+
+		;debug
+			;mov edx,edi
+			;call writeString
+			;call crlf
+			;lea edx,inputPassword
+			;call writeString
+			;call crlf
+
+
+				invoke Str_compare, EDI, ADDR inputPassword
+				je Clogin_success
+
+
+
+			;if not ,check next
+				inc esi
+				 jmp check_customer
+			
+			
+
+		Clogin_success:
 			; at this point, customer is successfully authenticated
 			mov showLoginSuccessMsg, 1
 			call customerPage
@@ -183,6 +258,10 @@ customerLogin proc
 		call Clrscr
 
 		;JMP LOGIN
+
+next_user:
+    inc esi
+    jmp check_customer
 
 	Clogin_failed:		;==============================
 		mov  eax,red+(black*16)
@@ -203,10 +282,17 @@ customerLogin proc
 		mov ecx, MAX
 		mov al, 0
 		rep stosb
+		call waitmsg
+		INVOKE InitMenu,0,offset loginFailSelection,lengthof loginFailSelection,0,0,0
 
-call waitMSg
-		jmp clstart  ; Retry Customer login
-
+			mov loginChoose, al
+				call CRLF
+		cmp loginChoose, 0	
+			je clstart		
+		cmp loginChoose, 1	
+			je registerPage
+		cmp loginChoose, 2	; If user chose Customer
+		je startPage
 		ret
 customerLogin endp
 
@@ -223,6 +309,8 @@ JumpRegisterPage proc
 		call registerPage
 
 JumpRegisterPage endp
+
+
 registerPage proc
 	rStart:
 		call WaitMsg
@@ -234,27 +322,37 @@ registerPage proc
 
 		lea edx,loginMsg
 		call WriteString
-		mov edx, OFFSET inputUsername  ; use username as buffer
-		mov ecx, MAX	;to ensure the user only input 20 char
+		mov ecx, currentUserCount
+		call GetUsernameSlot	;return edi= username[]
+		mov edx, edi  ; save username place
+		mov ecx, MAX-1	;to ensure the user only input 19 char
 		call ReadString
 		call CRLF
 		cmp eax, 0
 			je reInputUserName
 
-
+				;debug
+		;mov edx,edi
+		;call writeString
 		
-		invoke Str_copy,ADDR inputUsername,ADDR cUsername
+		invoke Str_copy,edi,ADDR cUsername	;save the name so that after that other can use it
+			;debug
+		;lea edx,cUsername
+		;call writeString
 
+;password
 		lea edx,passMsg
 		call WriteString
-		mov edx, OFFSET inputPassword
-		mov ecx, 20	;to ensure the user only input 20 char
+		mov ecx, currentUserCount
+		call GetPasswordSlot      	;return edi= password[]
+		mov edx, edi  ; save password place
+		mov ecx, MAX-1	;to ensure the user only input 19 char
 		call ReadString
 		call CRLF
 		cmp eax, 0
 			je reInputPassword
 
-		invoke Str_copy,ADDR inputPassword,ADDR cPassword	;save string
+		invoke Str_copy,edi,ADDR cPassword	;save string
 		;mov cPassword,dh
 		lea edx,regsus
 		mov  eax,green+(black*16)
@@ -488,6 +586,41 @@ rePassword proc
 			call CRLF
 			ret
 rePassword endp
+
+
+getUsernameSlot PROC
+
+
+		 mov eax, ecx       ; EAX = index
+		 mov ebx, MAX     ;each user have 21 lenght
+		 mul ebx	;eax=index* MAX
+		 mov edi, OFFSET userNameArray	
+		add edi, eax            ; EDI = userNameArray + index * MAX_LENGTH
+		ret
+
+;first user
+	;OFFSET userNameArray + 0 * MAX 
+	;= OFFSET userNameArray + 0 * 20 
+	;= OFFSET userNameArray + 0
+
+;fourth user
+	;OFFSET userNameArray + 3 * MAX 
+	;;= OFFSET userNameArray + 3 * 20 
+	;= OFFSET userNameArray + 60
+getUsernameSlot endp
+
+GetPasswordSlot PROC
+
+
+		 mov eax, ecx       ; EAX = index
+		 mov ebx, MAX     ;each user have 20 lenght
+		 mul ebx	;eax=index* MAX
+		 mov edi, OFFSET passwordArray	
+		add edi, eax            ; EDI = passwordArray + index * MAX_LENGTH
+		ret
+
+
+GetPasswordSlot endp
 
 
 END main

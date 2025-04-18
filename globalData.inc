@@ -100,9 +100,18 @@ CONSOLE_CURSOR_INFO ENDS
 
 	MAX_USERS   = 200
 
+	; Store user data
 	userNameArray			byte MAX_USERS * MAX dup(0)
 	passwordArray			byte MAX_USERS * MAX dup(0)
-	ticketname				byte MAX_USERS * MAX dup(0)
-	ticketOrigin			dword MAX_USERS * MAX dup(0)
-	ticketDestination       dword MAX_USERS * MAX dup(0)
-	ticketTimeslot			dword MAX_USERS * MAX dup(0)
+
+	; Store ticket data
+	ticketCustName			byte MAX_USERS * MAX dup(0)		; each element is a 20-byte string: the name of the customer who bought the ticket
+	ticketOriginIdx			dword MAX_USERS dup(0)
+	ticketDestinationIdx    dword MAX_USERS dup(0) 
+	ticketTimeSlotIdx		dword MAX_USERS dup(0)	; index of timeSlotArray
+
+	; time slot array
+	timeSlot1				byte "10 AM",0
+	timeSlot2				byte "2 PM",0
+	timeSlot3				byte "6 PM",0
+	timeSlotArray			dword offset timeSlot1, offset timeSlot2, offset timeSlot3

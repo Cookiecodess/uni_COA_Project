@@ -88,8 +88,8 @@ INCLUDE NearStationPage.inc
 
 	customerInSelectionArr	dword	OFFSET customerInOption1, OFFSET customerInOption2, OFFSET goBack
 
-	loginFailSelection	dword	OFFSET tryagain, OFFSET header3, OFFSET goBack
-
+	CloginFailSelection	dword	OFFSET tryagain, OFFSET header3, OFFSET goBack
+	AloginFailSelection	dword	OFFSET tryagain, OFFSET goBack
 
 
 
@@ -284,7 +284,9 @@ next_user:
 		mov al, 0
 		rep stosb
 		call waitmsg
-		INVOKE InitMenu,0,offset loginFailSelection,lengthof loginFailSelection,0,0,0
+
+
+		INVOKE InitMenu,0,offset CloginFailSelection,lengthof CloginFailSelection,0,0,0
 
 			mov loginChoose, al
 				call CRLF
@@ -444,7 +446,19 @@ adminLogin proc
 		rep stosb		; Fill buffer (inputPassword) with MAX number of zeroes
 
 		call waitmsg
-		jmp alstart   ; Retry Admin login
+
+
+		INVOKE InitMenu,0,offset AloginFailSelection,lengthof AloginFailSelection,0,0,0
+
+			mov loginChoose, al
+				call CRLF
+		cmp loginChoose, 0	
+			je alstart		
+
+		cmp loginChoose, 1	; If user chose Customer
+		je startPage
+
+
 
 
 adminLogin endp

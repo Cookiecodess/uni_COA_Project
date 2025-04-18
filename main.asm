@@ -10,6 +10,7 @@ INCLUDE ReceiptPage.inc
 INCLUDE calculateProfit.inc
 INCLUDE test.inc
 INCLUDE NearStationPage.inc
+;INCLUDE seatAvailability.inc
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
 	TAB = 09h
@@ -390,7 +391,7 @@ customerPage proc
 			jmp backToCustomerPage
 
 		NearStation:
-			; call NearStationPage
+			;call NearStationPage
 			cmp eax, -1	; If EAX = -1, redraw customer menu
 			je backToCustomerPage
 

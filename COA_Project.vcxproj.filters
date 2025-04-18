@@ -54,6 +54,9 @@
     <None Include="NearStationPage.inc">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="test.inc">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="main.asm">

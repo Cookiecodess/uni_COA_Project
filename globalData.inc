@@ -55,6 +55,8 @@ CONSOLE_CURSOR_INFO ENDS
 	ticketTypes				DWORD	OFFSET tcktSingleJourney, OFFSET tcktWeeklyPass, OFFSET tcktMonthlyPass
 	ticketPrices			DWORD	?, 40, 120
 
+	;MAX SEATS TO COUNT available seats
+	MAX_SEATS = 1200
 	
 
 	; ASSOCIATIVE ARRAY FOR BOUGHT TICKET DATA

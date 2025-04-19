@@ -287,6 +287,10 @@ DisplayStationMapWithHighlighting PROC USES eax ebx ecx edx esi, originIdx:DWORD
 		jmp TeleportLmao
 
 	donePrinting:
+		; Reset text color
+		mov eax, NORMAL_COLOR
+		call SetTextColor
+
 		ret
 DisplayStationMapWithHighlighting ENDP
 

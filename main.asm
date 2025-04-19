@@ -169,7 +169,7 @@ customerLogin proc
 
 			
 			mov edx, offset inputUsername
-			mov ecx, MAX	;to ensure the user only input 20 char?
+			mov ecx, MAX	;to ensure the user only input 20 chars
 			call ReadString
 			call CRLF
 			; lea edx,username
@@ -178,7 +178,7 @@ customerLogin proc
 			call WriteString
 
 			mov edx, offset inputPassword
-			mov ecx, MAX	;to ensure the user only input 20 char
+			mov ecx, MAX	;to ensure the user only input 20 chars
 			call ReadString
 			call CRLF
 			; lea edx,password
@@ -328,7 +328,7 @@ registerPage proc
 		mov ecx, currentUserCount
 		call GetUsernameSlot	;return edi= username[]
 		mov edx, edi  ; save username place
-		mov ecx, MAX-1	;to ensure the user only input 19 char
+		mov ecx, MAX	;to ensure the user only input 20 chars
 		call ReadString
 		call CRLF
 		cmp eax, 0
@@ -349,7 +349,7 @@ registerPage proc
 		mov ecx, currentUserCount
 		call GetPasswordSlot      	;return edi= password[]
 		mov edx, edi  ; save password place
-		mov ecx, MAX-1	;to ensure the user only input 19 char
+		mov ecx, MAX	;to ensure the user only input 20 chars
 		call ReadString
 		call CRLF
 		cmp eax, 0
@@ -607,7 +607,7 @@ getUsernameSlot PROC
 
 
 		 mov eax, ecx       ; EAX = index
-		 mov ebx, MAX     ;each user have 21 lenght
+		 mov ebx, MAX+1     ;each username has 21 bytes
 		 mul ebx	;eax=index* MAX
 		 mov edi, OFFSET userNameArray	
 		add edi, eax            ; EDI = userNameArray + index * MAX_LENGTH
@@ -628,7 +628,7 @@ GetPasswordSlot PROC
 
 
 		 mov eax, ecx       ; EAX = index
-		 mov ebx, MAX     ;each user have 20 lenght
+		 mov ebx, MAX+1     ;each password has 21 bytes
 		 mul ebx	;eax=index* MAX
 		 mov edi, OFFSET passwordArray	
 		add edi, eax            ; EDI = passwordArray + index * MAX_LENGTH

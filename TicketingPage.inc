@@ -3,9 +3,12 @@
 PrintTicketInfo PROTO
 TimedPassConfmMenu PROTO
 DrawSingleJrnyStationSelectionMenu PROTO
+IsDestStnOptionDisabled PROTO
+
 DrawTimeSlotMenu PROTO
 GetInputForTimeSlotPage PROTO
 IsTimeSlotOptionDisabled PROTO
+
 DrawSingleJrnyConfirmationMenu PROTO
 GetInputForDestStnPage PROTO
 
@@ -64,7 +67,7 @@ TicketingPage PROC USES ebx edx
 		call ClearStationMapStates
 
 		; Ticket type menu
-		invoke InitMenu, offset headerBookTicket, offset ticketTypeOptions, lengthof ticketTypeOptions, offset promptChoose, 0, 0
+		invoke InitMenu, offset headerBookTicket, offset ticketTypeOptions, lengthof ticketTypeOptions, offset promptChoose, 0, 0, 0
 
 		; Did user select "Back"? If so, let's not print anything and just return.
 		cmp eax, backIndex
@@ -105,8 +108,8 @@ TicketingPage PROC USES ebx edx
 		jmp ContinueForLimitedTimePass
 	
 	ContinueForSingleJourney:
-		; Print menu to let user choose origin station
-		invoke InitMenu, offset headerBookTicket, offset locations, lengthof locations, offset promptLocOrigin, offset DrawSingleJrnyStationSelectionMenu, 0
+		; Print menu to let user choose ORIGIN station
+		invoke InitMenu, offset headerBookTicket, offset locations, lengthof locations, offset promptLocOrigin, offset DrawSingleJrnyStationSelectionMenu, 0, 0
 
 
 		; EAX = index of station
@@ -118,8 +121,8 @@ TicketingPage PROC USES ebx edx
 		; Set bit 0 of stationMenuState flag, to indicate that ORIGIN has been selected
 		or stationMenuState, 00000001b
 
-		; Print menu to let user choose dest station. NOT PRINTING or MUTED-COLOR-HIGHLIGHT the origin station based on EAX
-		invoke InitMenu, offset headerBookTicket, offset locations, lengthof locations, offset promptLocDest, offset DrawSingleJrnyStationSelectionMenu, offset GetInputForDestStnPage 
+		; Print menu to let user choose DESTINATION station. NOT PRINTING or MUTED-COLOR-HIGHLIGHT the origin station based on EAX
+		invoke InitMenu, offset headerBookTicket, offset locations, lengthof locations, offset promptLocDest, offset DrawSingleJrnyStationSelectionMenu, 0, offset isDestStnOptionDisabled
 
 		mov destStnIdx, eax
 		mov boughtTicket.destStnIdx, eax
@@ -168,10 +171,10 @@ TicketingPage PROC USES ebx edx
 			mov dword ptr availableSeats[2 * type availableSeats], eax
 
 		; Print TIME SLOT selection menu
-		invoke InitMenu, offset headerBookTicket, offset timeSlotArray, lengthof timeSlotArray, offset promptTImeSlot, offset DrawTimeSlotMenu, offset GetInputForTimeSlotPage	; NOTE: timeSlotArray is defined in globalData.inc
+		invoke InitMenu, offset headerBookTicket, offset timeSlotArray, lengthof timeSlotArray, offset promptTImeSlot, offset DrawTimeSlotMenu, 0, offset isTimeSlotOptionDisabled	; NOTE: timeSlotArray is defined in globalData.inc
 
 		; confirmation page with all ticket details and a route map
-		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, 0, offset DrawSingleJrnyConfirmationMenu, 0
+		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, 0, offset DrawSingleJrnyConfirmationMenu, 0, 0
 
 		
 		
@@ -182,7 +185,7 @@ TicketingPage PROC USES ebx edx
 		jmp BackToTicketTypeMenu 
 
 	ContinueForLimitedTimePass:
-		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, 0, offset TimedPassConfmMenu, 0
+		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, 0, offset TimedPassConfmMenu, 0, 0
 
 
 		test eax, eax		; EAX = 0 --> Selected "Confirm purchase"
@@ -671,12 +674,12 @@ GetInputForTimeSlotPage ENDP
 ; returns a boolean in EAX (1 for true, 0 for false)
 IsTimeSlotOptionDisabled PROC 
 		cmp dword ptr availableSeats[eax * type availableSeats], 0
-		jne yes
+		je disabled
 	no:
-		mov eax, 0
+		mov ebx, 0
 		ret
-	yes:
-		mov eax, 1
+	disabled:
+		mov ebx, 1
 		ret
 	
 IsTimeSlotOptionDisabled ENDP
@@ -777,6 +780,9 @@ DrawSingleJrnyConfirmationMenu PROC USES eax ebx ecx edx esi
 DrawSingleJrnyConfirmationMenu ENDP
 
 
+
+
+
 GetInputForDestStnPage PROC
         push ebp
         mov ebp, esp
@@ -831,6 +837,20 @@ GetInputForDestStnPage PROC
         pop ebp
         ret 4
 GetInputForDestStnPage ENDP
+
+
+
+
+IsDestStnOptionDisabled PROC	
+	cmp eax, originStnIdx
+	je yes
+no:
+	mov ebx, 0
+	ret
+yes:
+	mov ebx, 1
+	ret
+IsDestStnOptionDisabled ENDP
 
 
 

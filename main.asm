@@ -118,7 +118,7 @@ main ENDP
 
 startPage proc
 	start:
-	invoke InitMenu, offset headerLogin, offset userOptions, lengthof userOptions, offset choose, 0, 0
+	invoke InitMenu, offset headerLogin, offset userOptions, lengthof userOptions, offset choose, 0, 0, 0
 
 		mov loginChoose, al
 				call CRLF
@@ -135,7 +135,7 @@ startPage endp
 
 customerInterface proc
 	call clrscr
-	invoke InitMenu, offset headerCustomer, offset customerInSelectionArr, lengthof customerInSelectionArr, offset promptUserPage, 0, 0
+	invoke InitMenu, offset headerCustomer, offset customerInSelectionArr, lengthof customerInSelectionArr, offset promptUserPage, 0, 0, 0
 	mov loginChoose, al
 				call CRLF
 		cmp loginChoose, 0	; If user chose Admin
@@ -286,7 +286,7 @@ next_user:
 		call waitmsg
 
 
-		INVOKE InitMenu,0,offset CloginFailSelection,lengthof CloginFailSelection,0,0,0
+		INVOKE InitMenu,0,offset CloginFailSelection,lengthof CloginFailSelection,0,0,0,0
 
 			mov loginChoose, al
 				call CRLF
@@ -448,7 +448,7 @@ adminLogin proc
 		call waitmsg
 
 
-		INVOKE InitMenu,0,offset AloginFailSelection,lengthof AloginFailSelection,0,0,0
+		INVOKE InitMenu,0,offset AloginFailSelection,lengthof AloginFailSelection,0,0,0,0
 
 			mov loginChoose, al
 				call CRLF
@@ -470,7 +470,7 @@ adminLogin endp
 
 customerPage proc
 	customerPageStart:
-			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, lengthof customerSelectionArr, offset promptUserPage, 0, 0
+			invoke InitMenu, offset headerCustomer, offset customerSelectionArr, lengthof customerSelectionArr, offset promptUserPage, 0, 0, 0
 			; EAX = index of selected option
 
 			cmp eax, 0
@@ -538,7 +538,7 @@ adminPage proc
 		; mov loginChoose, al
 				; call CRLF
 
-			invoke InitMenu, offset headerAdmin, offset adminSelectionArr, lengthof adminSelectionArr, offset promptUserPage, 0, 0
+			invoke InitMenu, offset headerAdmin, offset adminSelectionArr, lengthof adminSelectionArr, offset promptUserPage, 0, 0, 0
 			; EAX = index of selected option
 
 			cmp eax, 0		; selection: report

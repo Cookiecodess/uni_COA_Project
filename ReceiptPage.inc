@@ -124,7 +124,7 @@ GenerateReceipt proc
 		
 		call waitmsg
 
-		INVOKE InitMenu,0,offset confPrintOptions,lengthof confPrintOptions,offset askMsg,0,0
+		INVOKE InitMenu,0,offset confPrintOptions,lengthof confPrintOptions,offset askMsg,0,0,0
 		call CRLF
 		
 			cmp eax, 0		

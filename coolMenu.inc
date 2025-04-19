@@ -1,8 +1,9 @@
 ; coolMenu.inc
 
-InitMenu PROTO STDCALL :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
+InitMenu PROTO STDCALL :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
 DrawDefaultMenu PROTO
 GetInput PROTO
+NoCheckDisabled PROTO
 MoveCursorUp PROTO
 MoveCursorDown PROTO
 SelectItem PROTO
@@ -41,9 +42,10 @@ SelectItem PROTO
 ; Return arg:
 ;       EAX - (DWORD) index of selected option
 
-InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, optionListLength:DWORD, selectionPromptOffset:DWORD, customDrawMenuFunc:DWORD, customGetInputFunc:DWORD
+InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, optionListLength:DWORD, selectionPromptOffset:DWORD, customDrawMenuFunc:DWORD, customGetInputFunc:DWORD, customIsOptionDisabledFunc:DWORD
         LOCAL drawMenuFunc :DWORD
         LOCAL getInputFunc :DWORD
+        LOCAL isOptionDisabledFunc :DWORD
 
         ; Store data in global variables so they're accessible by all functions in this file
         mov eax, headerOffset
@@ -89,7 +91,17 @@ InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, opti
     UseCustomGetInput:
         mov eax, customGetInputFunc
     StoreGetInputFunc:
-        mov getInputFunc, eax
+        mov getInputFunc, eax        
+
+        ; Set function that checks if an option is disabled
+        cmp customIsOptionDisabledFunc, 0
+        jne UseCustomDisabledCheck
+        mov eax, offset NoCheckDisabled
+        jmp StoreDisabledCheckFunc
+    UseCustomDisabledCheck:
+        mov eax, customIsOptionDisabledFunc
+    StoreDisabledCheckFunc:
+        mov isOptionDisabledFunc, eax
 
         ; Initialize console
         call Clrscr
@@ -101,13 +113,19 @@ InitMenu PROC STDCALL USES edx, headerOffset:DWORD, optionListOffset:DWORD, opti
         call drawMenuFunc
 
         ; Get input
+        push isOptionDisabledFunc
         push drawMenuFunc
         call getInputFunc
 
         ret
 InitMenu ENDP
 
+
+
 ; Default function for reading input
+; Accepts two arguments:
+;       [ebp+8] : offset to function that draws menu
+;       [ebp+12] : offset to function that checks if an option will be disabled (non-selectable)
 GetInput PROC
         push ebp
         mov ebp, esp
@@ -119,9 +137,51 @@ GetInput PROC
 
         ; Check for specific keys
         .IF al == 'k' || al == 'K' || ax == UP          ; Move up
-            call MoveCursorUp
+
+				mov eax, currentSelection
+				dec eax
+				cmp eax, 0
+				jge no_wrapping_to_bottom
+				add eax, totalOptions		; wrap to bottom
+			no_wrapping_to_bottom:
+
+			; WHILE currentSelection is disabled, skip
+			SkipDisabled:
+                    call dword ptr [ebp+12]
+					cmp ebx, 0      ; isOptionDisabledFunc returns false, i.e. option is not disabled, so break out of this while loop
+					je EndSkip
+					dec eax		; skip over disabled option
+					cmp eax, 0	; check if need to wrap to bottom
+					jge no_wrapping_to_bottom2
+					add eax, totalOptions		; wrap to bottom
+				no_wrapping_to_bottom2:
+					jmp SkipDisabled
+			EndSkip:				
+				mov currentSelection, eax
+
         .ELSEIF al == 'j' || al == 'J' || ax == DOWN    ; Move down
-            call MoveCursorDown
+
+				mov eax, currentSelection
+				inc eax
+				cmp eax, totalOptions		; wrap to top
+				jl no_wrapping_to_top
+				xor eax, eax
+			no_wrapping_to_top:
+
+			; WHILE currentSelection is disabled, skip
+			SkipDisabled2:
+					call dword ptr [ebp+12]
+					cmp ebx, 0      ; isOptionDisabledFunc returns false, i.e. option is not disabled, so break out of this while loop
+					je EndSkip
+					inc eax		; skip over disabled option
+					cmp eax, totalOptions	; check if need to wrap to bottom
+					jl no_wrapping_to_top2
+					xor eax, eax		; wrap to bottom
+				no_wrapping_to_top2:
+					jmp SkipDisabled2
+			EndSkip2:				
+				mov currentSelection, eax
+
         .ELSEIF al == 13                                ; Enter key
             jmp EnterPressed
         ;.ELSEIF al == 'q' || al == 'Q'                  ; Quit
@@ -140,8 +200,17 @@ GetInput PROC
 
         mov esp, ebp
         pop ebp
-        ret 4
+        ret 8
 GetInput ENDP
+
+; Function passed as the isOptionDisabled function if no custom one is given
+; ALWAYS returns 0 (false) in EBX, meaning no options are disabled.
+; Custom implementations of this function should return a boolean value (0 or 1) in EBX.
+; This function should define how to check if an option in a menu is disabled.
+NoCheckDisabled PROC
+    mov ebx, 0
+    ret
+NoCheckDisabled ENDP
 
 ;---------------------------------------------
 ; DrawDefaultMenu Procedure

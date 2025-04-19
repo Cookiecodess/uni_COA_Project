@@ -59,7 +59,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="main.asm">
+    <MASM Include="PaymentPage.asm">
       <Filter>Source Files</Filter>
     </MASM>
   </ItemGroup>

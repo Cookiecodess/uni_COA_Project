@@ -90,7 +90,8 @@ INCLUDE NearStationPage.inc
 
 	CloginFailSelection	dword	OFFSET tryagain, OFFSET header3, OFFSET goBack
 	AloginFailSelection	dword	OFFSET tryagain, OFFSET goBack
-
+	
+	cannotBeBlank byte	"Sorry, your input cannot be blank.",0
 
 
 	customerSelectionArrLength dword ?
@@ -172,7 +173,12 @@ customerLogin proc
 			mov ecx, MAX	;to ensure the user only input 20 char?
 			call ReadString
 			call CRLF
+
 			; lea edx,username
+			;if user dont have input
+			cmp byte ptr [edx],0
+			je noInput
+
 
 			lea edx,passMsg
 			call WriteString
@@ -259,7 +265,27 @@ customerLogin proc
 		call Clrscr
 
 		;JMP LOGIN
+noInput:
+mov  eax,red+(black*16)
+		call SetTextColor
+		mov edx, OFFSET cannotBeBlank
+		call WriteString
+		call Crlf
+		mov  eax,lightGray+(black*16)
+		call SetTextColor
 
+		; clear user-input username, password
+		mov edi, OFFSET inputUsername
+		mov ecx, MAX
+		mov al, 0
+		rep stosb
+
+		mov edi, OFFSET inputPassword
+		mov ecx, MAX
+		mov al, 0
+		rep stosb
+		call waitmsg
+		jmp clstart
 next_user:
     inc esi
     jmp check_customer

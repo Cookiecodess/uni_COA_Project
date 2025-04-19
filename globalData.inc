@@ -65,7 +65,8 @@ CONSOLE_CURSOR_INFO ENDS
 	key3				BYTE	"Price: ",0
 	key4				BYTE	"Origin station: ",0
 	key5				BYTE	"Destination station: ",0
-	TicketStructKeys	DWORD	OFFSET key1, OFFSET key2, OFFSET key3, OFFSET key4, OFFSET key5 
+	key6				BYTE	"Time slot: ",0
+	TicketStructKeys	DWORD	OFFSET key1, OFFSET key2, OFFSET key3, OFFSET key4, OFFSET key5, OFFSET key6
 	; TICKET STRUCT DEFINITION - Stores information of a single ticket bought by a customer
 	TicketStruct STRUCT
 		custName		DWORD	?	; points to a customer username string
@@ -73,8 +74,9 @@ CONSOLE_CURSOR_INFO ENDS
 		price			DWORD	?
 		originStn		DWORD	?	; points to a location string (only applicable for single-journey)
 		destStn			DWORD	?	; points to a location string (only applicable for single-journey)
-		originStnIdx	DWORD	?
-		destStnIdx		DWORD	?
+		originStnIdx	DWORD	-1	; must be initialized as -1, as anything starting from 0 indicates the presence of a value (index starts from 0)
+		destStnIdx		DWORD	-1	
+		timeSlotIdx		DWORD	-1	
 	TicketStruct ENDS
 
 ; ========= Global variables =========

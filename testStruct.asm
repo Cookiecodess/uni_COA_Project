@@ -10,16 +10,21 @@ TicketStruct STRUCT
 	destStn			DWORD	?	; points to a location string (only applicable for single-journey)
 	originStnIdx	DWORD	?
 	destStnIdx		DWORD	?
+	timeSlotIdx		DWORD	?
 TicketStruct ENDS
 
-TICKET_STRUCT_SIZE = 28
+; TICKET_STRUCT_SIZE = 32
 
-ticketStructArray	TicketStruct	<>, <>, <>, <>, <>
+ticketStructArray	TicketStruct	20 dup(<>)
 ticketStructCount	DWORD			0
 
 sampleName			BYTE	"Cookie",0
 sampleTicketType	BYTE	"Single Journey",0
 samplePrice			DWORD	100
+
+
+SaveTicket PROTO :DWORD
+LoadTicket PROTO
 
 .code
 
@@ -35,5 +40,20 @@ inc ticketStructCount
 
 
 main ENDP
+
+; accepts:  pointer to source struct
+; returns: EDI - pointer to saved struct in array
+SaveTicket PROC sourceStructOffset:DWORD
+	mov esi, sourceStructOffset
+	; ecx = 0
+	; for (sizeof ticketStruct / 4) times:
+	;		
+	ret
+SaveTicket ENDP
+
+; accepts: ECX - index of struct array
+; returns: ESI - pointer to obtained struct from array
+LoadTicket PROC
+LoadTicket ENDP
 
 end main

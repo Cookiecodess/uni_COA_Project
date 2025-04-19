@@ -2,15 +2,14 @@
 
 PrintTicketInfo PROTO
 TimedPassConfmMenu PROTO
+
 DrawSingleJrnyStationSelectionMenu PROTO
 IsDestStnOptionDisabled PROTO
 
 DrawTimeSlotMenu PROTO
-GetInputForTimeSlotPage PROTO
 IsTimeSlotOptionDisabled PROTO
 
 DrawSingleJrnyConfirmationMenu PROTO
-GetInputForDestStnPage PROTO
 
 
 
@@ -37,8 +36,8 @@ GetInputForDestStnPage PROTO
 	optionCancel	BYTE	"Cancel",0
 	confirmationOptions	DWORD	OFFSET optionCfmPur, OFFSET optionCancel
 
-	msgChose			BYTE	"You chose ",0
 	strAvailableSeats	BYTE	"Available seats",0
+	msgChose			BYTE	"You chose ",0
 
 	availableSeats		DWORD	?,?,?	; Available seats for the 3 time slots for the selected ORIGIN-DESTINATION journey
 
@@ -57,6 +56,9 @@ TicketingPage PROC USES ebx edx
 		lea edi, boughtTicket
 		xor eax, eax						; EAX = 0 = the dword we want to store
 		rep stosd	; stosd = Store String Doubleword
+		mov boughtTicket.originStnIdx, -1
+		mov boughtTicket.destStnIdx, -1
+		mov boughtTicket.timeSlotIdx, -1
 
 		; clear availableSeats array
 		mov ecx, lengthof availableSeats
@@ -171,12 +173,14 @@ TicketingPage PROC USES ebx edx
 			mov dword ptr availableSeats[2 * type availableSeats], eax
 
 		; Print TIME SLOT selection menu
-		invoke InitMenu, offset headerBookTicket, offset timeSlotArray, lengthof timeSlotArray, offset promptTImeSlot, offset DrawTimeSlotMenu, 0, offset isTimeSlotOptionDisabled	; NOTE: timeSlotArray is defined in globalData.inc
+		invoke InitMenu, offset headerBookTicket, offset timeSlotArray, lengthof timeSlotArray, offset promptTimeSlot, offset DrawTimeSlotMenu, 0, offset isTimeSlotOptionDisabled	; NOTE: timeSlotArray is defined in globalData.inc
+
+		; Store selected time slot in ticket struct
+		mov boughtTicket.timeSlotIdx, eax
+		
 
 		; confirmation page with all ticket details and a route map
 		invoke InitMenu, offset headerBookTicket, offset confirmationOptions, lengthof confirmationOptions, 0, offset DrawSingleJrnyConfirmationMenu, 0, 0
-
-		
 		
 		test eax, eax		; EAX = 0 --> Selected "Confirm purchase"
 		jz return_but_proceed
@@ -298,6 +302,25 @@ PrintTicketInfo PROC USES eax ecx edx esi
 		call WriteString
 
 	SkipPrintingStations:
+		call CrLf
+
+		; Print time slot if it is not null
+		mov eax, boughtTicket.timeSlotIdx
+		cmp eax, -1
+		jz SkipPrintingTimeSlot
+
+		mov al, TAB
+		call WriteChar
+		mov edx, TicketStructKeys[5*4]
+		call WriteString
+		mov al, TAB
+		call WriteChar
+		call WriteChar
+		mov esi, boughtTicket.timeSlotIdx
+		mov edx, timeSlotArray[esi * type timeSlotArray]
+		call WriteString
+
+	SkipPrintingTimeSlot:
 		call CrLf
 
 
@@ -432,6 +455,28 @@ DrawSingleJrnyStationSelectionMenu PROC USES eax ebx ecx edx esi
 
         ret	
 DrawSingleJrnyStationSelectionMenu ENDP
+
+
+
+
+
+
+IsDestStnOptionDisabled PROC	
+		cmp eax, originStnIdx
+		je disabled
+	no:
+		mov ebx, 0
+		ret
+	disabled:
+		mov ebx, 1
+		ret
+IsDestStnOptionDisabled ENDP
+
+
+
+
+
+
 
 
 
@@ -595,80 +640,7 @@ DrawTimeSlotMenu ENDP
 
 
 
-GetInputForTimeSlotPage PROC
-	  push ebp
-        mov ebp, esp
-        
-    ; Input handling loop
-    InputLoop:
-        ; Get keyboard input
-        call ReadChar
 
-        ; Check for specific keys
-        .IF al == 'k' || al == 'K' || ax == UP          ; Move up
-
-				mov eax, currentSelection
-				dec eax
-				cmp eax, 0
-				jge no_wrapping_to_bottom
-				add eax, totalOptions		; wrap to bottom
-			no_wrapping_to_bottom:
-
-			; WHILE currentSelection is disabled, skip
-			SkipDisabled:
-					cmp dword ptr availableSeats[eax * type availableSeats], 0
-					jne EndSkip
-					dec eax		; skip over disabled option
-					cmp eax, 0	; check if need to wrap to bottom
-					jge no_wrapping_to_bottom2
-					add eax, totalOptions		; wrap to bottom
-				no_wrapping_to_bottom2:
-					jmp SkipDisabled
-			EndSkip:				
-				mov currentSelection, eax
-
-        .ELSEIF al == 'j' || al == 'J' || ax == DOWN    ; Move down
-
-				mov eax, currentSelection
-				inc eax
-				cmp eax, totalOptions		; wrap to top
-				jl no_wrapping_to_top
-				xor eax, eax
-			no_wrapping_to_top:
-
-			; WHILE currentSelection is disabled, skip
-			SkipDisabled2:
-					cmp dword ptr availableSeats[eax * type availableSeats], 0
-					jne EndSkip2
-					inc eax		; skip over disabled option
-					cmp eax, totalOptions	; check if need to wrap to bottom
-					jl no_wrapping_to_top2
-					xor eax, eax		; wrap to bottom
-				no_wrapping_to_top2:
-					jmp SkipDisabled2
-			EndSkip2:				
-				mov currentSelection, eax
-
-        .ELSEIF al == 13                                ; Enter key
-            jmp EnterPressed
-        ;.ELSEIF al == 'q' || al == 'Q'                  ; Quit
-        ;    jmp ExitProgram
-        .ENDIF
-
-        ; Redraw menu after potential changes
-        call dword ptr [ebp+8]
-
-        jmp InputLoop
-
-    EnterPressed:
-        ; Show cursor on return
-        INVOKE SetCursorVisibility, 1
-        mov eax, currentSelection     ; Returns selection index in EAX
-
-        mov esp, ebp
-        pop ebp
-        ret 4
-GetInputForTimeSlotPage ENDP
 
 
 ; returns a boolean in EAX (1 for true, 0 for false)
@@ -683,6 +655,9 @@ IsTimeSlotOptionDisabled PROC
 		ret
 	
 IsTimeSlotOptionDisabled ENDP
+
+
+
 
 
 
@@ -783,74 +758,11 @@ DrawSingleJrnyConfirmationMenu ENDP
 
 
 
-GetInputForDestStnPage PROC
-        push ebp
-        mov ebp, esp
-        
-    ; Input handling loop
-    InputLoop:
-        ; Get keyboard input
-        call ReadChar
-
-        ; Check for specific keys
-        .IF al == 'k' || al == 'K' || ax == UP          ; Move up
-				mov eax, currentSelection
-				dec eax
-				cmp eax, originStnIdx
-				jne no_need_to_skip_over1
-				dec eax		; skip over disabled option
-			no_need_to_skip_over1:
-				cmp eax, 0
-				jge no_wrapping_to_bottom
-				add eax, totalOptions		; wrap to bottom
-			no_wrapping_to_bottom:
-				mov currentSelection, eax
-        .ELSEIF al == 'j' || al == 'J' || ax == DOWN    ; Move down
-				mov eax, currentSelection
-				inc eax
-				cmp eax, originStnIdx
-				jne no_need_to_skip_over2
-				inc eax		; skip over disabled option
-			no_need_to_skip_over2:
-				cmp eax, totalOptions		; wrap to top
-				jl no_wrapping_to_top
-				xor eax, eax
-			no_wrapping_to_top:
-				mov currentSelection, eax
-        .ELSEIF al == 13                                ; Enter key
-            jmp EnterPressed
-        ;.ELSEIF al == 'q' || al == 'Q'                  ; Quit
-        ;    jmp ExitProgram
-        .ENDIF
-
-        ; Redraw menu after potential changes
-        call dword ptr [ebp+8]
-
-        jmp InputLoop
-
-    EnterPressed:
-        ; Show cursor on return
-        INVOKE SetCursorVisibility, 1
-        mov eax, currentSelection     ; Returns selection index in EAX
-
-        mov esp, ebp
-        pop ebp
-        ret 4
-GetInputForDestStnPage ENDP
 
 
 
 
-IsDestStnOptionDisabled PROC	
-	cmp eax, originStnIdx
-	je yes
-no:
-	mov ebx, 0
-	ret
-yes:
-	mov ebx, 1
-	ret
-IsDestStnOptionDisabled ENDP
+
 
 
 

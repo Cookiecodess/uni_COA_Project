@@ -28,8 +28,11 @@ headerPayment byte "Time to Pay Up!",0
 promptPayment byte "SELECT PAYMENT METHOD:",13,10,"How would you like to pay for your ticket?",0
 
 paymentMethod1 byte "Credit/Debit Card",0
-paymentMethod2 byte "Touch 'n Go",0
-paymentMethods dword offset paymentMethod1, offset paymentMethod2
+paymentMethod2 byte "Touch 'n Go",13,10,0 ; newline after last option for a visual divide between payment method options and "Back"
+paymentMethod3 byte "Cancel",0 ; newline after last option for a visual divide between payment method options and "Back"
+paymentMethods dword offset paymentMethod1, offset paymentMethod2, offset paymentMethod3
+
+promptConfirmCancel byte "Are you sure you want to cancel? You will be brought back to the Customer menu page. [y/n]: ",0
 
 promptCardDetails byte "Please enter your card details.",0
 tipCancel byte "[Hint: Enter 'c' in any field to cancel and go back to the Payment page.]",0
@@ -49,6 +52,9 @@ inputCardNo byte MAX_CARD_NO+1 dup(?)
 inputExpire byte MAX_EXPIRE+1 dup(?)
 inputCvv byte MAX_CVV+1 dup(?)
 
+msgPaySuccess byte "Payment successful!",0
+promptProceed byte "PRESS ANY KEY to view your receipt...",0
+
 
 .code
 ; main PROC
@@ -67,11 +73,33 @@ start:
     cmp eax, 1
     ; je TnG
 
+    cmp eax, 2
+    jne dontReturnToCustomerMenu
+
+    call CrLf
+    lea edx, promptConfirmCancel
+    call WriteString
+
+    ; Ask user if they confirm to cancel
+    call ReadChar
+    cmp al, 'y'
+    je returnToCustomerMenu
+    cmp al, 'Y'
+    je returnToCustomerMenu
+
+    jmp dontReturnToCustomerMenu
+
+returnToCustomerMenu:
+    mov eax, -1
+    ret
+
+dontReturnToCustomerMenu:
     jmp start
 
 CreditDebit:
     call ClrScr
     lea edx, promptCardDetails
+    call WriteString
     call CrLf
     call CrLf
 
@@ -90,14 +118,14 @@ GetCardNo:
     call WriteString
 
     lea edx, inputCardNo
-    mov ecx, MAX_CARD_NO
-    call ReadString
+    mov ecx, MAX_CARD_NO+1 ; for some reason, ReadString only reads ECX-1 chars! So i have to give it MAX_CARD_NO+1 to make it read MAX_CARD_NO chars.
+    call ReadString ; Returns string length in EAX!!!
 
-    ; Validate card no.
-    call StrLength
     ; Check if user input 'c', which is for cancelling
     INVOKE Str_compare, edx, ADDR cancelStr ; edx now holds the offset to the input string
     je start
+
+    ; Validate card no.
     ; card no. is invalid if shorter than minimum length
     cmp eax, MIN_CARD_NO
     jl invalidCardNo
@@ -125,23 +153,96 @@ GetExpire:
     call WriteString
 
     lea edx, inputExpire
-    mov ecx, MAX_EXPIRE
-    call ReadString
+    mov ecx, MAX_EXPIRE+1
+    call ReadString ; Returns string length in EAX!!!
 
-    call StrLength
-    cmp eax, MIN_CARD_NO
-    jl invalidCardNo
+    ; Check if user wants to cancel
     INVOKE Str_compare, edx, ADDR cancelStr ; edx now holds the offset to the input string
     je start
+
+    cmp eax, MAX_EXPIRE
+    jne invalidExpire
+    
+    ; Check if correct format (MM/YY)
+    mov esi, edx
+    mov al, byte ptr [esi]
+    call IsDigit
+    jnz invalidExpire
+    mov al, byte ptr [esi+1]
+    call IsDigit
+    jnz invalidExpire
+    cmp byte ptr [esi+2], '/'
+    jne invalidExpire
+    mov al, byte ptr [esi+3]
+    call IsDigit
+    jnz invalidExpire
+    mov al, byte ptr [esi+4]
+    call IsDigit
+    jnz invalidExpire
+        
+    jmp GetCvv
+
+invalidExpire:
+    lea edx, errorInvalid
+    call WriteStringInRed
+    call CrLf
+    call CrLf
     jmp GetExpire
-    
-    
+
+GetCvv:
+    lea edx, askCvv
+    call WriteString
+
+    lea edx, inputCvv
+    mov ecx, MAX_CVV+1
+    call ReadString ; Returns string length in EAX!!!
+
+    ; Check if user wants to cancel
+    INVOKE Str_compare, edx, ADDR cancelStr ; edx now holds the offset to the input string
+    je start
+
+    cmp eax, MAX_CVV
+    jl invalidCvv
+
+    ; invalid if not all are digits
+    mov ecx, eax
+    mov esi, edx
+    CheckDigit2:
+        mov al, byte ptr [esi]
+        call IsDigit
+        jnz invalidCvv
+        inc esi
+        loop CheckDigit2
+
+    jmp DoneGetCardDetails
+
+invalidCvv:
+    lea edx, errorInvalid
+    call WriteStringInRed
+    call CrLf
+    call CrLf
+    jmp GetCvv
+
+DoneGetCardDetails:
+    call ClrScr
+    call CrLf
+
+    mov eax, green
+    call SetTextColor
+    lea edx, msgPaySuccess
+    call WriteAlignCenter
+    mov eax, NORMAL_COLOR
+    call SetTextColor
+
+    lea edx, promptProceed
+    call WriteAlignCenter    
+
+    mov eax, 0  ; Return with EAX != 0 to indicate that program should proceed to next module, not redraw customer menu, after returning.
+    ret
 
 PaymentPage ENDP
 
-CheckIfCancel PROC
-    
-CheckIfCancel ENDP
+
 
 
 PrintPaymentQR PROC

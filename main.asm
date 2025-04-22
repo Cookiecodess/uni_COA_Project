@@ -1,10 +1,13 @@
 INCLUDE Irvine32.inc
+INCLUDELIB kernel32.lib
+
 INCLUDE globalData.inc
 INCLUDE generalFunctions.inc
 INCLUDE coolMenu.inc
 INCLUDE coolStationMap.inc
 INCLUDE displayScheduleAndCalculations.inc
 INCLUDE TicketingPage.inc
+INCLUDE PaymentPage.inc
 INCLUDE ReportPage.inc
 INCLUDE ReceiptPage.inc
 INCLUDE calculateProfit.inc
@@ -76,9 +79,9 @@ INCLUDE NearStationPage.inc
 	needToReg byte "Sorry you need to register first",0
 
 	customerOption1			byte	"View Schedule",0
-	customerOption2			byte	"Ticketing",0
+	customerOption2			byte	"Buy Tickets",0
 	customerOption3			byte	"Check Nearby Station",0
-	customerOption4			byte	"log out",0
+	customerOption4			byte	"Log out",0
 
 	customerSelectionArr	dword	OFFSET customerOption1, OFFSET customerOption2, OFFSET customerOption3, OFFSET customerOption4
 
@@ -105,6 +108,7 @@ INCLUDE NearStationPage.inc
 	reInputPasswordMSG byte "Sorry, your password cannot leave blank.",0
 	regSus byte "Register Suscessful! You will be redirected to the customer page in 3 seconds.",0
 	currentUserCount dword 0
+
 
 .code
 main PROC
@@ -522,7 +526,14 @@ customerPage proc
 			call TicketingPage ; return a dword representing whether to simply go back to customer page or proceed to receipt?
 			cmp eax, -1	; If EAX = -1, redraw customer menu
 			je backToCustomerPage
-			; Else, proceed to receipt module
+			; If EAX != -1, proceed to payment module
+
+		Payment:
+			call PaymentPage
+			cmp eax, -1
+			je backToCustomerPage
+
+			
 		ProceedToReceipt:
 			; TODO: Integrate the receipt printing module here
 			;       and THEN remove `jmp backToCustomerPage`.

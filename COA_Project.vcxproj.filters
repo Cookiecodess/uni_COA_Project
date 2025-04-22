@@ -57,9 +57,12 @@
     <None Include="test.inc">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="PaymentPage.inc">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="PaymentPage.asm">
+    <MASM Include="main.asm">
       <Filter>Source Files</Filter>
     </MASM>
   </ItemGroup>

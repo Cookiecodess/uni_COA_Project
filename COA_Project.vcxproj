@@ -28,6 +28,7 @@
     <None Include="myproc.inc" />
     <None Include="NearStationPage.inc" />
     <None Include="newfile.inc" />
+    <None Include="PaymentPage.inc" />
     <None Include="ReceiptPage.inc" />
     <None Include="ReportPage.inc" />
     <None Include="SchedulePage.inc" />
@@ -35,7 +36,7 @@
     <None Include="TicketingPage.inc" />
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="PaymentPage.asm" />
+    <MASM Include="main.asm" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

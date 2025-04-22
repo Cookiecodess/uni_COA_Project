@@ -28,6 +28,29 @@ CONSOLE_CURSOR_INFO STRUCT
 	bVisible DWORD ?
 CONSOLE_CURSOR_INFO ENDS
 
+; Console screen buffer info Struct
+
+COORD STRUCT
+    X WORD ?
+    Y WORD ?
+COORD ENDS
+
+SMALL_RECT STRUCT
+	Left     WORD ?  ;left-most column
+	Top      WORD ?  ;upper-most row
+	Right    WORD ?  ;right-most column
+	Bottom   WORD ?  ;lowest row
+SMALL_RECT ENDS
+
+; Seems like this struct has already been defined. Maybe by irvine32.lib, maybe by a windows-related library in Irvine folder; I'm not sure.
+; CONSOLE_SCREEN_BUFFER_INFO STRUCT
+	; dwSize        COORD <>
+	; dwCursorPos   COORD <>
+	; wAttributes   WORD ?
+	; srWindow      SMALL_RECT <>
+	; dwMaxWinSize  COORD <>
+; CONSOLE_SCREEN_BUFFER_INFO ENDS
+
 .const
 	MAX	= 20								; max characters to read
 	inputBuffer				byte	MAX+1 dup(?)  ; room for null character

@@ -3,6 +3,9 @@
 CalcStrArrSize PROTO
 CalculateDistanceBetweenStations PROTO
 CalculateFeeNew PROTO
+GetConsoleScreenBufferInfo PROTO,
+    outHandle:DWORD,
+    pBufferInfo:PTR CONSOLE_SCREEN_BUFFER_INFO
 GetStrArrElem PROTO
 PrintErrorMessage PROTO
 PrintHeader PROTO
@@ -343,7 +346,50 @@ SetCursorVisibility ENDP
 
 ; EDX = offset of string
 WriteAlignCenter PROC
-	
+	LOCAL consoleHandle:DWORD
+	LOCAL bufferInfo:CONSOLE_SCREEN_BUFFER_INFO
+	LOCAL strLen:DWORD
+
+	; Save offset to string
+	push edx
+
+	; Get string length
+	call StrLength
+	mov strLen, eax
+
+	; Get the console output handle (Irvine library function)
+    INVOKE GetStdHandle, STD_OUTPUT_HANDLE
+    mov consoleHandle, eax
+
+	; Get console screen buffer info
+	INVOKE GetConsoleScreenBufferInfo, consoleHandle, ADDR bufferInfo
+
+	; Get width of the console screen
+	; note: CONSOLE_SCREEN_BUFFER_INFO.dwSize.x is of type WORD
+	movzx eax, bufferInfo.dwSize.x
+	sub eax, strLen
+	jl StringExceedsWidth
+
+	mov edx, 0	; EDX:EAX - ensures that the higher bits of the dividend is 0.
+	mov ebx, 2
+	div ebx
+
+	; EDX:EAX (screenWidth - strLen) / EBX (2) 
+	; EAX = quotient, EDX = remainder
+
+	mov ecx, eax
+	mov al, ' '
+PrintSpace:
+	call WriteChar
+	loop PrintSpace
+
+StringExceedsWidth:
+	; Restore offset to string
+	pop edx
+	call WriteString
+	call CrLf
+
+	ret
 WriteAlignCenter ENDP
 
 

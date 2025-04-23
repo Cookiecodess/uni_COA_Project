@@ -35,9 +35,9 @@ profit proc
 		mov edx, locations[esi*TYPE DWORD]
 		call writeString
 		call crlf
-		;mov edi,esi
+
 		push ecx	;save outterLoop
-		;push esi
+		
 
 		mov  eax,lightGray+(black*16)
 		call SetTextColor
@@ -109,9 +109,9 @@ mov  eax,lightGray+(black*16)
 						mov distance,eax
 			
 			
-			push eax
+			push eax	;save distance
 				;push ebx
-					push eax
+				push eax	;
 						call crlf
 						mov al,TAB
 						call writechar
@@ -122,15 +122,10 @@ mov  eax,lightGray+(black*16)
 						mov al,':'
 						call writechar
 
-
-
-
-
-
-					pop eax
+					;pop eax
 
 					;mov eax, totalSold[(esi*4 + ebx)*TYPE DWORD]	
-					push eax
+					;push eax	;save distance
 						lea eax, [esi*4 + ebx]
 						mov temp1, 4
 						mul temp1
@@ -220,33 +215,28 @@ mov  eax,lightGray+(black*16)
 						mov al,':'
 						call writechar
 
-						pop eax
-							mov edx,temp3
+						pop eax	;resume distance to calculate sales
+					
+						mov edx,temp3
 					mul totalSold[edx]	;eax=((distance1-distance2)/4)*totalSold
-					div temp1	
+					div temp1	;temp1=4
 					mov edx,temp3
 					mov totalSales[edx], eax
-					mov eax,totalSales[edx]
+					;mov eax,totalSales[edx]
 					call writedec
 				;pop ebx
 
-			pop eax
-			push eax
+			pop eax	;Restore the previous distance value for cost calculation
 
-			
-			
 			call crlf
 			mov al,TAB
 			call writechar
 			call writechar
 
-
-
 			lea edx,costWord
 			call writeString
 			mov al,':'
 			call writechar
-
 
 
 			mov eax, distance
@@ -258,7 +248,6 @@ mov  eax,lightGray+(black*16)
 			mov edx,temp3	;save the profit
 			mov totalCost[edx],eax
 			
-
 
 			; Calculate and display PROFIT (earnings - cost)
 			call crlf
@@ -283,7 +272,7 @@ mov  eax,lightGray+(black*16)
 			mov totalProfit[edx],eax
 					mov  eax,lightGray+(black*16)
 		call SetTextColor
-			pop eax
+
 			call crlf
 			call crlf
 			inc ebx
@@ -302,11 +291,8 @@ mov  eax,lightGray+(black*16)
 		call crlf
 		jmp TeleportForOuter ; LOOP OUTER LOOP
 
-		
-		
+
 	done:
-
-
 		ret
 profit endp
 

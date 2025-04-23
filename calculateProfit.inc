@@ -219,29 +219,24 @@ mov  eax,lightGray+(black*16)
 					
 						mov edx,temp3
 					mul totalSold[edx]	;eax=((distance1-distance2)/4)*totalSold
-					div temp1	
+					div temp1	;temp1=4
 					mov edx,temp3
 					mov totalSales[edx], eax
-					mov eax,totalSales[edx]
+					;mov eax,totalSales[edx]
 					call writedec
 				;pop ebx
 
 			pop eax	;Restore the previous distance value for cost calculation
 
-			
-			
 			call crlf
 			mov al,TAB
 			call writechar
 			call writechar
 
-
-
 			lea edx,costWord
 			call writeString
 			mov al,':'
 			call writechar
-
 
 
 			mov eax, distance
@@ -253,7 +248,6 @@ mov  eax,lightGray+(black*16)
 			mov edx,temp3	;save the profit
 			mov totalCost[edx],eax
 			
-
 
 			; Calculate and display PROFIT (earnings - cost)
 			call crlf
@@ -297,11 +291,8 @@ mov  eax,lightGray+(black*16)
 		call crlf
 		jmp TeleportForOuter ; LOOP OUTER LOOP
 
-		
-		
+
 	done:
-
-
 		ret
 profit endp
 

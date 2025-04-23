@@ -34,9 +34,11 @@
     <None Include="SchedulePage.inc" />
     <None Include="test.inc" />
     <None Include="TicketingPage.inc" />
+    <None Include="TicketingPage_Seats.inc" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="main.asm" />
+    <MASM Include="testStruct.asm" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

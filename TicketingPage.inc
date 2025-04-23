@@ -13,6 +13,7 @@ DrawSingleJrnyConfirmationMenu PROTO
 
 
 
+
 .data
 	; SPACE = 32
 	;GENERAL------------------------------------------------------------------
@@ -753,6 +754,8 @@ DrawSingleJrnyConfirmationMenu PROC USES eax ebx ecx edx esi
 
         ret
 DrawSingleJrnyConfirmationMenu ENDP
+
+
 
 
 

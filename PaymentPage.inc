@@ -3,7 +3,10 @@
 
 SetConsoleOutputCP PROTO :DWORD
 PrintPaymentQR PROTO
+CalculateSeatIndex PROTO
+UpdateSeatCount PROTO
 PaymentPage PROTO
+
 
 .const
 GENERIC_READ           equ 80000000h
@@ -20,7 +23,7 @@ buffer         byte     BUFSIZE dup(0)
 bytesRead      dword    ?
 bytesWritten   dword    ?
 fileHandle2     dword    ?
-consoleHandle  dword    ?
+consoleHandle  dword    ? 
 
 failOpenFileMsg byte "Could not open file: ", 0
 
@@ -295,6 +298,10 @@ TnG:
         jne WaitEnterPress
 
 DonePayment:
+    ; Update available seat count
+    call UpdateSeatCount
+
+    ; Displat payment successful message
     call ClrScr
     call CrLf
 
@@ -348,6 +355,59 @@ file_failed:
     call CrLf
     ret
 PrintPaymentQR ENDP
+
+
+;-------------------------------------------------------
+; CalculateSeatIndex: Converts station indexes to array index
+; Receives: originStnIdx, destStnIdx in global variables
+; Returns: EAX = array index (0-19)
+;-------------------------------------------------------
+CalculateSeatIndex PROC USES ebx edx
+    ; Formula: index = originIndex * 4 + (destIndex MOD 4)
+    ; But need to adjust when destIndex > originIndex
+    mov eax, originStnIdx
+    mov ebx, 4
+    mul ebx                ; EAX = originIndex * 4
+    
+    mov ebx, destStnIdx
+    cmp ebx, originStnIdx
+    jle no_adjust
+    dec ebx                ; Adjust for skipped same-station case
+    no_adjust:
+    add eax, ebx           ; EAX = final index
+    
+    ret
+
+CalculateSeatIndex ENDP
+
+
+;-------------------------------------------------------
+; UpdateSeatCount: Increments seat count for selected journey
+; Receives: originStnIdx, destStnIdx, boughtTicket.timeSlotIdx in globals
+;-------------------------------------------------------
+UpdateSeatCount PROC
+    call CalculateSeatIndex
+    mov ebx, eax  ; EBX = array index
+    
+    ; Get correct time slot array
+    mov esi, OFFSET time1
+    cmp boughtTicket.timeSlotIdx, 0
+    je update_count
+    mov esi, OFFSET time2
+    cmp boughtTicket.timeSlotIdx, 1
+    je update_count
+    mov esi, OFFSET time3
+    
+update_count:
+    ; Increment seat count
+    mov eax, [esi + ebx*4]
+    inc eax
+    mov [esi + ebx*4], eax
+    
+    ret
+UpdateSeatCount ENDP
+
+
 
 
 

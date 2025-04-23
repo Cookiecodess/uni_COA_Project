@@ -51,6 +51,14 @@ SMALL_RECT ENDS
 	; dwMaxWinSize  COORD <>
 ; CONSOLE_SCREEN_BUFFER_INFO ENDS
 
+CHAR_INFO STRUCT
+    UNION Char
+        UnicodeChar WORD ?    ; WCHAR is 2 bytes (16-bit)
+        AsciiChar   BYTE ?    ; CHAR is 1 byte (8-bit)
+    ENDS
+    Attributes WORD ?         ; WORD is 2 bytes (16-bit)
+CHAR_INFO ENDS
+
 .const
 	MAX	= 20								; max characters to read
 	inputBuffer				byte	MAX+1 dup(?)  ; room for null character

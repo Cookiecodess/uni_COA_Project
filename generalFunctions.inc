@@ -1,8 +1,26 @@
 ; generalFunctions.inc
 
+
+; EXTERN FillConsoleOutputCharacterA:PROC
+; EXTERN FillConsoleOutputAttribute:PROC
+; EXTERN ScrollConsoleScreenBuffer:PROC
+
 CalcStrArrSize PROTO
 CalculateDistanceBetweenStations PROTO
 CalculateFeeNew PROTO
+ClearConsoleBuffer PROTO
+FillConsoleOutputAttribute PROTO STDCALL,
+    hConsoleOutput:DWORD,              ; Handle to the console output buffer
+    wAttribute:WORD,                   ; Attribute (e.g., current text color)
+    nLength:DWORD,                     ; Number of cells to fill
+    dwWriteCoord:COORD,                ; Starting coordinate
+    lpNumberOfAttrsWritten:PTR DWORD  ; Out: actual number written
+FillConsoleOutputCharacterA PROTO STDCALL, 
+    hConsoleOutput:DWORD,          ; Handle to the console output buffer
+    cCharacter:BYTE,               ; Character to be written (e.g., ' ')
+    nLength:DWORD,                 ; Number of characters to write
+    dwWriteCoord:COORD,            ; Starting position
+    lpNumberOfCharsWritten:PTR DWORD  ; Out: actual number written
 GetConsoleScreenBufferInfo PROTO,
     outHandle:DWORD,
     pBufferInfo:PTR CONSOLE_SCREEN_BUFFER_INFO
@@ -10,9 +28,25 @@ GetStrArrElem PROTO
 PrintErrorMessage PROTO
 PrintHeader PROTO
 PrintSpacesForCenterAlign PROTO
+
+ScrollConsoleScreenBuffer EQU <ScrollConsoleScreenBufferA>
+
+ScrollConsoleScreenBuffer PROTO,
+	hConsoleOutput:DWORD,
+	lpScrollRectangle:PTR SMALL_RECT,
+	lpClipRectangle:PTR SMALL_RECT,
+	dwDestinationOrigin:COORD,
+	lpFill:PTR CHAR_INFO
+
+; EXTERN ScrollConsoleScreenBufferA@20:NEAR
+; ScrollConsoleScreenBuffer TEXTEQU <ScrollConsoleScreenBufferA@20>
+
 SetConsoleCursorInfo PROTO, 
 	hConsoleOutput:DWORD, 
 	lpConsoleCursorInfo:PTR CONSOLE_CURSOR_INFO
+SetConsoleCursorPosition PROTO,
+	hConsoleOutput:DWORD, 
+	dwCursorPosition:COORD
 SetCursorVisibility PROTO isVisible:DWORD
 WriteAlignCenter PROTO
 WriteAlignRight PROTO
@@ -23,11 +57,12 @@ WriteStringInColor PROTO
 WriteStringInRed PROTO
 	
 
-
 .data
 	; FOR PrintHeader -------------------------------------------------------------------
 	equalSign           byte '='
     leftRightPadding    dword 40
+
+	; consoleHandle		dword ?
 
 
 .code
@@ -111,6 +146,120 @@ CalculateFeeNew PROC
 	pop ebp
 	ret 8
 CalculateFeeNew ENDP
+
+
+
+; failed to clear entire buffer. only clears visible area.
+ClearConsoleBuffer PROC
+	LOCAL csbi:CONSOLE_SCREEN_BUFFER_INFO  ; Store the console info
+	LOCAL scrollRect:SMALL_RECT             ; Scroll rectangle
+	LOCAL scrollTarget:COORD                ; Scroll target
+	LOCAL fill:CHAR_INFO                    ; Character fill for clearing
+	LOCAL hConsole:DWORD                    ; Handle for the console
+
+	; Get the handle to the console output
+    invoke GetStdHandle, STD_OUTPUT_HANDLE
+    mov hConsole, eax
+
+    ; Get the console screen buffer info
+    invoke GetConsoleScreenBufferInfo, hConsole, ADDR csbi
+    ; If failed to get buffer info, exit
+    ; test eax, eax
+    ; jz exit
+
+    ; Set the scroll rectangle to the entire buffer
+    mov ax, csbi.dwSize.X         ; Width of the buffer
+    mov scrollRect.Right, ax
+    mov ax, csbi.dwSize.Y         ; Height of the buffer
+    mov scrollRect.Bottom, ax
+    mov scrollRect.Left, 0
+    mov scrollRect.Top, 0
+
+    ; Set the scroll target to move the buffer up (scroll it off the screen)
+    mov scrollTarget.X, 0
+    neg csbi.dwSize.Y              ; Scroll up by the height of the buffer
+	mov ax, csbi.dwSize.Y
+    mov scrollTarget.Y, ax
+
+    ; Set the fill character to space (' ') and use the console's text attributes
+    mov fill.Char.UnicodeChar, ' '  ; Fill with space
+	mov ax, csbi.wAttributes
+    mov fill.Attributes, ax
+
+    ; Scroll the console screen buffer
+    lea edx, scrollRect
+    ; lea ecx, scrollTarget
+    lea ebx, fill
+    invoke ScrollConsoleScreenBuffer, hConsole, edx, NULL, scrollTarget, ebx
+
+    ; Move the cursor to the top-left corner (0,0)
+    mov csbi.dwCursorPosition.X, 0
+    mov csbi.dwCursorPosition.Y, 0
+    ; lea edx, csbi.dwCursorPosition
+    invoke SetConsoleCursorPosition, hConsole, csbi.dwCursorPosition
+
+; exit:
+    ; Exit the program
+    ; invoke ExitProcess, 0
+
+	ret
+ClearConsoleBuffer ENDP
+
+
+
+
+
+
+
+; ClearConsoleBuffer PROC USES eax ebx edx
+	; LOCAL hConsole:DWORD
+    ; LOCAL csbi:CONSOLE_SCREEN_BUFFER_INFO
+    ; LOCAL cells:DWORD
+    ; LOCAL written:DWORD
+    ; LOCAL coordZero:COORD
+
+	; Initialize coordZero to <0,0>
+	; mov coordZero.X, 0
+	; mov coordZero.Y, 0
+
+    ; Get handle to console output
+    ; INVOKE GetStdHandle, STD_OUTPUT_HANDLE
+    ; mov hConsole, eax
+
+    ; Get console screen buffer info
+    ; INVOKE GetConsoleScreenBufferInfo, hConsole, ADDR csbi
+
+    ; Calculate total number of cells (rows * columns)
+    ; movzx eax, csbi.dwSize.Y
+    ; mov eax, 300 ; an arbitrarily large height
+    ; movzx ebx, csbi.dwSize.X
+    ; mul ebx
+    ; mov cells, eax
+
+    ; Fill entire screen with spaces
+    ; INVOKE FillConsoleOutputCharacterA,
+        ; hConsole,
+        ; ' ',                ; ASCII space
+        ; cells,
+        ; coordZero,
+        ; ADDR written
+
+    ; Fill all cells with current text attribute
+    ; mov ax, csbi.wAttributes
+    ; INVOKE FillConsoleOutputAttribute,
+        ; hConsole,
+        ; csbi.wAttributes,
+        ; cells,
+        ; coordZero,
+        ; ADDR written
+
+    ; Reset cursor to top-left
+    ; INVOKE SetConsoleCursorPosition,
+        ; hConsole,
+        ; coordZero
+
+    ; ret
+; ClearConsoleBuffer ENDP
 
 
 

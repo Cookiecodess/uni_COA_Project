@@ -147,9 +147,8 @@ customerInterface proc
 			je customerLogin		;je=jump if equal to
 		cmp loginChoose, 1	; If user chose Customer
 			je registerPage
-		cmp loginChoose, 2	; If user chose Customer
-			
-	
+		cmp loginChoose, 2	; If user chose Customer			
+			je startPage
 	ret
 
 customerInterface endp

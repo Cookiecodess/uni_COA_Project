@@ -9,6 +9,7 @@ GetConsoleScreenBufferInfo PROTO,
 GetStrArrElem PROTO
 PrintErrorMessage PROTO
 PrintHeader PROTO
+PrintSpacesForCenterAlign PROTO
 SetConsoleCursorInfo PROTO, 
 	hConsoleOutput:DWORD, 
 	lpConsoleCursorInfo:PTR CONSOLE_CURSOR_INFO
@@ -18,6 +19,7 @@ WriteAlignRight PROTO
 ; WriteMenu PROTO
 ; WriteStrArr PROTO
 WriteStrArr PROTO
+WriteStringInColor PROTO
 WriteStringInRed PROTO
 	
 
@@ -339,23 +341,15 @@ SetCursorVisibility PROC USES eax, isVisible:DWORD
 SetCursorVisibility ENDP
 
 
-
-
-
-
-
-; EDX = offset of string
-WriteAlignCenter PROC
+; ECX = length of string
+; Returns number of spaces printed in EAX
+PrintSpacesForCenterAlign PROC USES ebx ecx edx
 	LOCAL consoleHandle:DWORD
 	LOCAL bufferInfo:CONSOLE_SCREEN_BUFFER_INFO
 	LOCAL strLen:DWORD
+	LOCAL spacesPrinted:DWORD
 
-	; Save offset to string
-	push edx
-
-	; Get string length
-	call StrLength
-	mov strLen, eax
+	mov strLen, ecx
 
 	; Get the console output handle (Irvine library function)
     INVOKE GetStdHandle, STD_OUTPUT_HANDLE
@@ -368,7 +362,7 @@ WriteAlignCenter PROC
 	; note: CONSOLE_SCREEN_BUFFER_INFO.dwSize.x is of type WORD
 	movzx eax, bufferInfo.dwSize.x
 	sub eax, strLen
-	jl StringExceedsWidth
+	jl StringExceedsWidth ; print no spaces if string length exceeds width
 
 	mov edx, 0	; EDX:EAX - ensures that the higher bits of the dividend is 0.
 	mov ebx, 2
@@ -377,18 +371,38 @@ WriteAlignCenter PROC
 	; EDX:EAX (screenWidth - strLen) / EBX (2) 
 	; EAX = quotient, EDX = remainder
 
-	mov ecx, eax
+	mov spacesPrinted, eax
+	mov ecx, spacesPrinted
 	mov al, ' '
 PrintSpace:
 	call WriteChar
 	loop PrintSpace
 
-StringExceedsWidth:
-	; Restore offset to string
-	pop edx
-	call WriteString
+	mov eax, spacesPrinted
+	ret
+
+StringExceedsWidth:	
+	mov eax, 0	; spaces printed = 0
+	ret
+PrintSpacesForCenterAlign ENDP
+
+
+
+
+; EDX = offset of string
+; Returns no. of spaces printed in EAX
+WriteAlignCenter PROC USES ecx edx
+
+	; Get string length
+	call StrLength ; returns string length in EAX
+	mov ecx, eax
+
+	call PrintSpacesForCenterAlign ; accepts string length in ECX, returns no. of spaces printed in EAX
+	push eax ; save no. of spaces printed
+	call WriteString ; prints string whose offset is stored in EDX
 	call CrLf
 
+	pop eax ; restore no. of spaces printed. EAX is the return value.
 	ret
 WriteAlignCenter ENDP
 
@@ -753,6 +767,19 @@ WriteStrArr PROC
 		ret 8			; clear the 2 arguments that were pushed to stack from the stack
 
 WriteStrArr ENDP
+
+
+
+; EAX = color constant (based on the SetTextColor function from Irvine)
+; EDX = offset of string
+WriteStringInColor PROC USES eax edx
+	call SetTextColor
+	call WriteString
+	mov eax, NORMAL_COLOR
+	call SetTextColor
+
+	ret
+WriteStringInColor ENDP
 
 
 

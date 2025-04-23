@@ -32,6 +32,7 @@ paymentMethod2 byte "Touch 'n Go",13,10,0 ; newline after last option for a visu
 paymentMethod3 byte "Cancel",0 ; newline after last option for a visual divide between payment method options and "Back"
 paymentMethods dword offset paymentMethod1, offset paymentMethod2, offset paymentMethod3
 
+; Credit/debit page
 promptConfirmCancel byte "Are you sure you want to cancel? You will be brought back to the Customer menu page. [y/n]: ",0
 
 promptCardDetails byte "Please enter your card details.",0
@@ -52,6 +53,14 @@ inputCardNo byte MAX_CARD_NO+1 dup(?)
 inputExpire byte MAX_EXPIRE+1 dup(?)
 inputCvv byte MAX_CVV+1 dup(?)
 
+; Touch n go page
+promptScan  byte "Open your Touch 'n Go app and scan this QR code.",0
+promptEnterAfterScan byte "We don't really have any way of knowing if you paid, so just press [Enter] after completing the transaction on Touch 'n Go.",0
+promptCancel byte "Press 'C' to cancel and go back to the SELECT PAYMENT METHOD menu.",0
+msgGuiltTrip1 byte "[See how much trust we put on our customers? ",0
+msgGuiltTrip2 byte "You won't betray that trust, will you? ",0
+msgGuiltTrip3 byte ":) ]",0
+
 msgPaySuccess byte "Payment successful!",0
 promptProceed byte "PRESS ANY KEY to view your receipt...",0
 
@@ -71,17 +80,18 @@ start:
     je CreditDebit
 
     cmp eax, 1
-    ; je TnG
+    je TnG
 
     cmp eax, 2
     jne dontReturnToCustomerMenu
 
+    ; Confirm with user if they rly want to cancel and go back to customer menu
     call CrLf
     lea edx, promptConfirmCancel
     call WriteString
 
-    ; Ask user if they confirm to cancel
     call ReadChar
+    ; if (input == 'y' || input == 'Y') return to customer menu
     cmp al, 'y'
     je returnToCustomerMenu
     cmp al, 'Y'
@@ -214,7 +224,7 @@ GetCvv:
         inc esi
         loop CheckDigit2
 
-    jmp DoneGetCardDetails
+    jmp DonePayment
 
 invalidCvv:
     lea edx, errorInvalid
@@ -223,7 +233,68 @@ invalidCvv:
     call CrLf
     jmp GetCvv
 
-DoneGetCardDetails:
+    jmp DonePayment
+
+
+
+TnG:
+    ; Clear screen and newline
+    call ClrScr
+    call CrLf
+
+    ; Print QR code
+    call PrintPaymentQR
+    call CrLf
+    call CrLf
+
+    ; Prompt user to scan QR code
+    INVOKE Str_ucase, ADDR promptScan ; convert to all-uppercase (Str_ucase is an Irvine function)
+    lea edx, promptScan
+    call WriteAlignCenter
+    call CrLf
+
+    ; Prompt user to press enter key after paying via TnG
+    lea edx, promptEnterAfterScan
+    call WriteAlignCenter
+    call CrLf
+
+    ; Display message: if want cancel, press 'C'
+    lea edx, promptCancel
+    call WriteAlignCenter
+    call CrLf
+    call CrLf
+    call CrLf
+
+    ; Calculate total length of threatening message
+    mov eax, lengthof msgGuiltTrip1
+    dec eax
+    add eax, lengthof msgGuiltTrip2
+    dec eax
+    add eax, lengthof msgGuiltTrip3
+    dec eax
+
+    ; Print the threatening message center-aligned
+    mov ecx, eax
+    call PrintSpacesForCenterAlign
+
+    lea edx, msgGuiltTrip1
+    call WriteString
+    lea edx, msgGuiltTrip2
+    mov eax, yellow
+    call WriteStringInColor
+    lea edx, msgGuiltTrip3
+    call WriteString
+
+    WaitEnterPress:
+        call ReadChar
+        cmp al, 'c'
+        je start
+        cmp al, 'C'
+        je start
+        cmp al, 0Dh
+        jne WaitEnterPress
+
+DonePayment:
     call ClrScr
     call CrLf
 
@@ -239,7 +310,6 @@ DoneGetCardDetails:
 
     mov eax, 0  ; Return with EAX != 0 to indicate that program should proceed to next module, not redraw customer menu, after returning.
     ret
-
 PaymentPage ENDP
 
 
@@ -267,7 +337,7 @@ PrintPaymentQR PROC
 
     ; Clean up
     invoke CloseHandle, fileHandle2
-    call WaitMsg
+    ; call WaitMsg
     ret
 
 file_failed:

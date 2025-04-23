@@ -110,9 +110,24 @@ CHAR_INFO ENDS
 		timeSlotIdx		DWORD	-1	
 	TicketStruct ENDS
 
+	; Enums for accessing members of a TicketStruct struct.
+	T_CUST_NAME			= 0
+	T_TICKET_TYPE		= 1
+	T_PRICE				= 2
+	T_ORIGIN_STN		= 3
+	T_DEST_STN			= 4
+	T_ORIGIN_STN_IDX	= 5
+	T_DEST_STN_IDX		= 6
+	T_TIME_SLOT_IDX		= 7
+
+
 ; ========= Global variables =========
 .data
-	; ERROR MESSAGES -------------------------------------------------------------------
+	; TICKET DATA ----------------------------------------------------------------------------
+	ticketStructArray	TicketStruct	20 dup(<>)	; Array storing tickets
+	ticketCount			DWORD			0			; Keeps track of how many tickets have been stored in the array
+	
+; ERROR MESSAGES -------------------------------------------------------------------
 	errorCode				DWORD	0
 	errorMessages			DWORD	OFFSET err1 
 	err1					BYTE	"Invalid option: Selected number not in list!",0

@@ -946,7 +946,85 @@ WriteStringInRed PROC USES eax
 WriteStringInRed ENDP
 
 
+;=============================================================
+; FUNCTIONS FOR STORING AND RETRIEVING TICKET DATA
+;=============================================================
 
+;------------------------------------------------
+; SaveTicket: Stores all members' data from given source TicketStruct to ticketStructArray as a new element.
+; Receives: pointer to source struct
+; Uses: ticketCount (DWORD) in globals
+; Returns: EAX - pointer to saved struct in ticketStructArray
+;------------------------------------------------
+SaveTicket PROC USES esi ebx ecx edx, pSourceStruct:PTR TicketStruct
+	LOCAL pTargetStruct:DWORD
+
+	; ESI = address of source TicketStruct
+	mov esi, pSourceStruct
+
+	; EAX = Array index = ticketCount * sizeof(ticketStructArray)
+	mov eax, ticketCount
+	mov ebx, TYPE ticketStructArray
+	mul ebx
+
+	; EDI = address of ticketStructArray[index]
+	lea edi, [ticketStructArray + eax]
+	mov pTargetStruct, edi
+
+	; Copy each member's data from source TicketStruct to target TicketStruct (in ticketStructArray)
+	mov ecx, SIZEOF TicketStruct / 4
+CopyMemberData:
+	mov eax, dword ptr [esi]
+	mov dword ptr [edi], eax
+	add esi, 4
+	add edi, 4
+	loop CopyMemberData
+	
+	; Increment ticket count
+	inc ticketCount
+
+	; Return pointer to saved struct in the array
+	mov eax, pTargetStruct
+	ret
+SaveTicket ENDP
+
+;------------------------------------------------
+; GetTicketPointer: Get a pointer to the nth TicketStruct in ticketStructArray, where n is a number
+; Receives: n (index of TicketStruct in the array)
+; Returns: EAX - pointer to target struct in array
+;------------------------------------------------
+GetTicketPointer PROC USES ebx ecx edx, index:DWORD
+	; EAX = index of ticket * sizeof(ticketStructArray)
+	mov eax, index
+	mov ebx, TYPE ticketStructArray
+	mul ebx
+
+	lea eax, [ticketStructArray + eax]
+	ret
+GetTicketPointer ENDP
+
+
+;------------------------------------------------
+; GetTicketMember: Gets the value of a specified member in a TicketStruct
+; Receives: 
+;		structOffset (PTR TicketStruct) - A pointer to a TicketStruct
+;		memberOffset (DWORD) - A number, which is the offset of a member in the TicketStruct
+; Returns: EAX - The value of the specified member
+;------------------------------------------------
+GetTicketMember PROC USES esi ebx edx, structOffset:PTR TicketStruct, memberOffset:DWORD
+	mov esi, structOffset
+
+	; EAX = memberOffset * 4
+	mov ebx, memberOffset
+	mov eax, 4
+	mul ebx
+
+	; ESI = structOffset + (memberOffset * 4)
+	add esi, eax
+	
+	mov eax, dword ptr [esi]
+	ret
+GetTicketMember ENDP
 
 
 

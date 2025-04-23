@@ -301,7 +301,10 @@ DonePayment:
     ; Update available seat count
     call UpdateSeatCount
 
-    ; Displat payment successful message
+    ; Save ticket data in ticketStructArray
+    INVOKE SaveTicket, ADDR boughtTicket
+
+    ; Display payment successful message
     call ClrScr
     call CrLf
 

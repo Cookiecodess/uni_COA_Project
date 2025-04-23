@@ -38,7 +38,6 @@
   </ItemGroup>
   <ItemGroup>
     <MASM Include="main.asm" />
-    <MASM Include="testStruct.asm" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

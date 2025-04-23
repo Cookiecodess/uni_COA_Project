@@ -536,6 +536,7 @@ customerPage proc
 		ProceedToReceipt:
 			; TODO: Integrate the receipt printing module here
 			;       and THEN remove `jmp backToCustomerPage`.
+			call GenerateReceipt
 			jmp backToCustomerPage
 
 		NearStation:

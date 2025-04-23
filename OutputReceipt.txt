@@ -1,5 +1,4 @@
 =================== Receipt ===================
-Name : 1
-Price : 
+Name : k
 Ticket Type : Single Journey
 Details : Penang to Perak

@@ -302,7 +302,7 @@ DonePayment:
     call UpdateSeatCount
 
     ; Save ticket data in ticketStructArray
-    INVOKE SaveTicket, ADDR boughtTicket
+    INVOKE SaveTicket, OFFSET boughtTicket
 
     ; Display payment successful message
     call ClrScr

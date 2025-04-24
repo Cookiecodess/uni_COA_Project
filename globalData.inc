@@ -123,6 +123,15 @@ CHAR_INFO ENDS
 
 ; ========= Global variables =========
 .data
+
+	; USER CREDENTIALS -----------------------------------------------------------------------
+	cUsername		byte	MAX+1 DUP(0)
+	cPassword		byte	MAX+1 DUP(0)
+
+	aUsername		byte	"1",0
+	aPassword		byte	"1",0
+
+
 	; TICKET DATA ----------------------------------------------------------------------------
 	ticketStructArray	TicketStruct	20 dup(<>)	; Array storing tickets
 	ticketCount			DWORD			0			; Keeps track of how many tickets have been stored in the array

@@ -4,6 +4,7 @@
 	msgCustEta			BYTE "Your ETA : ",0
 	msgDist				BYTE "Total Distance: ",0
 	msgKM				BYTE "KM",0
+	msgRM				BYTE "RM",0
 	msgHOUR				BYTE " HOUR(S) ",0
 	msgMINUTE			BYTE " MINUTES",0
 	msgTravelTime		BYTE "Journey Duration: ",0
@@ -19,6 +20,7 @@
 	indexHelper			DWORD ?
 	sixty				REAL4 60.0
 	result				REAL4 ?
+	indexTicket			DWORD ?
 
 
 .code
@@ -26,52 +28,82 @@
 		INVOKE GetLocalTime, OFFSET mytime
 		call clrscr
 
-		mov eax, boughtTicket.custName ; 
-		cmp eax, 0
-		je Empty
+		; looping through the array and finding ticket that the customer bought
+
+		mov ecx, ticketCount
+		mov esi, OFFSET ticketStructArray
+	
+		cmp ecx, 0
+		je Empty ;	---If no tickets are bought no need to loop,
+
+		FindTickets:
+		  INVOKE GetTicketMember, esi, T_CUST_NAME ; EAX = ticketStructArray[index].custname
+		  INVOKE Str_compare, OFFSET cUsername, eax ; Check if ticketStructArray[index].custname == cUsername (currently logged in username)
+		  jne Next
+		  mov indexTicket, esi	; if match then we save the current esi as index for accesing other columns
+		  call printDetails  
+		Next:
+		  add esi, TYPE ticketStructArray ; ESI += 20 because each TicketStruct is 20 bytes
+		  loop FindTickets
+
+		jmp Empty		; If no tickets match
 
 		printDetails:
+
+			;---printing NAME------
 			call clrscr
 			mov edx, OFFSET key1
 			call writeString
-			mov edx, boughtTicket.custName
+
+			INVOKE GetTicketMember, esi, T_CUST_NAME		; eax = custName
+			mov edx, eax
 			call writeString
+
 			call crlf
 
+			;---printing ticket type------
 			mov edx, OFFSET key2
 			call writeString
 			mov  eax,cyan+(black*16)
 			call SetTextColor
-			mov edx, boughtTicket.ticketType
+
+			INVOKE GetTicketMember, esi, T_TICKET_TYPE		; eax = ticket Type
+			mov edx, eax
 			call writeString
+
 			mov  eax,white+(black*16)
 			call SetTextColor
 			call crlf
 
+			;---printing ticket price------
 			mov edx, OFFSET key3
 			call writeString
-			mov eax, boughtTicket.price
+			mov edx, OFFSET msgRM
+			call writeString
+			INVOKE GetTicketMember, esi, T_PRICE		; eax = ticket price
 			call writeDec
 			call crlf
 
 			;---- if the ticket type is Weekly, print weekly details
-			mov eax, boughtTicket.ticketType
+			INVOKE GetTicketMember, esi, T_TICKET_TYPE
 			cmp eax, OFFSET tcktWeeklyPass
 			je ShowWeeklyDetails
 			;---- if the ticket type is Monthly, print monthly details
-			mov eax, boughtTicket.ticketType
+			INVOKE GetTicketMember, esi, T_TICKET_TYPE
 			cmp eax, OFFSET tcktMonthlyPass
 			je ShowWeeklyDetails
 
 			mov edx, OFFSET key4
 			call writeString
-			mov edx, boughtTicket.originStn
+			INVOKE GetTicketMember, esi, T_ORIGIN_STN
+			mov edx, eax
 			call writeString
 			call crlf
 
 			mov edx, OFFSET key5
 			call writeString
-			mov edx, boughtTicket.destStn	
+			INVOKE GetTicketMember, esi, T_DEST_STN
+			mov edx, eax	
 			call writeString
 			call crlf
 
@@ -80,8 +112,10 @@
 		
 
 			; getting the Distance
-			push boughtTicket.originStnIdx
-			push boughtTicket.destStnIdx
+			INVOKE GetTicketMember, esi, T_ORIGIN_STN_IDX
+			push eax
+			INVOKE GetTicketMember, esi, T_DEST_STN_IDX
+			push eax
 			call CalculateDistanceBetweenStations 
 			mov distanceTraveled, eax
 			call writeDec

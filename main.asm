@@ -13,7 +13,7 @@ INCLUDE ReceiptPage.inc
 INCLUDE calculateProfit.inc
 INCLUDE test.inc
 INCLUDE NearStationPage.inc
-;INCLUDE seatAvailability.inc
+INCLUDE seatAvailability.inc
 	CR = 0Dh	; Carriage Return
 	LF = 0Ah	; Line Feed
 	TAB = 09h
@@ -81,9 +81,10 @@ INCLUDE NearStationPage.inc
 	customerOption1			byte	"View Schedule",0
 	customerOption2			byte	"Buy Tickets",0
 	customerOption3			byte	"Check Nearby Station",0
-	customerOption4			byte	"Log out",0
+	customerOption4			byte	"View Seat Availability",0
+	customerOption5			byte	"Log out",0
 
-	customerSelectionArr	dword	OFFSET customerOption1, OFFSET customerOption2, OFFSET customerOption3, OFFSET customerOption4
+	customerSelectionArr	dword	OFFSET customerOption1, OFFSET customerOption2, OFFSET customerOption3, OFFSET customerOption4, OFFSET customerOption5
 
 	customerInOption1			byte	"Log In",0
 	customerInOption2			byte	"Register",0
@@ -512,7 +513,10 @@ customerPage proc
 			cmp eax, 2		; selection: NearStation
 				je NearStation
 
-			cmp eax, 3		; logOut
+			cmp eax, 3      ; selection: View Seat Availability
+				je Seats
+
+			cmp eax, 4		; logOut
 				je logOut	
 
 			jmp customerPageStart		; TEMP: redraw customerPage if user selects an option that hasn't been implemented
@@ -532,15 +536,20 @@ customerPage proc
 			cmp eax, -1
 			je backToCustomerPage
 
-			
+		
 		ProceedToReceipt:
 			; TODO: Integrate the receipt printing module here
 			;       and THEN remove `jmp backToCustomerPage`.
 			call GenerateReceipt
 			jmp backToCustomerPage
 
+		Seats:
+			call DisplaySeatAvailability
+			cmp eax, -1	; If EAX = -1, redraw customer menu
+			je backToCustomerPage
+
 		NearStation:
-			;call NearStationPage
+			call NearStationPage	
 			cmp eax, -1	; If EAX = -1, redraw customer menu
 			je backToCustomerPage
 

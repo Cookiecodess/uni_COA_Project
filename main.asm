@@ -47,12 +47,6 @@ INCLUDE NearStationPage.inc
 	tryagain		byte	"Try Again",0
 	loginChoose		byte	?
 
-	cUsername		byte	MAX+1 DUP(0)
-	cPassword		byte	MAX+1 DUP(0)
-
-	aUsername		byte	"1",0
-	aPassword		byte	"1",0
-
 
 	loginMsg		byte	"Enter Username: ", 0
 	passMsg			byte	"Enter Password: ", 0

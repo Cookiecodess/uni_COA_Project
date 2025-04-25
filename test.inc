@@ -9,6 +9,8 @@
 	msgMINUTE			BYTE " MINUTES",0
 	msgTravelTime		BYTE "Journey Duration: ",0
 	msgTrainTime		BYTE "Trains Are Available at 10AM, 2PM, and 6PM only.",0
+	msgPath				BYTE "Path: ",0
+	msgArrow			BYTE " ----> ",0
 
 
 	mytime				SYSTEMTIME <>
@@ -92,14 +94,14 @@
 			cmp eax, OFFSET tcktMonthlyPass
 			je ShowWeeklyDetails
 
-			mov edx, OFFSET key4
+			; ------ printing the path of the ticket from where to where
+			mov edx, OFFSET msgPath
 			call writeString
 			INVOKE GetTicketMember, esi, T_ORIGIN_STN
 			mov edx, eax
 			call writeString
-			call crlf
 
-			mov edx, OFFSET key5
+			mov edx, OFFSET msgArrow
 			call writeString
 			INVOKE GetTicketMember, esi, T_DEST_STN
 			mov edx, eax	
@@ -172,13 +174,24 @@
 				call writeString
 
 
-				movzx eax, arrivaltime.wHour
-				call writeDec
-				mov al, ':'
-				call writeChar
-				movzx eax, arrivaltime.wMinute
-				call writeDec
-				call writeDec
+				INVOKE GetTicketMember, esi, T_TIME_SLOT_IDX 
+				cmp eax, 0
+				ja PM
+				mov bx, 10
+				jmp continue
+
+				PM:
+				cmp eax, 1
+				jne lastTime
+				mov bx, 14
+
+				lastTime:
+				mov bx, 18
+
+				continue:
+				mov arrivaltime.wHour, bx
+				mov edx, timeSlotArray[eax*4]
+				call writeString
 				call crlf
 
 				;---writing ETA---
@@ -211,7 +224,7 @@
 		
 		Empty:
 			; --if no ticket is bought yet--
-			mov  eax,lightGreen+(black*16)
+			mov  eax,red+(black*16)
 			call SetTextColor
 			mov edx, OFFSET emptyMSG
 			call writeString
@@ -221,6 +234,7 @@
 			jmp done
 
 		ShowWeeklyDetails:
+		    pop eax
 			call crlf
 			mov  eax,black+(white*16)
 			call SetTextColor

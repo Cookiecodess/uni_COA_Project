@@ -128,8 +128,8 @@ CHAR_INFO ENDS
 	cUsername		byte	MAX+1 DUP(0)
 	cPassword		byte	MAX+1 DUP(0)
 
-	aUsername		byte	"1",0
-	aPassword		byte	"1",0
+	aUsername		byte	"admin",0
+	aPassword		byte	"password",0
 
 
 	; TICKET DATA ----------------------------------------------------------------------------

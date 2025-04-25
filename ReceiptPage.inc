@@ -23,7 +23,8 @@
 			optionSaveR	BYTE	"YES",0
 			optionCancelS	BYTE	"No and Quit",0
 			confPrintOptions	DWORD	OFFSET optionSaveR, OFFSET optionCancelS
-
+			weeklyPassWord byte "Weekly Pass",0
+			monthlyPassWord byte "Monthly Pass",0
 
     headerReceipt		byte "Receipt",0
 
@@ -109,6 +110,12 @@ GenerateReceipt proc
 		call CRLF
 
 
+		invoke Str_compare, edx, ADDR weeklyPassWord
+		je skipDetail
+		invoke Str_compare, edx, ADDR monthlyPassWord
+		je skipDetail
+
+
 		;from to destination
 		mov al, TAB
 		call WriteChar
@@ -122,6 +129,8 @@ GenerateReceipt proc
 		call WriteString
 		call CRLF
 		
+		skipDetail:
+
 		call waitmsg
 
 		INVOKE InitMenu,0,offset confPrintOptions,lengthof confPrintOptions,offset askMsg,0,0,0
@@ -209,6 +218,13 @@ saveReceipt proc
 		call newline
 
 
+		mov edx,boughtTicket.ticketType
+		invoke Str_compare, edx, ADDR weeklyPassWord
+		je skipDetail
+		invoke Str_compare, edx, ADDR monthlyPassWord
+		je skipDetail
+
+
 		;Detail
 		mov edx,offset detailS
 		mov ecx, lengthOf detailS- 1
@@ -236,7 +252,7 @@ saveReceipt proc
 
 		call newline
 
-
+skipDetail:
 
 
 	; Close file

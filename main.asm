@@ -63,10 +63,10 @@ INCLUDE seatAvailability.inc
 
 	adminOption1		byte	"Report",0
 	adminOption2		byte	"Profit Detail",0
-	adminOption3		byte	"-",0
-	adminOption4		byte	"Log out",0
 
-	adminSelectionArr	dword	OFFSET adminOption1, OFFSET adminOption2, OFFSET adminOption3, OFFSET adminOption4
+	adminOption3		byte	"Log out",0
+
+	adminSelectionArr	dword	OFFSET adminOption1, OFFSET adminOption2, OFFSET adminOption3
 
 	;CUSOTMER LOGIN
 	headerCustomer byte "CUSTOMER",0
@@ -587,9 +587,8 @@ adminPage proc
 			cmp eax, 1		; test
 			je callProfit
 
-			cmp eax,2
-			je callTest
-			cmp eax, 3		; logOut
+
+			cmp eax, 2		; logOut
 			je logOut		
 		
 			jmp adminStartPage		; TEMP: redraw adminPage if user selects an option that hasn't been implemented
@@ -606,9 +605,6 @@ adminPage proc
 			call waitmsg
 			jmp backToAdminPage
 
-		callTest:
-			call GenerateReceipt
-			jmp backToAdminPage
 
 		backToAdminPage:
 			jmp adminStartPage

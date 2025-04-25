@@ -11,7 +11,7 @@ INCLUDE PaymentPage.inc
 INCLUDE ReportPage.inc
 INCLUDE ReceiptPage.inc
 INCLUDE calculateProfit.inc
-INCLUDE test.inc
+INCLUDE SchedulePage.inc
 INCLUDE NearStationPage.inc
 INCLUDE seatAvailability.inc
 	CR = 0Dh	; Carriage Return

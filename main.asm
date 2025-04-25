@@ -258,6 +258,10 @@ customerLogin proc
 			; save index of current user of userNameArray in the variable currentCustIdx
 			mov currentCustIdx, esi
 
+			mov ecx, esi	
+			call GetUsernameSlot	; EDI = &userArray[ECX * MAX_LENGTH]
+			INVOKE Str_copy, edi, ADDR cUsername ; Update username of currently logged-in user
+
 			mov showLoginSuccessMsg, 1
 			call customerPage
 
@@ -653,6 +657,8 @@ rePassword proc
 rePassword endp
 
 
+; Receives: ECX - index
+; Returns: EDI - pointer to username string in userNameArray
 getUsernameSlot PROC
 
 

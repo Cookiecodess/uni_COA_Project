@@ -125,7 +125,7 @@ CHAR_INFO ENDS
 .data
 
 	; USER CREDENTIALS -----------------------------------------------------------------------
-	cUsername		byte	MAX+1 DUP(0)
+	cUsername		byte	MAX+1 DUP(0)		; String: username of the currently logged in user
 	cPassword		byte	MAX+1 DUP(0)
 
 	currentCustIdx	DWORD ? ; index of current user in userNameArray and passwordArray

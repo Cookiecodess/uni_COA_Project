@@ -58,8 +58,8 @@ inputCvv byte MAX_CVV+1 dup(?)
 
 ; Touch n go page
 promptScan  byte "Open your Touch 'n Go app and scan this QR code.",0
-promptEnterAfterScan byte "We don't really have any way of knowing if you paid, so just press [Enter] after completing the transaction on Touch 'n Go.",0
-promptCancel byte "Press 'C' to cancel and go back to the SELECT PAYMENT METHOD menu.",0
+promptEnterAfterScan byte "Press [ENTER] after completing the transaction to view your receipt.",0
+promptCancel byte "If you wish to CANCEL paying via TnG, press 'C'. You will be brought back to the SELECT PAYMENT METHOD menu.",0
 msgGuiltTrip1 byte "[See how much trust we put on our customers? ",0
 msgGuiltTrip2 byte "You won't betray that trust, will you? ",0
 msgGuiltTrip3 byte ":) ]",0
@@ -166,7 +166,7 @@ GetExpire:
     call WriteString
 
     lea edx, inputExpire
-    mov ecx, MAX_EXPIRE+1
+    mov ecx, MAX ; can read up to MAX-1 chars. if user accidentally enters '12/255' instead of '12/25', we can invalidate it. If we just read 5 chars, no error will occur, we'd just silently read '12/25' only. This can confuse the user. 
     call ReadString ; Returns string length in EAX!!!
 
     ; Check if user wants to cancel
@@ -207,7 +207,7 @@ GetCvv:
     call WriteString
 
     lea edx, inputCvv
-    mov ecx, MAX_CVV+1
+    mov ecx, MAX ; can read up to MAX-1 chars. if user accidentally enters '1233' instead of '123', we can invalidate it. If we just read 3 chars, no error will occur, we'd just silently read '123' only. This can confuse the user. 
     call ReadString ; Returns string length in EAX!!!
 
     ; Check if user wants to cancel
@@ -215,7 +215,7 @@ GetCvv:
     je start
 
     cmp eax, MAX_CVV
-    jl invalidCvv
+    jne invalidCvv ; CVV must be 3 chars.
 
     ; invalid if not all are digits
     mov ecx, eax
@@ -253,40 +253,44 @@ TnG:
     ; Prompt user to scan QR code
     INVOKE Str_ucase, ADDR promptScan ; convert to all-uppercase (Str_ucase is an Irvine function)
     lea edx, promptScan
-    call WriteAlignCenter
+    ; call WriteAlignCenter
+    call WriteString
+    call CrLf
     call CrLf
 
     ; Prompt user to press enter key after paying via TnG
     lea edx, promptEnterAfterScan
-    call WriteAlignCenter
+    ; call WriteAlignCenter
+    call WriteString
     call CrLf
 
     ; Display message: if want cancel, press 'C'
     lea edx, promptCancel
-    call WriteAlignCenter
+    ; call WriteAlignCenter
+    call WriteString
     call CrLf
     call CrLf
-    call CrLf
+    ; call CrLf
 
     ; Calculate total length of threatening message
-    mov eax, lengthof msgGuiltTrip1
-    dec eax
-    add eax, lengthof msgGuiltTrip2
-    dec eax
-    add eax, lengthof msgGuiltTrip3
-    dec eax
+    ; mov eax, lengthof msgGuiltTrip1
+    ; dec eax
+    ; add eax, lengthof msgGuiltTrip2
+    ; dec eax
+    ; add eax, lengthof msgGuiltTrip3
+    ; dec eax
 
     ; Print the threatening message center-aligned
-    mov ecx, eax
-    call PrintSpacesForCenterAlign
+    ; mov ecx, eax
+    ; call PrintSpacesForCenterAlign
 
-    lea edx, msgGuiltTrip1
-    call WriteString
-    lea edx, msgGuiltTrip2
-    mov eax, yellow
-    call WriteStringInColor
-    lea edx, msgGuiltTrip3
-    call WriteString
+    ; lea edx, msgGuiltTrip1
+    ; call WriteString
+    ; lea edx, msgGuiltTrip2
+    ; mov eax, yellow
+    ; call WriteStringInColor
+    ; lea edx, msgGuiltTrip3
+    ; call WriteString
 
     WaitEnterPress:
         call ReadChar

@@ -8,8 +8,7 @@
 	msgHOUR				BYTE " HOUR(S) ",0
 	msgMINUTE			BYTE " MINUTES",0
 	msgTravelTime		BYTE "Journey Duration: ",0
-	msgMissedAll		BYTE "SORRY! You have missed all of the Train for today.", 0
-	msgTrainTime		BYTE "Trains Are Available at 10AM, 3PM, and 6PM only.",0
+	msgTrainTime		BYTE "Trains Are Available at 10AM, 2PM, and 6PM only.",0
 
 
 	mytime				SYSTEMTIME <>
@@ -116,7 +115,7 @@
 			push eax
 			INVOKE GetTicketMember, esi, T_DEST_STN_IDX
 			push eax
-			call CalculateDistanceBetweenStations 
+			call CalculateDistanceBetweenStations
 			mov distanceTraveled, eax
 			call writeDec
 			mov edx, OFFSET msgKM
@@ -167,28 +166,6 @@
 			call crlf
 			call crlf
 			call crlf
-
-			; if the current time is more than 10, we display train at 3,
-			movzx eax, mytime.wHour
-			cmp eax, 10
-			jae secondTrain
-			mov arrivaltime.wHour, 10
-			mov arrivaltime.wMinute, 0
-			jmp writeTime
-
-			secondTrain:
-				cmp eax, 15
-				jae thirdTrain
-				mov arrivaltime.wHour, 15
-				mov arrivaltime.wMinute, 0
-				jmp writeTime
-
-			thirdTrain:
-				cmp eax, 18
-				jae noTrainLeft
-				mov arrivaltime.wHour, 18
-				mov arrivaltime.wMinute, 0
-		
 			
 			writeTime:
 				mov edx, OFFSET msgTimeArrival
@@ -219,6 +196,7 @@
 				cmp eax, 10
 				jb formatMinute
 				call writeDec
+				pop eax ; for some reason, the stack is misaligned, the return address is one level below so we pop first
 				jmp done
 
 				formatMinute:
@@ -227,6 +205,7 @@
 					call writeDec
 					mov eax, ebx
 					call writeDec
+					pop eax ; for some reason, the stack is misaligned, the return address is one level below so we pop first
 					jmp done
 
 		
@@ -294,23 +273,12 @@
 				loop printLoc	; ecx = 4
 
 			jmp done	
-		
-		noTrainLeft:
-			mov  eax,red+(black*16)
-			call SetTextColor
-			mov edx, OFFSET msgMissedAll
-			call writeString
-			mov  eax,white+(black*16)
-			call SetTextColor
-			jmp done
-
-			
 
 		done:
 			call crlf
 			call crlf
 			call waitmsg
 			mov eax, -1
-
+		
 		ret
 	show ENDP

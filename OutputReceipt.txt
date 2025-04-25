@@ -1,4 +1,4 @@
 =================== Receipt ===================
-Name : k
+Name : 123
 Ticket Type : Single Journey
 Details : Penang to Perak

@@ -15,6 +15,7 @@
     ; Menu options array
     timeSlotOptions  DWORD OFFSET timeSlot1, OFFSET timeSlot2, OFFSET timeSlot3, OFFSET back3
     timeSlotNumbers  DWORD 1, 2, 3, 4
+    getInputMsg byte "Please choose time slot to view the available seat : ",0
 
 .code
 
@@ -62,6 +63,8 @@ display_options:
     loop display_options
 
 get_selection:
+    lea edx,getInputMsg
+    call writestring
     ; Get user input
     call ReadInt
     mov selectedSlot, eax

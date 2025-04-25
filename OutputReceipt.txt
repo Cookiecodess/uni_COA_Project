@@ -1,4 +1,3 @@
 =================== Receipt ===================
 Name : 1
-Ticket Type : Single Journey
-Details : Penang to Perak
+Ticket Type : Monthly Pass

@@ -54,9 +54,6 @@
     <None Include="NearStationPage.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="test.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="PaymentPage.inc">
       <Filter>Header Files</Filter>
     </None>

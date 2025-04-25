@@ -33,7 +33,6 @@
     <None Include="ReportPage.inc" />
     <None Include="SchedulePage.inc" />
     <None Include="seatAvailability.inc" />
-    <None Include="test.inc" />
     <None Include="TicketingPage.inc" />
     <None Include="TicketingPage_Seats.inc" />
   </ItemGroup>

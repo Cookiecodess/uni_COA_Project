@@ -54,7 +54,7 @@ INCLUDE seatAvailability.inc
 	successMsg		byte	"Login Successful!", 0
 	failMsg			byte	"Login Failed!", 0
 
-		
+	registerUsername 	byte	MAX+1 DUP(?)
 	inputUsername	byte	MAX+1 DUP(?)	;like char[20] and initialize it by 0(null)
 	inputPassword	byte	MAX+1 DUP(?)	;but user only can type 19 word since at 20 need to store the 0(to stop)
 	
@@ -103,7 +103,7 @@ INCLUDE seatAvailability.inc
 	reInputPasswordMSG byte "Sorry, your password cannot leave blank.",0
 	regSus byte "Register Suscessful! You will be redirected to the customer page in 3 seconds.",0
 	currentUserCount dword 0
-
+	ExistMsg byte "Sorry, this username already exist.",0
 
 .code
 main PROC
@@ -155,12 +155,6 @@ customerLogin proc
 			mov ebx, lengthof headerCustomer
 			call PrintHeader
 			call CRLF
-			
-
-		;when user is undefined
-			;mov eax,offset cUsername
-			;cmp byte ptr [eax],0
-			;je jumpRegisterPage
 
 			
 			lea edx,loginMsg
@@ -190,18 +184,10 @@ customerLogin proc
 			
 
 
-			mov esi, 0 
+			mov esi, 0 ;initialize esi
 			;jmp check_customer
 	check_customer:	
-			;push OFFSET inputUsername
-			;push OFFSET cUsername
-			;call Str_compare			
-			;jne Clogin_failed
 
-			;push OFFSET inputPassword
-			;push OFFSET cPassword
-			;call Str_compare	
-			;jne Clogin_failed
 
 			cmp esi, currentUserCount
 				jg Clogin_failed	;out of log in number,meaning dont have this user
@@ -209,16 +195,6 @@ customerLogin proc
 			mov ecx, esi	;know now is check which user already
 			call GetUsernameSlot	; EDI = &userArray[esi * MAX_LENGTH]
 			
-			
-		;debug
-			;mov edx,edi
-			;call writeString
-			;call crlf
-			;lea edx,inputUsername
-			;call writeString
-			;call crlf	
-			
-
 
 			;compare inpurUsername with userarray[esi]
 			invoke Str_compare, EDI, ADDR inputUsername
@@ -232,18 +208,8 @@ customerLogin proc
 				call GetPasswordSlot
 
 
-		;debug
-			;mov edx,edi
-			;call writeString
-			;call crlf
-			;lea edx,inputPassword
-			;call writeString
-			;call crlf
-
-
 				invoke Str_compare, EDI, ADDR inputPassword
 				je Clogin_success
-
 
 
 			;if not ,check next
@@ -365,11 +331,41 @@ registerPage proc
 		call CRLF
 		cmp eax, 0
 			je reInputUserName
-
+		INVOKE Str_copy, edx, ADDR registerUsername
 				;debug
 		;mov edx,edi
 		;call writeString
+	mov esi, 0 
 		
+	check_customer:	
+
+
+			cmp esi, currentUserCount
+				jge save	;dont have same username
+			;get usernamearray esi
+			mov ecx, esi	;know now is check which user already
+			call GetUsernameSlot	; EDI = &userArray[esi * MAX_LENGTH]
+			
+
+			;compare inpurUsername with userarray[esi]
+			invoke Str_compare, EDI, addr registerUsername
+
+			je IsDulplicate		; same username, just skip        
+			inc esi
+		    jmp check_customer
+
+
+
+
+			;if not ,check next
+				inc esi
+				 jmp check_customer
+			
+	
+
+
+
+Save:
 		invoke Str_copy,edi,ADDR cUsername	;save the name so that after that other can use it
 			;debug
 		;lea edx,cUsername
@@ -413,7 +409,9 @@ registerPage proc
 		reInputPassword:
 			call rePassword
 			jmp rStart
-
+IsDulplicate:
+			call usernameExist
+			jmp rStart
 
 
 		ret
@@ -651,7 +649,16 @@ rePassword proc
 			call CRLF
 			ret
 rePassword endp
-
+usernameExist proc
+			mov  eax,red+(black*16)
+			 call SetTextColor
+			lea edx,existMsg
+			call writeString
+			mov  eax,lightGray+(black*16)
+			call SetTextColor
+			call CRLF
+			ret
+usernameExist endp
 
 ; Receives: ECX - index
 ; Returns: EDI - pointer to username string in userNameArray

@@ -254,6 +254,14 @@ customerLogin proc
 
 		Clogin_success:
 			; at this point, customer is successfully authenticated
+
+			; save index of current user of userNameArray in the variable currentCustIdx
+			mov currentCustIdx, esi
+
+			mov ecx, esi	
+			call GetUsernameSlot	; EDI = &userArray[ECX * MAX_LENGTH]
+			INVOKE Str_copy, edi, ADDR cUsername ; Update username of currently logged-in user
+
 			mov showLoginSuccessMsg, 1
 			call customerPage
 
@@ -352,7 +360,7 @@ registerPage proc
 		mov ecx, currentUserCount
 		call GetUsernameSlot	;return edi= username[]
 		mov edx, edi  ; save username place
-		mov ecx, MAX	;to ensure the user only input 20 chars
+		mov ecx, MAX+1	;to ensure the user only input MAX chars
 		call ReadString
 		call CRLF
 		cmp eax, 0
@@ -373,7 +381,7 @@ registerPage proc
 		mov ecx, currentUserCount
 		call GetPasswordSlot      	;return edi= password[]
 		mov edx, edi  ; save password place
-		mov ecx, MAX	;to ensure the user only input 20 chars
+		mov ecx, MAX+1	;to ensure the user only input MAX chars
 		call ReadString
 		call CRLF
 		cmp eax, 0
@@ -381,6 +389,12 @@ registerPage proc
 
 		invoke Str_copy,edi,ADDR cPassword	;save string
 		;mov cPassword,dh
+
+		; Increment user count
+		mov eax, currentUserCount
+		inc eax
+		mov currentUserCount, eax
+
 		lea edx,regsus
 		mov  eax,green+(black*16)
 			 call SetTextColor
@@ -639,11 +653,13 @@ rePassword proc
 rePassword endp
 
 
+; Receives: ECX - index
+; Returns: EDI - pointer to username string in userNameArray
 getUsernameSlot PROC
 
 
 		 mov eax, ecx       ; EAX = index
-		 mov ebx, MAX+1     ;each username has 21 bytes
+		 mov ebx, MAX+1     ;each username has 21 bytes (MAX bytes of input and 1 byte for null-terminator)
 		 mul ebx	;eax=index* MAX
 		 mov edi, OFFSET userNameArray	
 		add edi, eax            ; EDI = userNameArray + index * MAX_LENGTH
@@ -664,7 +680,7 @@ GetPasswordSlot PROC
 
 
 		 mov eax, ecx       ; EAX = index
-		 mov ebx, MAX+1     ;each password has 21 bytes
+		 mov ebx, MAX+1     ;each password has 21 bytes (MAX bytes of input and 1 byte for null-terminator
 		 mul ebx	;eax=index* MAX
 		 mov edi, OFFSET passwordArray	
 		add edi, eax            ; EDI = passwordArray + index * MAX_LENGTH

@@ -2,7 +2,7 @@
 .data
     ; Strings
     headerNearStation      BYTE    "=== Nearby Stations ===",0
-    promptSelectStation    BYTE    "Select a station plssss:",0
+    promptSelectStation    BYTE    "Please Select a Station:",0
     msgPickedLocation      BYTE    "Station Selected: ",0
     transportHeader        BYTE    "Available Nearby Transport:",0
     backOption2            BYTE    "Back",0

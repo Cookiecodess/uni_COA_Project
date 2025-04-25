@@ -60,6 +60,12 @@
     <None Include="PaymentPage.inc">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="TicketingPage_Seats.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="seatAvailability.inc">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="main.asm">

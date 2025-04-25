@@ -127,7 +127,7 @@ CHAR_INFO ENDS
 	; USER CREDENTIALS -----------------------------------------------------------------------
 	cUsername		byte	MAX+1 DUP(0)		; String: username of the currently logged in user
 	cPassword		byte	MAX+1 DUP(0)
-
+	currentCustIdx  dword	?
 	aUsername		byte	"admin",0
 	aPassword		byte	"password",0
 

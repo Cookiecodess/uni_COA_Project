@@ -125,11 +125,11 @@ CHAR_INFO ENDS
 .data
 
 	; USER CREDENTIALS -----------------------------------------------------------------------
-	cUsername		byte	MAX+1 DUP(0)
+	cUsername		byte	MAX+1 DUP(0)		; String: username of the currently logged in user
 	cPassword		byte	MAX+1 DUP(0)
 
-	aUsername		byte	"1",0
-	aPassword		byte	"1",0
+	aUsername		byte	"admin",0
+	aPassword		byte	"password",0
 
 
 	; TICKET DATA ----------------------------------------------------------------------------
@@ -161,11 +161,11 @@ CHAR_INFO ENDS
 	MAX_USERS   = 200
 
 	; Store user data
-	userNameArray			byte MAX_USERS * MAX dup(0)
-	passwordArray			byte MAX_USERS * MAX dup(0)
+	userNameArray			byte MAX_USERS * (MAX+1) dup(0)
+	passwordArray			byte MAX_USERS * (MAX+1) dup(0)
 
 	; Store ticket data
-	ticketCustName			byte MAX_USERS * MAX dup(0)		; each element is a 20-byte string: the name of the customer who bought the ticket
+	ticketCustName			byte MAX_USERS * (MAX+1) dup(0)		; each element is a 20-byte string: the name of the customer who bought the ticket
 	ticketOriginIdx			dword MAX_USERS dup(0)
 	ticketDestinationIdx    dword MAX_USERS dup(0) 
 	ticketTimeSlotIdx		dword MAX_USERS dup(0)	; index of timeSlotArray

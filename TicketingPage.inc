@@ -76,8 +76,13 @@ TicketingPage PROC USES ebx edx
 		cmp eax, backIndex
 		je return_and_redraw_cust_menu
 
-		; User selected a ticket. Record their username
-		mov boughtTicket.custName, OFFSET cUsername 
+		; Get address of username from userNameArray, using currentCustIdx
+		mov esi, MAX+1
+		imul esi, currentCustIdx
+		add esi, OFFSET userNameArray	; EAX = &userNameArray + (currentCustIdx * (MAX+1))
+
+		; Store address of the username in boughtTicket (a TicketStruct struct)
+		mov boughtTicket.custName, esi
 		
 		; Actions for each selection
 		cmp eax, SINGLE_JOURNEY		; Single journey ticket chosen

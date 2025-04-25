@@ -43,13 +43,44 @@ scrollRect SMALL_RECT <>         ; Scroll rectangle
 scrollTarget COORD <>             ; Scroll target
 fill CHAR_INFO <>                ; Character fill for clearing
 hConsole DWORD ?                ; Handle for the console
+mode DWORD ?
+written DWORD ?
 
+; clearStr db 27, '[', '3', 'J', 27, '[', '2', 'J', 27, '[', 'H', 0']]]'
+clearStr db 27,'[','2','J',27,'[','H',0
+len = 11
+
+; Constants
+; STD_OUTPUT_HANDLE equ -11
+ENABLE_VIRTUAL_TERMINAL_PROCESSING equ 0004h
 
 .code
 main PROC
+	mov ecx, 100
+	mov eax, 0
+	; add ecx, 5
+	PrintStuff:
+		call WriteDec
+		call CrLf
+		inc eax
+		loop PrintStuff
+
+
 	; Get the handle to the console output
     invoke GetStdHandle, STD_OUTPUT_HANDLE
     mov hConsole, eax
+
+	; Get current mode
+	INVOKE GetConsoleMode, hConsole, ADDR mode
+	or mode, ENABLE_VIRTUAL_TERMINAL_PROCESSING
+
+	; Set updated mode
+	INVOKE SetConsoleMode, hConsole, mode
+
+	; Clear screen + scrollback
+	; VT code: ESC[3J ESC[2J ESC[H
+	; DOES NOT WORK
+	invoke WriteConsoleA, hConsole, offset clearStr, len, ADDR written, 0
 
     ; Get the console screen buffer info
     invoke GetConsoleScreenBufferInfo, hConsole, ADDR csbi
@@ -60,14 +91,9 @@ main PROC
 
 	
 
-	mov ecx, 100
-	mov eax, 0
-	; add ecx, 5
-	PrintStuff:
-		call WriteDec
-		call CrLf
-		inc eax
-		loop PrintStuff
+	
+
+	call ShrinkBuffer
 
 	; Get the console screen buffer info
     invoke GetConsoleScreenBufferInfo, hConsole, ADDR csbi
@@ -79,4 +105,18 @@ main PROC
 	exit
 		
 main ENDP
+
+ShrinkBuffer PROC USES eax
+
+	INVOKE GetConsoleScreenBufferInfo, hConsole, ADDR csbi
+
+	mov ax, csbi.srWindow.Bottom
+	sub ax, csbi.srWindow.Top
+	inc ax
+	mov csbi.dwSize.Y, ax
+	INVOKE SetConsoleScreenBufferSize, hConsole, csbi.dwSize
+
+	ret
+ShrinkBuffer ENDP
+
 end main

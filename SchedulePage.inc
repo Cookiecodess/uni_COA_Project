@@ -185,6 +185,7 @@
 				mov durationtime.wHour, ax ; save the hour first
 				cmp ax, 0
 
+				finit		; cleaning the FPU
 				je lessThanAnHour
 				fild distanceTraveled    ; ST(0) = 420.0
 				fild speed               ; ST(0) = 320.0, ST(1) = 420.0

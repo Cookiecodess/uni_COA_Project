@@ -10,7 +10,6 @@
     invalidSelection BYTE "Invalid selection! Please try again.",0
     toPrefix         BYTE "To ",0
     colonSpace       BYTE ": ",0
-    availableSeats2   BYTE "Available seats: ",0
 
     ; Menu options array
     timeSlotOptions  DWORD OFFSET timeSlot1, OFFSET timeSlot2, OFFSET timeSlot3, OFFSET back3
@@ -36,8 +35,12 @@ menu_start:
     call Crlf
 
     ; Display time slot prompt
+    mov eax, yellow + (black SHL 4)
+    call SetTextColor
     mov edx, OFFSET timeSlotPrompt
     call WriteString
+    mov eax, lightGray + (black SHL 4)
+    call SetTextColor
     call Crlf
 
     ; Display menu options
@@ -63,8 +66,13 @@ display_options:
     loop display_options
 
 get_selection:
+    mov eax, green + (black SHL 4)
+    call SetTextColor
     lea edx,getInputMsg
     call writestring
+    mov eax, lightGray + (black SHL 4)
+    call SetTextColor
+
     ; Get user input
     call ReadInt
     mov selectedSlot, eax
@@ -98,10 +106,14 @@ display_availability:
     call Crlf
 
     ; Display selected time slot header
+    mov eax, lightBlue + (black SHL 4)
+    call SetTextColor
     mov eax, selectedSlot
     dec eax
     mov edx, timeSlotOptions[eax*4]
     call WriteString
+    mov eax, lightGray + (black SHL 4)
+    call SetTextColor
     call Crlf
     call Crlf
 
@@ -111,8 +123,12 @@ display_availability:
 
 display_origin_loop:
     ; Display origin station name
+    mov eax, yellow + (black SHL 4)
+    call SetTextColor
     mov edx, locations[ecx*4]
     call WriteString
+    mov eax, lightGray + (black SHL 4)
+    call SetTextColor
     call Crlf
 
     ; Loop through all destination stations (4 per origin)

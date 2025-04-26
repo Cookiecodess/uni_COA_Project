@@ -1,7 +1,7 @@
 ; NearStationPage.inc - Final Version
 .data
     ; Strings
-    headerNearStation      BYTE    "=== Nearby Stations ===",0
+    headerNearStation      BYTE    "NEARBY STATIONS",0
     promptSelectStation    BYTE    "Please Select a Station:",0
     msgPickedLocation      BYTE    "Station Selected: ",0
     transportHeader        BYTE    "Available Nearby Transport:",0
@@ -28,6 +28,8 @@
     ; Colors
     DEF_COLOR = white + (black SHL 4)
     SEL_COLOR = yellow + (black SHL 4)
+    HEADER_COLOR = lightGray + (black SHL 4)
+    STATION_COLOR = lightBlue + (black SHL 4)
 
 .code
 ; Keyboard constants
@@ -48,17 +50,22 @@ ShowStationInfo PROC USES eax edx esi
     call Clrscr
     
     ; Header
-    mov edx, OFFSET headerNearStation
-    call WriteString
-    call Crlf
+    mov eax, OFFSET headerNearStation
+    mov ebx, LENGTHOF headerNearStation
+    call PrintHeader
     call Crlf
     
     ; Selected station
     mov edx, OFFSET msgPickedLocation
     call WriteString
+
+    mov eax, STATION_COLOR
+    call SetTextColor
     mov esi, currentSelection2
     mov edx, stationOptions[esi*4]
     call WriteString
+    mov eax, DEF_COLOR
+    call SetTextColor
     call Crlf
     call Crlf
     
@@ -121,9 +128,9 @@ DrawStationMenu PROC USES eax ecx edx esi
     call Clrscr
     
     ; Header
-    mov edx, OFFSET headerNearStation
-    call WriteString
-    call Crlf
+    mov eax, OFFSET headerNearStation
+    mov ebx, LENGTHOF headerNearStation
+    call PrintHeader
     call Crlf
     
     ; Prompt

@@ -32,7 +32,6 @@
     <None Include="SchedulePage.inc" />
     <None Include="seatAvailability.inc" />
     <None Include="TicketingPage.inc" />
-    <None Include="TicketingPage_Seats.inc" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="main.asm" />

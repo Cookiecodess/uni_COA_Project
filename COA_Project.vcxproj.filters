@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="myproc.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="calculateProfit.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -36,9 +33,6 @@
     <None Include="TicketingPage.inc">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="newfile.inc">
-      <Filter>Header Files</Filter>
-    </None>
     <None Include="globalData.inc">
       <Filter>Header Files</Filter>
     </None>
@@ -55,9 +49,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="PaymentPage.inc">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="TicketingPage_Seats.inc">
       <Filter>Header Files</Filter>
     </None>
     <None Include="seatAvailability.inc">

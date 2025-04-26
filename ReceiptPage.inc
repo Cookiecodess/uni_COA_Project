@@ -76,6 +76,7 @@ GenerateReceipt proc
 		mov bookingnum,eax
 		mov  eax,green+(black*16)
 			 call SetTextColor
+			 mov eax,bookingnum
 		call WriteDec
 		mov  eax,lightGray+(black*16)
 			 call SetTextColor

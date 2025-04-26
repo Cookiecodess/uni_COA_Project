@@ -26,9 +26,9 @@
     backIndex2             DWORD   5
 
     ; Colors
-    DEF_COLOR = white + (black SHL 4)
+    DEF_COLOR = lightGray+(black*16)
     SEL_COLOR = yellow + (black SHL 4)
-    HEADER_COLOR = lightGray + (black SHL 4)
+    HEADER_COLOR = lightGray+(black*16)
     STATION_COLOR = lightBlue + (black SHL 4)
 
 .code

@@ -92,7 +92,7 @@
 			mov edx, eax
 			call writeString
 
-			mov  eax,white+(black*16)
+			mov  eax,lightGray+(black*16)
 			call SetTextColor
 			call crlf
 
@@ -297,7 +297,7 @@
 			call SetTextColor
 			mov edx, OFFSET emptyMSG
 			call writeString
-			mov  eax,white+(black*16)
+			mov  eax,lightGray+(black*16)
 			call SetTextColor
 			call crlf
 			jmp done
@@ -309,7 +309,7 @@
 			call SetTextColor
 			mov edx, OFFSET msgTrainTime
 			call writeString
-			mov  eax,white+(black*16)
+			mov  eax,lightGray+(black*16)
 			call SetTextColor
 
 			mov ecx, LENGTHOF locations		; ecx = 0
@@ -363,7 +363,7 @@
 			mov  eax,lightGray+(black*16)
 			call SetTextColor
 			call waitmsg
-			mov  eax,white+(black*16)
+			mov  eax,lightGray+(black*16)
 			call SetTextColor
 			mov eax, -1
 		

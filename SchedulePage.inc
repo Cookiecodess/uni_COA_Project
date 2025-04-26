@@ -22,6 +22,7 @@
 	sixty				REAL4 60.0
 	result				REAL4 ?
 	indexTicket			DWORD ?
+	len					DWORD 17
 
 
 .code
@@ -56,6 +57,15 @@
 			mov edx, OFFSET key1
 			call writeString
 
+			;lining up the text
+			mov ecx, len
+			sub ecx, LENGTHOF key1
+			add ecx, 2
+			printSpaces:
+				mov al, " "
+				call writeChar
+				loop printSpaces
+
 			INVOKE GetTicketMember, esi, T_CUST_NAME		; eax = custName
 			mov edx, eax
 			call writeString
@@ -65,6 +75,16 @@
 			;---printing ticket type------
 			mov edx, OFFSET key2
 			call writeString
+
+			;lining up the text
+			mov ecx, len
+			sub ecx, LENGTHOF key2
+			add ecx, 2
+			printSpaces2:
+				mov al, " "
+				call writeChar
+				loop printSpaces2
+
 			mov  eax,cyan+(black*16)
 			call SetTextColor
 
@@ -79,6 +99,16 @@
 			;---printing ticket price------
 			mov edx, OFFSET key3
 			call writeString
+
+			;lining up the text
+			mov ecx, len
+			sub ecx, LENGTHOF key3
+			add ecx, 2
+			printSpaces3:
+				mov al, " "
+				call writeChar
+				loop printSpaces3
+
 			mov edx, OFFSET msgRM
 			call writeString
 			INVOKE GetTicketMember, esi, T_PRICE		; eax = ticket price
@@ -97,12 +127,23 @@
 			; ------ printing the path of the ticket from where to where
 			mov edx, OFFSET msgPath
 			call writeString
+			;lining up the text
+			mov ecx, len
+			sub ecx, LENGTHOF msgPath
+			add ecx, 2
+			printSpaces4:
+				mov al, " "
+				call writeChar
+				loop printSpaces4
+
 			INVOKE GetTicketMember, esi, T_ORIGIN_STN
 			mov edx, eax
 			call writeString
 
 			mov edx, OFFSET msgArrow
 			call writeString
+
+
 			INVOKE GetTicketMember, esi, T_DEST_STN
 			mov edx, eax	
 			call writeString
@@ -110,6 +151,15 @@
 
 			mov edx, OFFSET msgDist
 			call writeString
+
+			;lining up the text
+			mov ecx, len
+			sub ecx, LENGTHOF msgDist
+			add ecx, 2
+			printSpaces5:
+				mov al, " "
+				call writeChar
+				loop printSpaces5
 		
 
 			; getting the Distance
@@ -133,7 +183,9 @@
 				mov edx, 0
 				div speed
 				mov durationtime.wHour, ax ; save the hour first
+				cmp ax, 0
 
+				je lessThanAnHour
 				fild distanceTraveled    ; ST(0) = 420.0
 				fild speed               ; ST(0) = 320.0, ST(1) = 420.0
 				fdiv                     ; ST(0) = 1.3125 (division result)
@@ -150,6 +202,21 @@
 
 				mov ax, minuteArrive
 				mov durationtime.wMinute, ax
+				jmp WriteJourneyDuration
+
+				lessThanAnHour:
+					fild distanceTraveled    ; ST(0) = 200.0
+					fild speed               ; ST(0) = 320.0, ST(1) = 200.0
+					fdiv                     ; ST(0) = 0.625 (division result)
+						
+					fmul dword ptr [sixty]   ; Multiply the fractional part by 60: 0.625 * 60 = 18.75
+											   ; Now ST(0) = 37.5
+  	
+					frndint						; round up
+					fist minuteArrive			; store in the minuteArrive
+
+					mov ax, minuteArrive
+					mov durationtime.wMinute, ax
 
 			WriteJourneyDuration:
 				movzx eax, durationtime.wHour
@@ -184,6 +251,7 @@
 				cmp eax, 1
 				jne lastTime
 				mov bx, 14
+				jmp continue
 
 				lastTime:
 				mov bx, 18
@@ -291,7 +359,11 @@
 		done:
 			call crlf
 			call crlf
+			mov  eax,lightGray+(black*16)
+			call SetTextColor
 			call waitmsg
+			mov  eax,white+(black*16)
+			call SetTextColor
 			mov eax, -1
 		
 		ret
